@@ -144,7 +144,7 @@ struct GuideErrorTests {
         #expect(s.isVisible && s.nextDeadline == nil)
     }
 
-    @Test("An unavailable Choose by App binding gets the same feedback")
+    @Test("An unavailable Context Aware binding gets the same feedback")
     func unavailable() {
         var s = schedule()
         _ = s.handle(open(leader), at: 0)

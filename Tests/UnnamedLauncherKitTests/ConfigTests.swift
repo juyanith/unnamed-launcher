@@ -211,7 +211,7 @@ struct ValidationTests {
         #expect(errors(json(entries: minimalEntries, actions: #"{ "edit": { "type": "launch" } }"#)).first?.contains("Unknown action type “launch”") == true)
     }
 
-    @Test("Variants: undefined contexts and nested Choose by App")
+    @Test("Variants: undefined contexts and nested Context Aware")
     func variants() {
         let undefined = #"{ "edit": { "type": "contextual", "variants": { "web": { "type": "noop" } } } }"#
         #expect(errors(json(entries: minimalEntries, actions: undefined)).contains { $0.contains("context “web”, which isn't defined") })

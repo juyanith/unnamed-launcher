@@ -80,7 +80,7 @@ Each uses `ContentUnavailableView` with the first action as a button (rule 27).
 | --- | --- | --- | --- |
 | Bindings, no config yet (only seen if the starter couldn't be written) | No Bindings | Add a leader such as Hyper+Space, then the keys under it. | New Binding |
 | Actions | No Actions | Actions are what bindings do: open an app, run a command, send a shortcut. | New Action |
-| Contexts | No Contexts | A context is a set of apps, such as your browsers, that Choose by App checks. | New Context |
+| Contexts | No Contexts | A context is a set of apps, such as your browsers, that Context Aware actions check. | New Context |
 | Bindings, config invalid | The banner above the outline lists the errors, and the outline shows the last valid config (S-023, S-034). | — | — |
 
 The Guide never has an empty state, because validation forbids empty menus.

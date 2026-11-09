@@ -8,7 +8,7 @@ struct GuideContent: Equatable {
         var key: String
         var title: String
         var isMenu: Bool
-        /// False for Choose by App with nothing to run in the app in front.
+        /// False for Context Aware with nothing to run in the app in front.
         var isAvailable = true
         /// "not available in Notes", shown on an unavailable row.
         var note: String?

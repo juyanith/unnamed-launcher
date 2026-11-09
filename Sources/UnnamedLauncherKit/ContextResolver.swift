@@ -1,6 +1,6 @@
 import Foundation
 
-/// Picks the action Choose by App runs for the app in front (SPEC.md,
+/// Picks the action Context Aware runs for the app in front (SPEC.md,
 /// Actions, contextual).
 public enum ContextResolver {
     /// The action to run, or nil when the action is unavailable for this app.
@@ -19,7 +19,7 @@ public enum ContextResolver {
 }
 
 extension LoadedConfig {
-    /// False for a Choose by App binding with nothing to run for this app.
+    /// False for a Context Aware binding with nothing to run for this app.
     public func isAvailable(_ binding: BindingNode, frontApp: String?) -> Bool {
         guard let id = binding.action, let action = config.actions[id] else { return true }
         return ContextResolver.resolve(action, frontApp: frontApp, contexts: config.contexts) != nil

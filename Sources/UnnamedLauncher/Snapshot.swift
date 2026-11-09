@@ -42,6 +42,13 @@ enum Snapshot {
                     try? await Task.sleep(for: .seconds(0.8))
                     capture(to: "\(dir)/\(page.rawValue)-\(mode).png")
                 }
+                if only?.contains("actions") ?? true {
+                    // S-046: a Use Application action, with its Mode picker.
+                    model.sidebar = .actions
+                    model.actionSelection = "open-editor"
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/actions-app-\(mode).png")
+                }
             }
             if only == nil || only?.contains("empty") == true {
                 // S-042: each page with nothing in it.

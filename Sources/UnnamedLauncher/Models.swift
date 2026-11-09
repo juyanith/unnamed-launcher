@@ -28,7 +28,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         switch self {
         case .bindings: "Leaders, menus and bindings from the config file appear here."
         case .actions: "Actions that bindings run appear here."
-        case .contexts: "Sets of apps that Choose by App checks appear here."
+        case .contexts: "Sets of apps that Context Aware checks appear here."
         }
     }
 }

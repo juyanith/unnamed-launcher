@@ -4,7 +4,7 @@
 
 | Target | Holds | Depends on |
 | --- | --- | --- |
-| `UnnamedLauncherKit` | Pure logic: key names and chords (`Keys.swift`), the config model with strict decoding (`Config.swift`), validation and the binding tree (`ConfigValidator.swift`), loading and the starter config (`ConfigLoader.swift`), the sequence engine (`SequenceEngine.swift`), action plans and Choose by App (`ActionPlan.swift`, `ContextResolver.swift`), the Guide's timing and placement (`GuideSchedule.swift`, `GuidePlacement.swift`), and editing and writing the file (`ConfigDocument.swift`, `ConfigWriter.swift`, `JSONKeyOrder.swift`). There's no AppKit and no default actor isolation, and everything is `Sendable`. | Foundation |
+| `UnnamedLauncherKit` | Pure logic: key names and chords (`Keys.swift`), the config model with strict decoding (`Config.swift`), validation and the binding tree (`ConfigValidator.swift`), loading and the starter config (`ConfigLoader.swift`), the sequence engine (`SequenceEngine.swift`), action plans and Context Aware (`ActionPlan.swift`, `ContextResolver.swift`), the Guide's timing and placement (`GuideSchedule.swift`, `GuidePlacement.swift`), and editing and writing the file (`ConfigDocument.swift`, `ConfigWriter.swift`, `JSONKeyOrder.swift`). There's no AppKit and no default actor isolation, and everything is `Sendable`. | Foundation |
 | `UnnamedLauncher` | The app: menu bar menu, Bindings window, Settings, the Guide panel, the event tap, actions, permissions. Main-actor by default. | `UnnamedLauncherKit`, AppKit, SwiftUI |
 | `UnnamedLauncherKitTests` | Unit tests for every validation rule and engine rule. | `UnnamedLauncherKit` |
 
@@ -21,7 +21,7 @@ CGEvent tap ─► TapContext ─► EngineBox ──┐
                  consume / pass ◄─────────┤
                                           └─ DispatchQueue.main ─► Launcher.apply(effect)
                                                                      ├─ GuideController (show, hide)
-                                                                     └─ ActionRunner (Open App, …)
+                                                                     └─ ActionRunner (Use Application, …)
 ConfigStore (main) ── onLoad ─► EngineBox.replace(config)
 ```
 

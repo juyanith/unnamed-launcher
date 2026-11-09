@@ -15,7 +15,7 @@ public enum SequenceEffect: Sendable, Equatable {
     case showMenu(BindingNode, path: [String], frontApp: String?)
     /// A binding was selected: run its action for `frontApp`. The sequence has ended.
     case run(BindingNode, frontApp: String?)
-    /// A Choose by App binding with nothing to run for the app in front.
+    /// A Context Aware binding with nothing to run for the app in front.
     /// The sequence stays in its menu (S-013).
     case unavailable(BindingNode, path: [String])
     /// Cancel, or Back from a leader's menu. The sequence has ended.

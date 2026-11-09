@@ -25,6 +25,10 @@ struct SystemPerformer: ActionPerformer {
         switch plan {
         case let .openApp(bundleId):
             try await openApp(bundleId)
+        case let .focusApp(bundleId):
+            try await focusApp(bundleId)
+        case let .startApp(bundleId):
+            try await openApp(bundleId, newCopy: true)
         case let .open(url):
             try await open(url)
         case .nothing:
@@ -68,16 +72,35 @@ struct SystemPerformer: ActionPerformer {
 
     /// Brings the app forward if it's running, otherwise launches it. Going
     /// through NSWorkspace activates it even though this app isn't active.
-    private func openApp(_ bundleId: String) async throws(PlanError) {
+    /// With `newCopy`, starts another copy even if one is running (Start).
+    private func openApp(_ bundleId: String, newCopy: Bool = false) async throws(PlanError) {
         guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) else {
             throw PlanError("Couldn't open \(bundleId): not installed.")
         }
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = true
+        configuration.createsNewApplicationInstance = newCopy
         do {
             _ = try await NSWorkspace.shared.openApplication(at: url, configuration: configuration)
         } catch {
             throw PlanError("Couldn't open \(bundleId): \(error.localizedDescription)")
+        }
+    }
+
+    /// Brings the app forward only if it's running (Focus, S-046).
+    private func focusApp(_ bundleId: String) async throws(PlanError) {
+        guard let running = NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).first else {
+            let name = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId)
+                .map { FileManager.default.displayName(atPath: $0.path(percentEncoded: false)).replacingOccurrences(of: ".app", with: "") }
+            throw PlanError("\(name ?? bundleId) isn't running.")
+        }
+        guard let url = running.bundleURL else { return }
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = true
+        do {
+            _ = try await NSWorkspace.shared.openApplication(at: url, configuration: configuration)
+        } catch {
+            throw PlanError("Couldn't focus \(bundleId): \(error.localizedDescription)")
         }
     }
 

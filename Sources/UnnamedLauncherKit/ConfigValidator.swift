@@ -148,11 +148,11 @@ public enum ConfigValidator {
                     error("Action “\(id)” has a variant for context “\(contextID)”, which isn't defined.", id)
                 }
                 if case .contextual = variants[contextID] {
-                    error("Action “\(id)” has a Choose by App variant inside it. Variants must be other kinds of action.", id)
+                    error("Action “\(id)” has a Context Aware variant inside it. Variants must be other kinds of action.", id)
                 }
             }
             if case .contextual = fallback {
-                error("Action “\(id)” has a Choose by App fallback. The fallback must be another kind of action.", id)
+                error("Action “\(id)” has a Context Aware fallback. The fallback must be another kind of action.", id)
             }
         }
 

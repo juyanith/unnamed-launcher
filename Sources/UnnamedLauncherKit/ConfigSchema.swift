@@ -100,7 +100,11 @@ public enum ConfigSchema {
             ]
         }
         var variants = [
-            variant("application", ["bundleId": ["type": "string"]], required: ["bundleId"]),
+            variant("application", [
+                "bundleId": ["type": "string"],
+                "mode": ["enum": Config.AppMode.allCases.map(\.rawValue),
+                         "description": "focusOrStart (default): bring it forward, starting it if needed. focus: only if running. start: a new copy."],
+            ], required: ["bundleId"]),
             variant("open", ["target": ["type": "string"]], required: ["target"]),
             variant("exec", [
                 "command": ["type": "array", "items": ["type": "string"], "minItems": 1],

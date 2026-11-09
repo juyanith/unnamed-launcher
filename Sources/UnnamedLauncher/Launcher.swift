@@ -84,7 +84,7 @@ final class Launcher {
                                                queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.refreshPermissions() }
         }
-        // Choose by App needs the app in front at the moment a leader is pressed (S-013).
+        // Context Aware needs the app in front at the moment a leader is pressed (S-013).
         engine.setFrontApp(NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification,
                                                           object: nil, queue: .main) { [engine] note in

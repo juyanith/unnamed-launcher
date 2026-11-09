@@ -66,8 +66,30 @@ public struct Config: Sendable, Equatable {
         }
     }
 
+    /// What Use Application does (S-046). Written as `mode` in the file;
+    /// left out for the default, Focus or Start.
+    public enum AppMode: String, Sendable, Equatable, CaseIterable {
+        /// Bring the app forward if it's running, otherwise start it.
+        case focusOrStart
+        /// Bring the app forward only if it's running.
+        case focus
+        /// Start a new copy of the app, even if one is running.
+        case start
+
+        public static let `default` = AppMode.focusOrStart
+
+        /// The glossary name shown in the UI.
+        public var displayName: String {
+            switch self {
+            case .focusOrStart: "Focus or Start"
+            case .focus: "Focus"
+            case .start: "Start"
+            }
+        }
+    }
+
     public indirect enum Action: Sendable, Equatable {
-        case application(bundleId: String)
+        case application(bundleId: String, mode: AppMode = .default)
         case open(target: String)
         case exec(command: [String], cwd: String?, env: [String: String])
         case send(keys: String)
@@ -89,11 +111,11 @@ public struct Config: Sendable, Equatable {
         /// The glossary name shown in the UI.
         public var displayName: String {
             switch self {
-            case .application: "Open App"
+            case .application: "Use Application"
             case .open: "Open"
             case .exec: "Run Command"
             case .send: "Send Shortcut"
-            case .contextual: "Choose by App"
+            case .contextual: "Context Aware"
             case .noop: "Do Nothing"
             }
         }
@@ -200,8 +222,13 @@ extension Config.Action: Decodable {
         let path = "an action of type “\(type)”"
         switch type {
         case "application":
-            try c.rejectUnknown(allowed: ["type", "bundleId"], at: path)
-            self = .application(bundleId: try c.required("bundleId"))
+            try c.rejectUnknown(allowed: ["type", "bundleId", "mode"], at: path)
+            let modeName: String = try c.value("mode", default: Config.AppMode.default.rawValue)
+            guard let mode = Config.AppMode(rawValue: modeName) else {
+                throw DecodingError.dataCorrupted(.init(codingPath: c.codingPath + [AnyKey("mode")],
+                    debugDescription: "Unknown mode “\(modeName)” in an action of type “application”. Use focusOrStart, focus or start."))
+            }
+            self = .application(bundleId: try c.required("bundleId"), mode: mode)
         case "open":
             try c.rejectUnknown(allowed: ["type", "target"], at: path)
             self = .open(target: try c.required("target"))

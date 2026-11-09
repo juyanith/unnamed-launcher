@@ -49,8 +49,9 @@ public enum ConfigWriter {
     static func action(_ action: Config.Action, contexts: [Config.Context]) -> String {
         var fields = [("type", quote(action.type))]
         switch action {
-        case let .application(bundleId):
+        case let .application(bundleId, mode):
             fields.append(("bundleId", quote(bundleId)))
+            if mode != .default { fields.append(("mode", quote(mode.rawValue))) }
         case let .open(target):
             fields.append(("target", quote(target)))
         case let .exec(command, cwd, env):

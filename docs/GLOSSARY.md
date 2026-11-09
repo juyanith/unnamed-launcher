@@ -11,13 +11,16 @@ One name per idea. Use these words in the UI, the docs, the log and VoiceOver la
 | Binding | A key that runs an action, such as E → Editor. | shortcut, command, item, mapping, hotkey |
 | Entry | Config-file word for a menu or binding. Never shown in the UI; say "binding" or "menu". | (UI) |
 | Action | What a binding does: open an app, open a file or URL, run a command, send a shortcut, choose by app, or nothing. | command, task, handler |
-| Open App | The `application` action: bring the app forward, launching it first if needed. | launch, activate, focus, switch to |
+| Use Application | The `application` action: focus an app, start it, or both, by its mode. | Open App, launch, activate, switch to |
+| Focus or Start | The default mode of Use Application: bring the app forward, starting it first if it isn't running. | open, launch or activate |
+| Focus | A mode of Use Application: bring the app forward only if it's running. | activate, switch to |
+| Start | A mode of Use Application: start a new copy of the app, even if one is running. | launch, open, new instance |
 | Open | The `open` action: open a file, folder or URL in its default app. | launch, browse |
 | Run Command | The `exec` action: start a program with arguments. | execute, exec, shell, script |
 | Send Shortcut | The `send` action: press one or more key combinations in the app you were using. | send keys, keystroke, type, simulate |
-| Choose by App | The `contextual` action: run a different action depending on the app in front. | contextual, conditional, smart action |
+| Context Aware | The `contextual` action: run a different action depending on the app in front. | contextual, conditional, smart action, Choose by App |
 | Do Nothing | The `noop` action. | noop, placeholder, empty |
-| Context | A named set of apps, such as "browser", that Choose by App checks against. | app group, profile, scope |
+| Context | A named set of apps, such as "browser", that Context Aware actions check against. | app group, profile, scope |
 | App in front | The app that was active when you pressed the leader. Actions go to it. | focused app, frontmost, target app |
 | Guide | The small panel that shows where you are in a sequence and which keys come next (HUD in the code). | HUD, overlay, popup, palette, cheat sheet |
 | Path | The breadcrumb row at the top of the guide: "Commands › Applications". | breadcrumbs, trail, location |

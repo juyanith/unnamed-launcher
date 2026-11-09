@@ -38,7 +38,7 @@ UX:
 - Flow: launch the app, which reads the config file → if the file is missing, writes the starter config → the menu bar icon shows Ready. There's nothing to undo, and the starter file is never written over an existing file.
 - Surface: none of its own. The status appears in the menu bar menu (S-008).
 - States: missing file → starter written, and the menu shows "Created config file" once. Invalid file → error state (S-008). Valid → Ready.
-- Words: the starter has the leader "Commands" (Hyper+Space) with bindings "Finder" (F, Open App) and "Terminal" (T, Open App, `com.apple.Terminal`). Errors name the path and the rule in one sentence, such as "Binding “Hyper+Space Q” uses action “open-foo”, which isn't defined." No codes, no blame.
+- Words: the starter has the leader "Commands" (Hyper+Space) with bindings "Finder" (F, Use Application) and "Terminal" (T, Use Application, `com.apple.Terminal`). Errors name the path and the rule in one sentence, such as "Binding “Hyper+Space Q” uses action “open-foo”, which isn't defined." No codes, no blame.
 - Access: n/a.
 Status: done
 
@@ -92,7 +92,7 @@ Acceptance:
 UX:
 - Flow: press the leader → the guide appears (after the delay, S-016) → press a key → the guide updates in the same frame, or closes when a binding runs. Escape cancels and Backspace goes back (S-007).
 - Surface: Panel (a tool kept open beside the work that you watch while you type). It's a non-activating, floating, borderless Liquid Glass panel with no title or close button.
-- States: normal (path plus rows). Too many rows → two columns after 12 rows; past 24, three columns. Long titles truncate at the end, and the full title is spoken by VoiceOver. A Choose by App binding with no match is dimmed and its row reads "not available in <App>" (S-013). An empty menu can't happen because validation blocks it.
+- States: normal (path plus rows). Too many rows → two columns after 12 rows; past 24, three columns. Long titles truncate at the end, and the full title is spoken by VoiceOver. A Context Aware binding with no match is dimmed and its row reads "not available in <App>" (S-013). An empty menu can't happen because validation blocks it.
 - Words: the path uses the menu titles joined with " › ", starting with the leader's title, for example "Commands › Applications". Each row shows a keycap (key name: "E", "Space", "F5"), the title, and a trailing "›" if it opens a menu. The footer shows the keycaps "esc Cancel" and "delete Back" in secondary text.
 - Access: keys come from the event tap, so the guide needs no focus. VoiceOver announces the path when the guide opens and each menu change ("Applications, 3 keys") through an accessibility notification, without moving VoiceOver focus. Keycaps are not color-only. Text is at least 11 pt, and the guide follows Increase Contrast. Reduce Motion turns the appear animation into a fade.
 Status: done
@@ -531,3 +531,16 @@ Main jobs in the brief map to M1 (job 1), M4 (job 2) and S-002, S-008 and S-009 
 - **System commands:** covered by `exec` and `send` (S-011, S-012).
 - **Run scripts and Shortcuts:** covered by `exec`, for example `shortcuts run "Name"` (S-011).
 - **Accounts, sync, analytics, upgrade prompts:** dropped. This is a personal app.
+
+### S-046 Use Application with Focus, Start, or Focus or Start
+As the user, I choose whether an app binding only focuses the app, starts a new copy, or focuses it and starts it if needed. Open App is now Use Application, Choose by App is now Context Aware, and the Type picker is alphabetical.
+Screens: actions-light.png, actions-dark.png
+Depends: S-006, S-030
+Acceptance:
+- [unit] `mode` is `focusOrStart` (default, left out of the file), `focus` or `start`; an unknown mode is an error; the schema lists all three.
+- [unit] Each mode plans its own way in: open, focus only, new copy.
+- [self] Focus on an app that isn't running fails with "<App> isn't running." in the Guide.
+- [self] The Type picker lists Context Aware, Do Nothing, Open, Run Command, Send Shortcut, Use Application.
+- [snap] The Actions page shows a Mode picker under Bundle ID, with a footer for the mode.
+Status: done
+Verified: modes, file reading and writing, schema (unit tests); plans, Focus failure, Type order (self-test); Mode picker in light and dark (snapshots actions-app-*). Not yet tried by hand: Start on a running app opening a second copy.

@@ -209,7 +209,7 @@ nonisolated final class EngineBox: Sendable {
         engine.withLock { $0?.reset() }
     }
 
-    /// The app in front, for Choose by App (S-013).
+    /// The app in front, for Context Aware (S-013).
     func setFrontApp(_ bundleId: String?) {
         engine.withLock { engine in
             frontApp = bundleId

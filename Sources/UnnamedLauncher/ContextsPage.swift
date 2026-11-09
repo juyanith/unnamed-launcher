@@ -36,7 +36,7 @@ struct ContextsPage: View {
                     ContentUnavailableView {
                         Label("No Contexts", systemImage: "macwindow.on.rectangle")
                     } description: {
-                        Text("A context is a set of apps, such as your browsers, that Choose by App checks.")
+                        Text("A context is a set of apps, such as your browsers, that Context Aware actions check.")
                     } actions: {
                         Button("New Context") { add() }
                     }
@@ -91,7 +91,7 @@ private struct ContextForm: View {
                 TextField("ID", text: $newID).onSubmit(rename)
                 if let idProblem { Text(idProblem).font(.callout).foregroundStyle(.red) }
             } footer: {
-                Text("Choose by App variants refer to the context by this id.")
+                Text("Context Aware variants refer to the context by this id.")
             }
             Section {
                 ForEach(context.apps, id: \.self) { bundleId in

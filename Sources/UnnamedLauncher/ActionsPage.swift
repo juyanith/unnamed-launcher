@@ -135,28 +135,31 @@ private struct ActionForm: View {
     }
 }
 
-/// The fields for an action's type. Used again for each Choose by App
-/// variant and its fallback, which can be any type except Choose by App.
+/// The fields for an action's type. Used again for each Context Aware
+/// variant and its fallback, which can be any type except Context Aware.
 struct ActionFields: View {
     @Binding var action: Config.Action
     let contexts: [Config.Context]
-    var allowsChooseByApp = true
+    var allowsContextAware = true
 
     var body: some View {
         Section {
             Picker("Type", selection: Binding(get: { action.type }, set: { action = .empty(of: $0) })) {
-                ForEach(Config.Action.types(allowsChooseByApp: allowsChooseByApp), id: \.self) { type in
+                ForEach(Config.Action.types(allowsContextAware: allowsContextAware), id: \.self) { type in
                     Text(Config.Action.empty(of: type).displayName).tag(type)
                 }
             }
         }
         switch action {
-        case let .application(bundleId):
+        case let .application(bundleId, mode):
             Section {
-                TextField("Bundle ID", text: text(bundleId) { .application(bundleId: $0) })
-                Button("Choose App…") { chooseApp() }
+                TextField("Bundle ID", text: text(bundleId) { .application(bundleId: $0, mode: mode) })
+                Button("Choose App…") { chooseApp(mode: mode) }
+                Picker("Mode", selection: Binding(get: { mode }, set: { action = .application(bundleId: bundleId, mode: $0) })) {
+                    ForEach(Config.AppMode.menuOrder, id: \.self) { Text($0.displayName).tag($0) }
+                }
             } footer: {
-                Text("Brings the app forward, launching it first if needed.")
+                Text(mode.explanation)
             }
         case let .open(target):
             Section {
@@ -201,7 +204,7 @@ struct ActionFields: View {
                         var changed = variants
                         changed[context.id] = new
                         action = .contextual(variants: changed, fallback: fallback)
-                    }), contexts: contexts, allowsChooseByApp: false)
+                    }), contexts: contexts, allowsContextAware: false)
                 }
             }
             Section {
@@ -214,7 +217,7 @@ struct ActionFields: View {
             }
             if let fallback {
                 ActionFields(action: Binding(get: { fallback }, set: { action = .contextual(variants: variants, fallback: $0) }),
-                             contexts: contexts, allowsChooseByApp: false)
+                             contexts: contexts, allowsContextAware: false)
             }
         case .noop:
             Section {
@@ -229,13 +232,13 @@ struct ActionFields: View {
     }
 
     /// An Open panel limited to apps (S-030).
-    private func chooseApp() {
+    private func chooseApp(mode: Config.AppMode) {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.application]
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
         guard panel.runModal() == .OK, let url = panel.url,
               let id = Bundle(url: url)?.bundleIdentifier else { return }
-        action = .application(bundleId: id)
+        action = .application(bundleId: id, mode: mode)
     }
 
     private func chooseFile() {
@@ -249,8 +252,10 @@ struct ActionFields: View {
 }
 
 extension Config.Action {
-    static func types(allowsChooseByApp: Bool) -> [String] {
-        ["application", "open", "exec", "send"] + (allowsChooseByApp ? ["contextual"] : []) + ["noop"]
+    /// The types for the Type picker, alphabetical by the name shown (S-046).
+    static func types(allowsContextAware: Bool) -> [String] {
+        let types = ["application", "open", "exec", "send", "noop"] + (allowsContextAware ? ["contextual"] : [])
+        return types.sorted { empty(of: $0).displayName.localizedStandardCompare(empty(of: $1).displayName) == .orderedAscending }
     }
 
     /// A blank action of a type, for the type picker.
@@ -262,6 +267,20 @@ extension Config.Action {
         case "send": .send(keys: "")
         case "contextual": .contextual(variants: [:], fallback: nil)
         default: .noop
+        }
+    }
+}
+
+extension Config.AppMode {
+    /// The Mode picker's order, as the modes are named in the glossary.
+    static let menuOrder: [Config.AppMode] = [.focus, .start, .focusOrStart]
+
+    /// The footer under the Mode picker.
+    var explanation: String {
+        switch self {
+        case .focusOrStart: "Brings the app forward, starting it first if it isn't running."
+        case .focus: "Brings the app forward if it's running. Otherwise nothing happens and the Guide says so."
+        case .start: "Starts a new copy of the app, even if one is already running."
         }
     }
 }

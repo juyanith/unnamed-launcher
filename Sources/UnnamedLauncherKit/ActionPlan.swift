@@ -7,6 +7,10 @@ import Foundation
 public enum ActionPlan: Sendable, Equatable {
     /// Bring the app forward, launching it first if needed.
     case openApp(bundleId: String)
+    /// Bring the app forward only if it's already running.
+    case focusApp(bundleId: String)
+    /// Start a new copy of the app, even if one is running.
+    case startApp(bundleId: String)
     /// Open a file, folder or URL with its default app.
     case open(URL)
     /// Start a program directly, with no shell.
@@ -27,8 +31,12 @@ public enum ActionPlanner {
     /// The plan for an action. `home` expands a leading `~`.
     public static func plan(_ action: Config.Action, home: URL) throws(PlanError) -> ActionPlan {
         switch action {
-        case let .application(bundleId):
-            return .openApp(bundleId: bundleId)
+        case let .application(bundleId, mode):
+            switch mode {
+            case .focusOrStart: return .openApp(bundleId: bundleId)
+            case .focus: return .focusApp(bundleId: bundleId)
+            case .start: return .startApp(bundleId: bundleId)
+            }
         case let .open(target):
             return .open(try openURL(target, home: home))
         case let .exec(command, cwd, env):
@@ -44,7 +52,7 @@ public enum ActionPlanner {
             return .nothing
         case .contextual:
             // Resolve with `ContextResolver` first.
-            throw PlanError("Choose by App must be resolved for the app in front first.")
+            throw PlanError("Context Aware must be resolved for the app in front first.")
         }
     }
 

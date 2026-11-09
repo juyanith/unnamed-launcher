@@ -99,7 +99,7 @@ struct SendPlanTests {
     }
 }
 
-@Suite("Choose by App (S-013)")
+@Suite("Context Aware (S-013)")
 struct ContextTests {
     let contexts = [
         Config.Context(id: "browser", apps: ["com.google.Chrome", "com.apple.Safari"]),
@@ -135,7 +135,7 @@ struct ContextTests {
     }
 }
 
-@Suite("Choose by App in a sequence (S-013)")
+@Suite("Context Aware in a sequence (S-013)")
 struct ContextSequenceTests {
     let text = json(entries: """
     { "keys": "Hyper+Space", "title": "Commands" },
@@ -186,5 +186,42 @@ struct NoopSequenceTests {
         }
         #expect(!engine.isActive)
         #expect(try ActionPlanner.plan(config.config.actions[binding.action!]!, home: testHome) == .nothing)
+    }
+}
+
+@Suite("Use Application modes (S-046)")
+struct UseApplicationTests {
+    @Test("Each mode plans its own way of opening the app")
+    func plans() throws {
+        #expect(try ActionPlanner.plan(.application(bundleId: "dev.zed.Zed"), home: testHome) == .openApp(bundleId: "dev.zed.Zed"))
+        #expect(try ActionPlanner.plan(.application(bundleId: "dev.zed.Zed", mode: .focus), home: testHome) == .focusApp(bundleId: "dev.zed.Zed"))
+        #expect(try ActionPlanner.plan(.application(bundleId: "dev.zed.Zed", mode: .start), home: testHome) == .startApp(bundleId: "dev.zed.Zed"))
+    }
+
+    @Test("A file without mode means Focus or Start")
+    func defaultMode() throws {
+        let config = try load(json(entries: minimalEntries, actions: minimalActions)).get()
+        #expect(config.config.actions["edit"] == .application(bundleId: "dev.zed.Zed", mode: .focusOrStart))
+    }
+
+    @Test("mode is read from the file, and an unknown one is an error")
+    func readMode() throws {
+        let focus = #"{ "edit": { "type": "application", "bundleId": "dev.zed.Zed", "mode": "focus" } }"#
+        #expect(try load(json(entries: minimalEntries, actions: focus)).get().config.actions["edit"]
+                == .application(bundleId: "dev.zed.Zed", mode: .focus))
+        let bad = #"{ "edit": { "type": "application", "bundleId": "dev.zed.Zed", "mode": "launch" } }"#
+        #expect(errors(json(entries: minimalEntries, actions: bad)).first?.contains("Unknown mode “launch”") == true)
+    }
+
+    @Test("mode is written only when it isn't the default")
+    func writeMode() {
+        #expect(!ConfigWriter.action(.application(bundleId: "a"), contexts: []).contains("mode"))
+        #expect(ConfigWriter.action(.application(bundleId: "a", mode: .start), contexts: []).contains(#""mode": "start""#))
+    }
+
+    @Test("The schema lists every mode")
+    func schema() {
+        #expect(ConfigSchema.json.contains(#""focusOrStart""#) && ConfigSchema.json.contains(#""focus""#)
+                && ConfigSchema.json.contains(#""start""#))
     }
 }

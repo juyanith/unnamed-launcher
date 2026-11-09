@@ -35,7 +35,7 @@ This is the source of truth for how sequences, actions and the config file behav
 ### Actions
 | Type | Fields | Behavior |
 | --- | --- | --- |
-| `application` | `bundleId` | Brings the app forward if it's running, otherwise launches it. |
+| `application` | `bundleId`, `mode` (optional) | `focusOrStart` (default) brings the app forward if it's running, otherwise starts it. `focus` only brings it forward if it's running. `start` starts a new copy even if one is running. |
 | `open` | `target` | Opens a file, folder or URL with its default app. A leading `~` expands to the home folder. |
 | `exec` | `command` (array), optional `cwd`, `env` | Runs a process directly, with no shell and no expansion except a leading `~`. `cwd` defaults to the home folder. The app doesn't wait for it or capture its output, but does report if it fails to start. |
 | `send` | `keys` | Sends one or more chords to the app that was in front. Held leader modifiers must not leak into the chord. `Primary` means ⌘. |

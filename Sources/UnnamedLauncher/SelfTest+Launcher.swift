@@ -67,7 +67,7 @@ extension SelfTest {
         check("S-005 the Guide lists the leader's keys in file order",
               content.rows.map(\.key) == ["Space", "E", "B", "A", "N", "S", "L", "F"])
         let addressBar = content.rows.first { $0.key == "L" }
-        check("S-013 a Choose by App binding with nothing for the app in front is dimmed",
+        check("S-013 a Context Aware binding with nothing for the app in front is dimmed",
               addressBar?.isAvailable == false && addressBar?.note == "not available in Notes"
               && content.rows.first { $0.key == "F" }?.isAvailable == true)
         check("S-005 menus are marked, bindings aren't",
@@ -125,7 +125,7 @@ extension SelfTest {
         check("S-020 the system theme follows the Mac", guide.window.appearance == nil)
     }
 
-    /// S-006, S-010: Open App and Open, through the real performer for
+    /// S-006, S-010: Use Application and Open, through the real performer for
     /// failures and the recording one for plans (nothing is launched).
     static func actionChecks() async {
         let system = ActionRunner()
@@ -150,6 +150,25 @@ extension SelfTest {
             .open(URL(fileURLWithPath: "/Users/someone/notes")),
             .open(URL(string: "https://example.com/a?b=1")!),
         ], "\(recorder.plans)")
+
+        // S-046: Use Application's modes, and Focus with the app not running.
+        try? await runner.run(.application(bundleId: "a.b", mode: .focus), id: "focus")
+        try? await runner.run(.application(bundleId: "a.b", mode: .start), id: "start")
+        try? await runner.run(.application(bundleId: "a.b"), id: "either")
+        check("S-046 Focus, Start and Focus or Start each plan their own way in",
+              recorder.plans.suffix(3) == [.focusApp(bundleId: "a.b"), .startApp(bundleId: "a.b"), .openApp(bundleId: "a.b")],
+              "\(recorder.plans)")
+        do throws(PlanError) {
+            try await system.run(.application(bundleId: "net.unnamed.not-installed", mode: .focus), id: "focus")
+            check("S-046 Focus on an app that isn't running says so", false, "no failure")
+        } catch {
+            check("S-046 Focus on an app that isn't running says so", error.message == "net.unnamed.not-installed isn't running.", error.message)
+        }
+        let names = Config.Action.types(allowsContextAware: true).map { Config.Action.empty(of: $0).displayName }
+        check("S-046 the Type picker is alphabetical", names == ["Context Aware", "Do Nothing", "Open", "Run Command",
+                                                               "Send Shortcut", "Use Application"], "\(names)")
+        check("S-046 variants offer every type but Context Aware",
+              !Config.Action.types(allowsContextAware: false).contains("contextual"))
 
         // S-011: a real run, through sh only because this check asks for it.
         let marker = "/tmp/UnnamedLauncher-exec.txt"
