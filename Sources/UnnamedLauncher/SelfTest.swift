@@ -1,4 +1,5 @@
 import AppKit
+import OSLog
 import UnnamedLauncherKit
 
 /// Self-test for agents: runs the app's real functions against a test config,
@@ -34,6 +35,7 @@ enum SelfTest {
             await configChecks(model)
             await guideChecks(model)
             await actionChecks()
+            await failureChecks(model)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
@@ -161,6 +163,22 @@ enum SelfTest {
             check("S-011 a program that can't be found is reported",
                   error.message == "Couldn't run net-unnamed-no-such-program: it isn't in PATH.", error.message)
         }
+    }
+
+    /// S-015: a failure shows in the Guide for two seconds and is logged.
+    private static func failureChecks(_ model: AppModel) async {
+        let message = "Couldn't open dev.example.missing: not installed."
+        model.launcher.report(message, title: "Editor")
+        try? await Task.sleep(for: .seconds(0.3))
+        let guide = model.launcher.guide
+        check("S-015 the Guide shows the failure", guide.isVisible && guide.content?.failure == message)
+        try? await Task.sleep(for: Motion.errorMessageHold + .seconds(0.5))
+        check("S-015 the failure closes after two seconds", !guide.window.isVisible)
+        let logged = (try? OSLogStore(scope: .currentProcessIdentifier))
+            .flatMap { try? $0.getEntries(at: $0.position(timeIntervalSinceLatestBoot: 0)) }?  // grid: ok OSLogStore, not a view
+            .compactMap { $0 as? OSLogEntryLog }
+            .contains { $0.subsystem == "net.unnamed.launcher" && $0.composedMessage.contains(message) } ?? false
+        check("S-015 the failure is in the log under net.unnamed.launcher", logged)
     }
 
     private static func check(_ name: String, _ ok: Bool, _ detail: String = "") {

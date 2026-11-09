@@ -108,6 +108,13 @@ final class Launcher {
 
     // MARK: - Events
 
+    /// Shows a failed action in the Guide and writes it to the log (S-015).
+    func report(_ message: String, title: String) {
+        lastFailure = message
+        log.error("Action “\(title, privacy: .public)” failed: \(message, privacy: .public)")
+        guide.showFailure(message, title: title)
+    }
+
     private func apply(_ effect: SequenceEffect) {
         guard let config = store.loaded else { return }
         switch effect {
@@ -124,8 +131,7 @@ final class Launcher {
                 do throws(PlanError) {
                     try await runner.run(action, id: id)
                 } catch {
-                    lastFailure = error.message
-                    log.error("Action failed: \(error.message, privacy: .public)")
+                    report(error.message, title: binding.title)
                 }
             }
         case .cancelled:

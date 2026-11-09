@@ -211,7 +211,8 @@ Depends: S-006
 Acceptance:
 - [snap] The HUD shows a red error line, such as "Couldn't open dev.zed.Zed: not installed", for 2 seconds, then closes.
 - [self] Every failure is written to the unified log under subsystem `net.unnamed.launcher`.
-Status: todo
+Status: done
+Verified: shown, closes after 2 s, logged (self-test); /tmp/UnnamedLauncher-shots/hud-error-light.png. The error line uses the warning color (orange) with a triangle, not red, per DESIGN-SYSTEM.md's one warning color.
 
 ## M3 Timing and feedback
 

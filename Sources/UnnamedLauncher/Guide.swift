@@ -20,6 +20,8 @@ struct GuideContent: Equatable {
     var cancelKey: String
     /// nil when Back is turned off.
     var backKey: String?
+    /// Why an action failed (S-015). When set, the Guide shows only this.
+    var failure: String?
 
     init(menu: BindingNode, path: [String], config: LoadedConfig, frontApp: String?, frontAppName: String? = nil) {
         self.path = path
@@ -71,6 +73,32 @@ struct GuideView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Space.md) {
             pathRow
+            if let failure = content.failure {
+                failureRow(failure)
+            } else {
+                menuRows
+                footer
+            }
+        }
+        .padding(Space.margin)
+        .fixedSize()
+        .background { background }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(content.failure ?? content.announcement)
+    }
+
+    private func failureRow(_ message: String) -> some View {
+        Label {
+            Text(message)
+                .frame(maxWidth: Layout.guideFailureWidth, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: "exclamationmark.triangle.fill")
+        }
+        .foregroundStyle(Surfaces.warning)
+    }
+
+    private var menuRows: some View {
             HStack(alignment: .top, spacing: Space.xl) {
                 ForEach(Array(content.columns.enumerated()), id: \.offset) { _, column in
                     // A Grid lines the titles up after the widest keycap.
@@ -80,13 +108,6 @@ struct GuideView: View {
                     .frame(width: Layout.guideColumnWidth, alignment: .leading)
                 }
             }
-            footer
-        }
-        .padding(Space.margin)
-        .fixedSize()
-        .background { background }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(content.announcement)
     }
 
     private var pathRow: some View {
@@ -207,6 +228,18 @@ final class GuideController {
                              userInfo: [.announcement: content.announcement, .priority: NSAccessibilityPriorityLevel.high.rawValue])
     }
 
+    /// Shows why an action failed for Motion.errorMessageHold, then closes (S-015).
+    func showFailure(_ message: String, title: String) {
+        let content = GuideContent(path: [title], rows: [], cancelKey: "", backKey: nil, failure: message)
+        show(content)
+        let shown = content
+        Task { [weak self] in
+            try? await Task.sleep(for: Motion.errorMessageHold)
+            // Only close it if nothing newer took its place.
+            if self?.content == shown { self?.hide() }
+        }
+    }
+
     func hide() {
         guard isShown else { return }
         isShown = false
@@ -239,10 +272,11 @@ final class GuideController {
 extension GuideContent {
     static let placeholder = GuideContent(path: [], rows: [], cancelKey: "esc", backKey: "delete")
 
-    init(path: [String], rows: [Row], cancelKey: String, backKey: String?) {
+    init(path: [String], rows: [Row], cancelKey: String, backKey: String?, failure: String? = nil) {
         self.path = path
         self.rows = rows
         self.cancelKey = cancelKey
         self.backKey = backKey
+        self.failure = failure
     }
 }

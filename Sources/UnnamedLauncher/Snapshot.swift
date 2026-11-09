@@ -61,6 +61,17 @@ enum Snapshot {
                     try? await Task.sleep(for: .seconds(0.3))
                 }
             }
+            if only == nil || only?.contains("hud-error") == true {
+                let guide = model.launcher.guide
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    guide.showFailure("Couldn't open dev.zed.Zed: not installed.", title: "Editor")
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/hud-error-\(mode).png", window: guide.window)
+                    guide.hide()
+                    try? await Task.sleep(for: .seconds(0.3))
+                }
+            }
             print("SNAPSHOT done \(dir)")
             // An open sheet refuses terminate, and the run would wait forever.
             for window in NSApp.windows { if let sheet = window.attachedSheet { window.endSheet(sheet) } }
