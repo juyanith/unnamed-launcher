@@ -43,3 +43,4 @@ ConfigStore (main) ── onLoad ─► EngineBox.replace(config)
 
 - [docs/architecture-review-2026-11-08.md](docs/architecture-review-2026-11-08.md) (end of M1)
 - [docs/architecture-review-2026-11-08-m2.md](docs/architecture-review-2026-11-08-m2.md) (end of M2)
+- [docs/architecture-review-2026-11-08-m3.md](docs/architecture-review-2026-11-08-m3.md) (end of M3)
