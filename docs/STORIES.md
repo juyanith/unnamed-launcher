@@ -544,3 +544,14 @@ Acceptance:
 - [snap] The Actions page shows a Mode picker under Bundle ID, with a footer for the mode.
 Status: done
 Verified: modes, file reading and writing, schema (unit tests); plans, Focus failure, Type order (self-test); Mode picker in light and dark (snapshots actions-app-*). Not yet tried by hand: Start on a running app opening a second copy.
+
+### S-047 Focus returns to the last focused window
+As the user, I press a Use Application binding for an app that's running and land in the window I used last, not whichever of its windows happens to be on top.
+Screens: none (no UI)
+Depends: S-046
+Acceptance:
+- [unit] The focused window wins, then the main window, then the frontmost standard window, then a minimized one; panels are skipped; no windows means nothing to raise.
+- [self] A process that doesn't answer gives up within a second, and activation still runs.
+- [manual] With two Ghostty windows, use the second, switch to another app, press Hyper+Space T: the second window is in front.
+Status: done
+Verified: window choice (unit tests), unresponsive process (self-test). Not yet tried by hand: the manual line; windows on another Space or under a window manager.

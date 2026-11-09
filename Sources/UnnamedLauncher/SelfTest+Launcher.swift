@@ -164,6 +164,10 @@ extension SelfTest {
         } catch {
             check("S-046 Focus on an app that isn't running says so", error.message == "net.unnamed.not-installed isn't running.", error.message)
         }
+        // S-047: an app that doesn't answer leaves activation to decide, quickly.
+        let asked = ContinuousClock.now
+        check("S-047 no window to raise for a process that isn't there",
+              !WindowRaiser.raiseLastFocused(pid: 999_999) && ContinuousClock.now - asked < .seconds(1))
         let names = Config.Action.types(allowsContextAware: true).map { Config.Action.empty(of: $0).displayName }
         check("S-046 the Type picker is alphabetical", names == ["Context Aware", "Do Nothing", "Open", "Run Command",
                                                                "Send Shortcut", "Use Application"], "\(names)")
