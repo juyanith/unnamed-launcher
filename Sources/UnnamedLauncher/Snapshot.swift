@@ -66,6 +66,20 @@ enum Snapshot {
                     try? await Task.sleep(for: .seconds(0.3))
                 }
             }
+            if only == nil || only?.contains("hud-theme") == true {
+                // S-020: a fixed theme wins over the Mac's mode.
+                let guide = model.launcher.guide
+                for (mac, theme) in [("dark", "light"), ("light", "dark")] {
+                    NSApp.appearance = NSAppearance(named: mac == "light" ? .aqua : .darkAqua)
+                    guide.theme = theme
+                    guide.show(SeedData.guideContent)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/hud-theme-\(theme)-on-\(mac).png", window: guide.window)
+                    guide.hide()
+                    try? await Task.sleep(for: .seconds(0.3))
+                }
+                guide.theme = "system"
+            }
             if only == nil || only?.contains("hud-error") == true {
                 let guide = model.launcher.guide
                 for mode in ["light", "dark"] {

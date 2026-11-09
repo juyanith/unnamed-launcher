@@ -51,6 +51,20 @@ final class GuideController {
     /// Where on the screen the Guide goes (ui.position).
     var position: GuidePlacement.Position = .center
 
+    /// The Guide's look (ui.theme, S-020): "system" follows the Mac, "light"
+    /// and "dark" fix it. Only the Guide; windows always follow the Mac.
+    var theme = "system" {
+        didSet { made?.panel.appearance = Self.appearance(for: theme) }
+    }
+
+    static func appearance(for theme: String) -> NSAppearance? {
+        switch theme.lowercased() {
+        case "light": NSAppearance(named: .aqua)
+        case "dark": NSAppearance(named: .darkAqua)
+        default: nil
+        }
+    }
+
     /// True once a panel exists.
     var hasPanel: Bool { made != nil }
     var isVisible: Bool { isShown && (made?.panel.isVisible ?? false) }
@@ -59,6 +73,7 @@ final class GuideController {
     private var parts: (panel: GuidePanel, host: NSHostingView<GuideHost>) {
         if let made { return made }
         let panel = GuidePanel()
+        panel.appearance = Self.appearance(for: theme)
         let host = NSHostingView(rootView: GuideHost(model: model))
         host.sizingOptions = [.intrinsicContentSize]
         panel.contentView = host

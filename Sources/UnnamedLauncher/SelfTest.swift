@@ -121,6 +121,14 @@ enum SelfTest {
             try? await Task.sleep(for: .seconds(0.3))
         }
         guide.position = .center
+
+        // S-020: the theme sets the Guide's own appearance.
+        guide.theme = "dark"
+        check("S-020 a dark theme makes the Guide dark", guide.window.appearance?.name == .darkAqua)
+        guide.theme = "light"
+        check("S-020 a light theme makes the Guide light", guide.window.appearance?.name == .aqua)
+        guide.theme = "system"
+        check("S-020 the system theme follows the Mac", guide.window.appearance == nil)
     }
 
     /// S-006, S-010: Open App and Open, through the real performer for

@@ -262,7 +262,8 @@ Screens: hud
 Depends: S-005
 Acceptance:
 - [snap] Light and dark snapshots both match the token colors, whatever the system appearance.
-Status: todo
+Status: done
+Verified: appearance per theme (self-test); /tmp/UnnamedLauncher-shots/hud-theme-dark-on-light.png and hud-theme-light-on-dark.png, real captures with glass.
 
 ### S-021 Run sequences with no HUD at all
 As the user, I set `showHud` to false and never see the panel.
