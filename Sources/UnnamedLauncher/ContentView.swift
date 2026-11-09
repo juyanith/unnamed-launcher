@@ -1,19 +1,20 @@
 import SwiftUI
 
-/// The settings window: a sidebar of pages and the selected page.
+/// The Bindings window: a sidebar of pages and the selected page.
 struct ContentView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         NavigationSplitView {
             sidebar
         } detail: {
-            SettingsPage(page: model.sidebar ?? .bindings)
+            BindingsPage(page: model.sidebar ?? .bindings)
         }
         .noInitialFocus()
         .task {
             SelfTest.runIfRequested(model: model)
-            Snapshot.runIfRequested(model: model)
+            Snapshot.runIfRequested(model: model, openSettings: openSettings)
         }
     }
 
@@ -27,14 +28,14 @@ struct ContentView: View {
     }
 }
 
-/// One settings page. Each page is an empty state until its story is built
-/// (Bindings S-023, Actions S-030, Contexts S-031, General S-032).
-struct SettingsPage: View {
+/// One page of the Bindings window. Each is an empty state until its story
+/// is built (Bindings S-023, Actions S-030, Contexts S-031).
+struct BindingsPage: View {
     let page: SidebarItem
 
     var body: some View {
         ContentUnavailableView(
-            page.emptyTitle,
+            "No \(page.title) Yet",
             systemImage: page.symbol,
             description: Text(page.emptyMessage)
         )

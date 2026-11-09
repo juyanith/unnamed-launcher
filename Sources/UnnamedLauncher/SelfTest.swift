@@ -24,10 +24,11 @@ enum SelfTest {
         Task {
             try? await Task.sleep(for: .seconds(0.5))
             check("the config file is the /tmp override", model.configURL.path.hasPrefix("/tmp/"))
-            check("the app has no Dock icon", NSApp.activationPolicy() == .accessory)
-            check("the settings window opens on Bindings", model.sidebar == .bindings)
-            model.sidebar = .general
-            check("the settings window can switch pages", model.sidebar == .general)
+            check("the app is a menu bar app (LSUIElement)", Bundle.main.object(forInfoDictionaryKey: "LSUIElement") as? Bool == true)
+            check("an open window gives the app a main menu", NSApp.activationPolicy() == .regular)
+            check("the Bindings window opens on Bindings", model.sidebar == .bindings)
+            model.sidebar = .contexts
+            check("the Bindings window can switch pages", model.sidebar == .contexts)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)

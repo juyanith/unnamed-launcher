@@ -8,7 +8,7 @@ does and how: `docs/BRIEF.md`, `docs/SPEC.md`, `docs/STORIES.md`,
 
 ## Layout
 
-- `Sources/UnnamedLauncher/` the app. `App.swift` has the menu bar item, the settings window, and the app delegate.
+- `Sources/UnnamedLauncher/` the app. `App.swift` has the menu bar item, the Bindings window, Settings, and the app delegate. `docs/DESIGN.md` is the design plan.
 - `Sources/UnnamedLauncherKit/` rules and data logic with no SwiftUI. Tests in `Tests/UnnamedLauncherKitTests/`.
 - `Package.swift` a Swift package. There is no Xcode project.
 - `build.sh` builds, signs, and installs `~/Applications/UnnamedLauncher.app`.
@@ -21,7 +21,7 @@ does and how: `docs/BRIEF.md`, `docs/SPEC.md`, `docs/STORIES.md`,
 - Unit tests: `swift test --scratch-path ~/Library/Developer/UnnamedLauncher/test-build`.
 - Self-test (the app's real functions against a /tmp config): `tools/selftest.sh`. Exit 0 when every check passes. Add a check for every story with logic in `SelfTest.swift`.
 - After every UI change, take snapshots with sample data and look at them: `tools/snap.sh`.
-  It writes `/tmp/UnnamedLauncher-shots/<page>-light.png` and `-dark.png` for every settings page, then quits. `APP_SNAPSHOT_PAGES=bindings,general tools/snap.sh` limits the pages.
+  It writes `/tmp/UnnamedLauncher-shots/<page>-light.png` and `-dark.png` for every Bindings page, plus `settings-light.png` and `-dark.png`, then quits. `APP_SNAPSHOT_PAGES=bindings,settings tools/snap.sh` limits the pages.
   For the Guide, the menu bar menu, a sheet, or a popover, add a capture to `Snapshot.swift`.
 - Snapshots and the self-test refuse to run without `APP_STORE` (a config file in /tmp).
 - Never test against the real config file in `~/.config/unnamed-launcher/`.
@@ -35,7 +35,7 @@ does and how: `docs/BRIEF.md`, `docs/SPEC.md`, `docs/STORIES.md`,
 - Compare accents: add `APP_ACCENT=<id>` to the snapshot command.
 - Spacing comes from `Space` in `UI/Grid.swift`, on a 4 pt grid. Mark custom pages and cards with `.gridArea` and `.gridProbe`.
 - Windows open calm: `.noInitialFocus()` on every window and sheet (no focus ring or selected text on open), `.fitsContent()` on sheets and Settings tabs (no scroll bar with nothing to scroll). System scroll bars. Both in `UI/WindowBehavior.swift`.
-- The settings window is a sidebar window (`ContentView.swift`) with the pages in `SidebarItem`. Add a case for a new page.
+- The Bindings window is a sidebar window (`ContentView.swift`) with the pages in `SidebarItem`. Settings (`SettingsView.swift`) is one grouped Form, 520 pt wide; preferences go there, your data goes in the Bindings window.
 - Window chrome (title bar, toolbar, sidebar, menus, sheets) stays system. Buttons use system styles, like `.borderedProminent`.
 - Colors: `.primary`, `.secondary`, `.tint`, and system colors. Never fixed grays or white for text.
 - Every action has a menu bar item and a keyboard shortcut.

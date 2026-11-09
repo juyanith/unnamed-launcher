@@ -11,14 +11,14 @@ Built from [BRIEF.md](BRIEF.md), [SPEC.md](SPEC.md) and [research/launchers.md](
 | `menubar` | The menu bar menu, all OK |
 | `menubar-warning` | The menu bar menu with a missing permission or a config error |
 | `welcome` | The first-run window |
-| `settings-bindings` | The Bindings page of the settings window |
-| `settings-actions` | The Actions page |
-| `settings-contexts` | The Contexts page |
-| `settings-general` | The General page |
+| `bindings` | The Bindings page of the Bindings window |
+| `actions` | The Actions page |
+| `contexts` | The Contexts page |
+| `settings` | The Settings window |
 
 **How each acceptance line is checked:** `[snap]` snapshot, `[unit]` unit test, `[self]` self-test, `[manual]` a person must try it.
 
-**Seed data:** snapshot mode loads a fixture config with two leaders, a nested menu, actions of every type, and two contexts. Each of these can be created in the settings window (S-024 to S-032).
+**Seed data:** snapshot mode loads a fixture config with two leaders, a nested menu, actions of every type, and two contexts. Each of these can be created in the Bindings window or Settings (S-024 to S-032).
 
 ---
 
@@ -147,7 +147,7 @@ UX:
 - Flow: menu bar icon → "Enabled" (a check mark that toggles) → the icon dims and leaders type normally again → choose it again to turn it back on. "Quit Unnamed Launcher" (⌘Q) quits with no confirmation, since nothing is lost.
 - Surface: menu bar menu, a toggle item (inline: changes one value).
 - States: on → check mark, normal icon. Off → no check mark, dimmed icon, and the status line reads "Not capturing leaders". Enabled is remembered across launches.
-- Words: menu order is the status line, "Enabled", a separator, "Reload Config", "Open Config File", a separator, "Settings…" (⌘,), "Quit Unnamed Launcher" (⌘Q).
+- Words: menu order is the status line, "Enabled", a separator, "Reload Config", "Open Config File", a separator, "Edit Bindings…" (⌘B), "Settings…" (⌘,), "Quit Unnamed Launcher" (⌘Q).
 - Access: the status item's accessibility label includes the state: "Unnamed Launcher, off".
 Status: todo
 
@@ -265,20 +265,20 @@ Acceptance:
 - [unit] The configured keys work, an empty `backKey` turns Back off, and binding a step to either key fails validation.
 Status: todo
 
-## M4 Settings window
+## M4 Bindings window and Settings
 
 ### S-023 See all bindings as a tree
-As the user, I open Settings… from the menu bar and see every leader, menu and binding in an outline.
-Screens: settings-bindings
+As the user, I choose Edit Bindings… from the menu bar and see every leader, menu and binding in an outline.
+Screens: bindings
 Depends: S-001
 Acceptance:
-- [snap] A sidebar with Bindings, Actions, Contexts and General. Bindings shows an outline with key, title and action columns, in file order.
+- [snap] A sidebar with Bindings, Actions and Contexts. Bindings shows an outline with key, title and action columns, in file order.
 - [snap] An invalid config shows a banner above the outline listing the errors, and the outline shows the last valid config.
 Status: todo
 
 ### S-024 Add a menu or binding
 As the user, I select a menu and choose Add Binding or Add Menu (⌘N and ⇧⌘N).
-Screens: settings-bindings
+Screens: bindings
 Depends: S-023, S-033
 Acceptance:
 - [self] The new entry is added at the end of the selected menu, with its key recorder focused.
@@ -287,7 +287,7 @@ Status: todo
 
 ### S-025 Record a key
 As the user, I click a key field and press the chord or key I want.
-Screens: settings-bindings
+Screens: bindings
 Depends: S-024
 Acceptance:
 - [self] For a leader, the recorder captures a full chord. For a step, it captures one key with no modifiers.
@@ -297,7 +297,7 @@ Status: todo
 
 ### S-026 Edit a binding's title and action
 As the user, I change a binding's title or pick a different action from a popup.
-Screens: settings-bindings
+Screens: bindings
 Depends: S-024, S-030
 Acceptance:
 - [self] Changing the title or action rewrites only that entry in the file.
@@ -306,7 +306,7 @@ Status: todo
 
 ### S-027 Delete an entry
 As the user, I press Delete on a selected entry to remove it.
-Screens: settings-bindings
+Screens: bindings
 Depends: S-023, S-033
 Acceptance:
 - [self] Deleting a menu that has children asks first and names how many entries will go. ⌘Z restores them.
@@ -314,7 +314,7 @@ Status: todo
 
 ### S-028 Reorder a menu's items by dragging
 As the user, I drag a binding up or down within its menu.
-Screens: settings-bindings
+Screens: bindings
 Depends: S-023, S-033
 Acceptance:
 - [self] The new order is written to the file, and the HUD then lists the items in that order.
@@ -323,7 +323,7 @@ Status: todo
 
 ### S-029 Sort a menu alphabetically
 As the user, I choose Sort Alphabetically on a menu.
-Screens: settings-bindings
+Screens: bindings
 Depends: S-028
 Acceptance:
 - [unit] The children are sorted in three groups: named keys alphabetically with F-keys by number, then digits, then letters.
@@ -332,7 +332,7 @@ Status: todo
 
 ### S-030 Create and edit actions
 As the user, I add an action, pick its type, and fill in a form for that type.
-Screens: settings-actions
+Screens: actions
 Depends: S-023, S-033
 Acceptance:
 - [snap] A list of actions with their type and how many bindings use each, plus a form that changes with the type.
@@ -342,7 +342,7 @@ Status: todo
 
 ### S-031 Define contexts
 As the user, I create a "browser" context and add Chrome and Firefox to it.
-Screens: settings-contexts
+Screens: contexts
 Depends: S-030
 Acceptance:
 - [snap] A list of contexts in order, each showing its apps with their icons and names.
@@ -350,16 +350,16 @@ Acceptance:
 Status: todo
 
 ### S-032 Change general settings
-As the user, I set the HUD delay, timeout, position, theme and feedback options in a form.
-Screens: settings-general
+As the user, I open Settings… (⌘,) and set the Guide delay, timeout, position, theme, cancel and back keys, and feedback options.
+Screens: settings
 Depends: S-023, S-033
 Acceptance:
-- [snap] A grouped form with each setting from `runtime` and `ui`, each with a short help line.
+- [snap] One grouped Form, 520 pt wide, with sections Guide, Keys, Feedback and Startup, and a short help line in each section footer.
 - [unit] A negative delay can't be entered.
 Status: todo
 
 ### S-033 Save edits back to the config file
-As the user, every change I make in the settings window is written to `config.json` right away.
+As the user, every change I make in the Bindings window or Settings is written to `config.json` right away.
 Depends: S-001
 Acceptance:
 - [unit] A config loaded and saved with no edits keeps the same entry order, action order and contexts as the original.
@@ -368,9 +368,9 @@ Acceptance:
 - [self] If the file changes on disk while the window is open, the window reloads it.
 Status: todo
 
-### S-034 Fix validation errors from the settings window
+### S-034 Fix validation errors from the Bindings window
 As the user, I click an error in the banner and the entry or action it names is selected.
-Screens: settings-bindings
+Screens: bindings
 Depends: S-023
 Acceptance:
 - [self] Clicking an error selects the right row and focuses the field with the problem.
@@ -386,8 +386,8 @@ Acceptance:
 Status: todo
 
 ### S-036 Start at login
-As the user, I turn on "Open at Login" in General.
-Screens: settings-general
+As the user, I turn on "Open at Login" in Settings.
+Screens: settings
 Depends: S-032
 Acceptance:
 - [self] The switch uses `SMAppService.mainApp` and reflects its current `status`. If you turn it off in System Settings, the switch shows off.
@@ -434,9 +434,9 @@ Acceptance:
 - [snap] An app icon (Icon Composer, light, dark and tinted) and a template menu bar symbol with normal, dimmed and warning states.
 Status: todo
 
-### S-042 Empty states in the settings window
+### S-042 Empty states in the Bindings window
 As the user, an empty page tells me what to add and how.
-Screens: settings-bindings, settings-actions, settings-contexts
+Screens: bindings, actions, contexts
 Depends: S-023
 Acceptance:
 - [snap] Each empty list shows one line of explanation and an Add button.
@@ -444,18 +444,18 @@ Status: todo
 
 ### S-043 Context menus in the outline
 As the user, I right-click an entry to Add Binding Here, Duplicate, Sort Alphabetically or Delete.
-Screens: settings-bindings
+Screens: bindings
 Depends: S-024, S-027, S-029
 Acceptance:
 - [self] Every context menu item matches an item in the menu bar, with the same name and shortcut.
 Status: todo
 
-### S-044 Use the settings window from the keyboard
+### S-044 Use the Bindings window from the keyboard
 As the user, I move through the outline with the arrow keys, press Return to edit a title, and press Space to record a key.
-Screens: settings-bindings
+Screens: bindings
 Depends: S-025
 Acceptance:
-- [manual] Every action in the settings window can be done without a mouse.
+- [manual] Every action in the Bindings window and Settings can be done without a mouse.
 - [self] VoiceOver reads each row as "key, title, action".
 Status: todo
 

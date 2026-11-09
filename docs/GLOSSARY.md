@@ -27,4 +27,5 @@ One name per idea. Use these words in the UI, the docs, the log and VoiceOver la
 | Reload Config | Read the config file again and use it if it's valid. | refresh, restart, re-read |
 | Enabled | Whether Unnamed Launcher is capturing leaders. When it's off, no keys are captured. | active, running, paused, armed |
 | Permissions | The Accessibility and Input Monitoring access in System Settings that the app needs to capture keys. Use Apple's names for each one. | rights, access, privileges |
-| Settings | The settings window (Settings… ⌘,). | Preferences, options, config editor |
+| Bindings window | The window for editing bindings, actions and contexts, opened by Edit Bindings… (⌘B). | editor, config editor, settings window |
+| Settings | The Settings window (Settings… ⌘,): Guide, keys, feedback, Open at Login. | Preferences, options |

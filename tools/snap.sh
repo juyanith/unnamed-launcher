@@ -1,7 +1,7 @@
 #!/bin/zsh
-# Snapshots of every settings page in light and dark, against a test config in /tmp.
+# Snapshots of every Bindings page and Settings in light and dark, against a test config in /tmp.
 # Usage: tools/snap.sh            all pages
-#        APP_SNAPSHOT_PAGES=bindings,general tools/snap.sh
+#        APP_SNAPSHOT_PAGES=bindings,settings tools/snap.sh
 #        tools/snap.sh -AppleShowScrollBars Always     see the scroll bars as people with a mouse see them
 set -u
 app=~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher

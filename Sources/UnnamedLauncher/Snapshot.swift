@@ -4,12 +4,13 @@ import SwiftUI
 
 /// Screenshot mode for agents.
 ///   APP_STORE=/tmp/test.json APP_SNAPSHOT=/tmp/shots ~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher
-/// writes <page>-light.png and <page>-dark.png for every settings page, then quits.
+/// writes <page>-light.png and <page>-dark.png for every Bindings page, and
+/// settings-light.png and settings-dark.png for Settings, then quits.
 /// Each PNG gets a <page>-<mode>-layout.json with the grid probes (tools/check-layout.swift).
-/// APP_SNAPSHOT_PAGES=bindings,general limits the pages.
+/// APP_SNAPSHOT_PAGES=bindings,settings limits the pages.
 /// Add APP_ACCENT=<id> to see the pages in another accent.
 enum Snapshot {
-    static func runIfRequested(model: AppModel) {
+    static func runIfRequested(model: AppModel, openSettings: OpenSettingsAction) {
         let env = ProcessInfo.processInfo.environment
         guard let dir = env["APP_SNAPSHOT"], !dir.isEmpty else { return }
         // Snapshots never run against the real config file.
@@ -35,6 +36,17 @@ enum Snapshot {
                     model.sidebar = page
                     try? await Task.sleep(for: .seconds(0.8))
                     capture(to: "\(dir)/\(page.rawValue)-\(mode).png")
+                }
+            }
+            if only == nil || only?.contains("settings") == true {
+                let main = NSApp.windows.first { $0.canBecomeMain && !$0.isSheet }
+                openSettings()
+                try? await Task.sleep(for: .seconds(1))
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    let settings = NSApp.windows.first { $0.isVisible && $0 !== main && !$0.isSheet && $0.canBecomeKey }
+                    capture(to: "\(dir)/settings-\(mode).png", window: settings)
                 }
             }
             print("SNAPSHOT done \(dir)")

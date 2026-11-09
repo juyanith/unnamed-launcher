@@ -1,9 +1,9 @@
-import Foundation
+import AppKit
 import UnnamedLauncherKit
 
-/// The settings window's sidebar pages. Snapshot mode walks through every case.
+/// The Bindings window's sidebar pages. Snapshot mode walks through every case.
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case bindings, actions, contexts, general
+    case bindings, actions, contexts
 
     var id: String { rawValue }
 
@@ -12,7 +12,6 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .bindings: "Bindings"
         case .actions: "Actions"
         case .contexts: "Contexts"
-        case .general: "General"
         }
     }
 
@@ -21,13 +20,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .bindings: "keyboard"
         case .actions: "bolt"
         case .contexts: "macwindow.on.rectangle"
-        case .general: "gearshape"
         }
-    }
-
-    /// The empty page's title until its story is built.
-    var emptyTitle: String {
-        self == .general ? "No Settings Yet" : "No \(title) Yet"
     }
 
     /// What the empty page says until its story is built.
@@ -36,7 +29,6 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .bindings: "Leaders, menus and bindings from the config file appear here."
         case .actions: "Actions that bindings run appear here."
         case .contexts: "Sets of apps that Choose by App checks appear here."
-        case .general: "Guide timing, position and feedback settings appear here."
         }
     }
 }
@@ -45,6 +37,15 @@ enum SidebarItem: String, CaseIterable, Identifiable {
 @Observable
 final class AppModel {
     var sidebar: SidebarItem? = .bindings
+
+    /// How many of the app's windows are open. While any is, the app is a
+    /// regular app with a main menu (Edit > Undo, Window); otherwise it lives
+    /// only in the menu bar (DESIGN.md, Archetype).
+    var openWindows = 0 {
+        didSet {
+            NSApp.setActivationPolicy(openWindows > 0 ? .regular : .accessory)
+        }
+    }
 
     /// The config file. Tests and snapshots point APP_STORE at a file in /tmp.
     let configURL = ConfigLocation.url(environment: ProcessInfo.processInfo.environment,
