@@ -50,6 +50,20 @@ final class AppModel {
     /// The config file. Tests and snapshots point APP_STORE at a file in /tmp.
     let configURL = ConfigLocation.url(environment: ProcessInfo.processInfo.environment,
                                        home: URL.homeDirectory)
+    let store: ConfigStore
+    let launcher: Launcher
+
+    /// The one model, for the app delegate.
+    private(set) static weak var current: AppModel?
+
+    init() {
+        store = ConfigStore(url: configURL)
+        launcher = Launcher(store: store)
+        Self.current = self
+        // Snapshots and the self-test never capture the real keyboard.
+        let isTestRun = SelfTest.requested || !(ProcessInfo.processInfo.environment["APP_SNAPSHOT"] ?? "").isEmpty
+        launcher.start(captureKeys: !isTestRun)
+    }
 }
 
 enum Store {

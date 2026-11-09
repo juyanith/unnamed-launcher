@@ -1,0 +1,93 @@
+import Foundation
+
+/// Reads the config file and turns every failure into sentences (S-001).
+public enum ConfigLoader {
+    /// Decodes and validates JSON data.
+    public static func load(_ data: Data) -> Result<LoadedConfig, ConfigErrors> {
+        let config: Config
+        do {
+            config = try JSONDecoder().decode(Config.self, from: data)
+        } catch {
+            return .failure(ConfigErrors(issues: [ConfigIssue(.error, describe(error))]))
+        }
+        return ConfigValidator.validate(config)
+    }
+
+    /// Reads the file. A missing file is an error here; the app writes the
+    /// starter config first (`writeStarterIfMissing`).
+    public static func load(contentsOf url: URL) -> Result<LoadedConfig, ConfigErrors> {
+        do {
+            return load(try Data(contentsOf: url))
+        } catch {
+            return .failure(ConfigErrors(issues: [ConfigIssue(.error, "Unable to read \(url.path): \(error.localizedDescription)")]))
+        }
+    }
+
+    /// Writes the starter config when no file exists. Never writes over a
+    /// file. Returns true when it wrote one.
+    @discardableResult
+    public static func writeStarterIfMissing(at url: URL) throws -> Bool {
+        let files = FileManager.default
+        guard !files.fileExists(atPath: url.path) else { return false }
+        try files.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data(starterJSON.utf8).write(to: url, options: .withoutOverwriting)
+        return true
+    }
+
+    /// One leader with two bindings (S-001, UX).
+    public static let starterJSON = """
+    {
+      "version": 1,
+      "entries": [
+        { "keys": "Hyper+Space", "title": "Commands" },
+        { "keys": "Hyper+Space F", "title": "Finder", "action": "open-finder" },
+        { "keys": "Hyper+Space T", "title": "Terminal", "action": "open-terminal" }
+      ],
+      "actions": {
+        "open-finder": { "type": "application", "bundleId": "com.apple.finder" },
+        "open-terminal": { "type": "application", "bundleId": "com.apple.Terminal" }
+      }
+    }
+
+    """
+
+    /// A decoding error as one sentence that names where the problem is.
+    static func describe(_ error: any Error) -> String {
+        if let unknown = error as? UnknownFieldError {
+            return "Unknown field “\(unknown.field)” in \(unknown.path). Check its spelling, or remove it."
+        }
+        guard let decoding = error as? DecodingError else { return error.localizedDescription }
+        switch decoding {
+        case let .keyNotFound(key, context):
+            return "Missing “\(key.stringValue)” in \(place(context.codingPath))."
+        case let .typeMismatch(type, context), let .valueNotFound(type, context):
+            return "“\(context.codingPath.last?.stringValue ?? "value")” in \(place(context.codingPath.dropLast())) should be \(kind(type))."
+        case let .dataCorrupted(context):
+            if context.codingPath.isEmpty {
+                let detail = (context.underlyingError as NSError?)?.userInfo[NSDebugDescriptionErrorKey] as? String
+                return "The config file isn't valid JSON\(detail.map { ": \($0)" } ?? ".")"
+            }
+            return "\(context.debugDescription) (in \(place(context.codingPath)))"
+        @unknown default:
+            return decoding.localizedDescription
+        }
+    }
+
+    private static func place(_ path: some Collection<any CodingKey>) -> String {
+        guard !path.isEmpty else { return "the file" }
+        return path.map { key in
+            if let index = key.intValue { return "item \(index + 1)" }
+            return key.stringValue
+        }.joined(separator: " › ")
+    }
+
+    private static func kind(_ type: Any.Type) -> String {
+        switch type {
+        case is String.Type: "text in quotes"
+        case is Int.Type: "a whole number"
+        case is Bool.Type: "true or false"
+        case is [String].Type: "a list of text"
+        default: "a different kind of value"
+        }
+    }
+}

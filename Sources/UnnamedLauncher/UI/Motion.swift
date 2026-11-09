@@ -31,6 +31,10 @@ enum Motion {
         reduceMotion ? nil : .smooth(duration: 0.2)
     }
 
+    /// The Guide's fade, for the AppKit panel (NSAnimationContext). Same
+    /// length as guideAppear and guideDismiss. Skipped under Reduce Motion.
+    static let guideFadeSeconds: TimeInterval = 0.12
+
     /// How long a failed action's message stays in the Guide (S-015).
     static let errorMessageHold: Duration = .seconds(2)
 }

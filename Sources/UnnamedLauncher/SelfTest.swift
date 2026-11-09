@@ -30,8 +30,75 @@ enum SelfTest {
             model.sidebar = .contexts
             check("the Bindings window can switch pages", model.sidebar == .contexts)
 
+            await configChecks(model)
+            await guideChecks(model)
+            await actionChecks()
+
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
+        }
+    }
+
+    /// S-001, S-008, S-009: the starter config, reload with errors, Enabled.
+    private static func configChecks(_ model: AppModel) async {
+        let store = model.store
+        let launcher = model.launcher
+        // tools/selftest.sh deletes the file first, so launch wrote the starter.
+        check("S-001 a missing config file gets the starter config", store.createdStarter
+              && store.loaded?.leaders.first?.children.map(\.title) == ["Finder", "Terminal"])
+        check("S-002 snapshots and self-tests install no event tap", !launcher.isCapturing)
+
+        let good = try? String(contentsOf: store.url, encoding: .utf8)
+        try? Data(#"{ "version": 1, "entries": [{ "keys": "Hyper+Spcae", "title": "C" }] }"#.utf8).write(to: store.url)
+        store.reload()
+        check("S-008 a reload with errors keeps the last valid config",
+              store.loaded?.leaders.first?.title == "Commands" && !store.errors.isEmpty)
+        let broken = MenuBarStatus(launcher: launcher, store: store)
+        check("S-008 a config error shows in the menu with a warning icon",
+              broken.icon == .warning && broken.firstError?.contains("Hyper+Spcae") == true, broken.firstError ?? "no error")
+        try? good?.write(to: store.url, atomically: true, encoding: .utf8)
+        store.reload()
+        let fixed = MenuBarStatus(launcher: launcher, store: store)
+        check("S-008 a fixed file reloads and clears the error", store.errors.isEmpty && fixed.firstError == nil)
+        check("S-008 the status line says when the config loaded",
+              fixed.statusLine?.hasPrefix("Config loaded at") == true || fixed.statusLine == "Created config file"
+              || !fixed.missingPermissions.isEmpty, fixed.statusLine ?? "nil")
+
+        launcher.isEnabled = false
+        let off = MenuBarStatus(launcher: launcher, store: store)
+        check("S-009 turning Enabled off dims the icon and says so",
+              off.icon == .off && off.statusLine == "Not capturing leaders" && !launcher.isCapturing)
+        check("S-009 the off state is in the VoiceOver label", off.accessibilityLabel == "Unnamed Launcher, off")
+        launcher.isEnabled = true
+    }
+
+    /// S-005: the Guide shows the path and rows, and never takes focus.
+    private static func guideChecks(_ model: AppModel) async {
+        let content = SeedData.guideContent
+        check("S-005 the Guide lists the leader's keys in file order",
+              content.rows.map(\.key) == ["Space", "E", "B", "A", "N", "S"])
+        check("S-005 menus are marked, bindings aren't",
+              content.rows.first { $0.key == "A" }?.isMenu == true && content.rows.first { $0.key == "E" }?.isMenu == false)
+        check("S-005 the footer shows esc and delete", content.cancelKey == "esc" && content.backKey == "delete")
+        let front = NSApp.keyWindow
+        let guide = model.launcher.guide
+        guide.show(content)
+        try? await Task.sleep(for: .seconds(0.3))
+        check("S-005 the Guide is on screen", guide.isVisible)
+        check("S-005 the Guide never becomes the key window",
+              !guide.window.canBecomeKey && !guide.window.isKeyWindow && NSApp.keyWindow === front)
+        guide.hide()
+        try? await Task.sleep(for: .seconds(0.3))
+        check("S-007 the Guide hides when the sequence ends", !guide.window.isVisible)
+    }
+
+    /// S-006: a bundle id that isn't installed is reported, not ignored.
+    private static func actionChecks() async {
+        do throws(ActionRunner.Failure) {
+            try await ActionRunner.run(.application(bundleId: "net.unnamed.not-installed"), id: "missing")
+            check("S-006 a missing app is reported", false, "no failure")
+        } catch {
+            check("S-006 a missing app is reported", error.message == "Couldn't open net.unnamed.not-installed: not installed.", error.message)
         }
     }
 

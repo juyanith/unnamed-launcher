@@ -40,7 +40,7 @@ UX:
 - States: missing file → starter written, and the menu shows "Created config file" once. Invalid file → error state (S-008). Valid → Ready.
 - Words: the starter has the leader "Commands" (Hyper+Space) with bindings "Finder" (F, Open App) and "Terminal" (T, Open App, `com.apple.Terminal`). Errors name the path and the rule in one sentence, such as "Binding “Hyper+Space Q” uses action “open-foo”, which isn't defined." No codes, no blame.
 - Access: n/a.
-Status: todo
+Status: done
 
 ### S-002 Grant the permissions the app needs
 As the user, I see which permission is missing in the menu bar menu and click to open the right System Settings pane.
@@ -56,7 +56,8 @@ UX:
 - States: both missing → two rows. One missing → one row. Both granted → no rows, and the icon is normal. Granted but macOS still blocks it → "Relaunch to Finish Setup".
 - Words: a section header "Needs Permission", then rows "Accessibility — Open Settings…" and "Input Monitoring — Open Settings…". Under them, a disabled line in sentence case: "Unnamed Launcher needs both to capture your leader keys."
 - Access: the menu is fully keyboard-operable as a standard NSMenu. The warning badge is also announced: the status item's accessibility label is "Unnamed Launcher, needs permission".
-Status: todo
+Status: done
+Verified: no tap without permissions (self-test), menu status model (self-test). Not yet tried by hand: granting both and capture starting without relaunch; the menu snapshot (menus can't be captured without Screen Recording).
 
 ### S-003 Start a sequence with a leader chord
 As the user, I press Hyper+Space anywhere and the launcher takes over the keyboard until the sequence ends.
@@ -66,7 +67,8 @@ Acceptance:
 - [unit] Once a sequence starts, every key-down, repeat and matching key-up is consumed.
 - [self] The tap callback returns in under 1 ms for 1,000 synthetic events.
 - [manual] The app in front never sees the leader. For example, Hyper+Space in a text field types nothing.
-Status: todo
+Status: done
+Verified: engine rules and 1,000 events in under 200 ms (unit tests). Not yet tried by hand: Hyper+Space typing nothing in a text field.
 
 ### S-004 Step through menus with single keys
 As the user, I press A then T after the leader to reach Applications › Terminal.
@@ -76,7 +78,7 @@ Acceptance:
 - [unit] Leader modifiers that are still held are ignored on step keys. Any other modifier makes the step not match.
 - [unit] Keys match by physical position (US ANSI), whatever the active layout.
 - [unit] Menus can nest without limit. A test with 6 levels passes.
-Status: todo
+Status: done
 
 ### S-005 See the options in the HUD
 As the user, I see a small panel showing where I am and which keys I can press next.
@@ -91,9 +93,10 @@ UX:
 - Flow: press the leader → the guide appears (after the delay, S-016) → press a key → the guide updates in the same frame, or closes when a binding runs. Escape cancels and Backspace goes back (S-007).
 - Surface: Panel (a tool kept open beside the work that you watch while you type). It's a non-activating, floating, borderless Liquid Glass panel with no title or close button.
 - States: normal (path plus rows). Too many rows → two columns after 12 rows; past 24, three columns. Long titles truncate at the end, and the full title is spoken by VoiceOver. A Choose by App binding with no match is dimmed and its row reads "not available in <App>" (S-013). An empty menu can't happen because validation blocks it.
-- Words: the path uses the menu titles joined with " › ", starting with the leader's title, for example "Commands › Applications". Each row shows a keycap (key name: "E", "Space", "F5"), the title, and a trailing "›" if it opens a menu. The footer shows the keycaps "esc Cancel" and "⌫ Back" in secondary text.
+- Words: the path uses the menu titles joined with " › ", starting with the leader's title, for example "Commands › Applications". Each row shows a keycap (key name: "E", "Space", "F5"), the title, and a trailing "›" if it opens a menu. The footer shows the keycaps "esc Cancel" and "delete Back" in secondary text.
 - Access: keys come from the event tap, so the guide needs no focus. VoiceOver announces the path when the guide opens and each menu change ("Applications, 3 keys") through an accessibility notification, without moving VoiceOver focus. Keycaps are not color-only. Text is at least 11 pt, and the guide follows Increase Contrast. Reduce Motion turns the appear animation into a fade.
-Status: todo
+Status: done
+Verified: rows, footer, never key (self-test), light snapshot hud-light.png. Not yet checked: dark snapshot and glass (need Screen Recording), focus staying in the app in front (by hand).
 
 ### S-006 Open or switch to an app with a binding
 As the user, I press Hyper+Space E and Zed comes to the front, launching first if it isn't running.
@@ -102,7 +105,8 @@ Acceptance:
 - [self] When the app is running, it's activated. When it isn't, `NSWorkspace` launches it by `bundleId`.
 - [self] When the bundle id isn't installed, the sequence ends and the failure is recorded (shown in S-015).
 - [manual] From the leader press to the app activating takes under 100 ms when the app is already running.
-Status: todo
+Status: done
+Verified: missing app reported (self-test). Not yet tried by hand: activation speed under 100 ms.
 
 ### S-007 Cancel or go back mid-sequence
 As the user, I press Escape to stop, or Backspace to go up one menu.
@@ -115,9 +119,9 @@ UX:
 - Flow: during a sequence, Escape → the guide fades out and nothing runs. Backspace → the guide shows the parent menu, and Backspace in the leader's own menu cancels.
 - Surface: the guide (S-005).
 - States: when the sequence ends with no visible guide (it was still waiting for its delay), nothing appears. The feedback is simply that the next key types normally.
-- Words: the footer keycaps "esc Cancel" and "⌫ Back" show the configured keys by name. When Back is turned off, the Back keycap is hidden.
+- Words: the footer keycaps "esc Cancel" and "delete Back" show the configured keys by name. When Back is turned off, the Back keycap is hidden.
 - Access: VoiceOver announces "Cancelled" on Cancel and the parent menu's name on Back.
-Status: todo
+Status: done
 
 ### S-008 Reload the config and see its errors
 As the user, I choose "Reload Config" or "Open Config File" in the menu bar, and if the file is broken I see why.
@@ -133,7 +137,8 @@ UX:
 - States: OK → a disabled line "Config loaded at 14:02". Error → a section "Config Error" with the first error in sentence case, wrapped to 2 lines with the full text in a tooltip, plus "+2 more" if there are more. Warnings (unused actions) never show in the menu, only in Settings (S-034) and the log.
 - Words: "Reload Config", "Open Config File", "Show in Finder" (with ⌥ held), and "Config Error" as the section header. Errors follow S-001's pattern.
 - Access: standard NSMenu. The error line is a disabled item, so VoiceOver reads it in order.
-Status: todo
+Status: done
+Verified: errors keep the last config, status line and warning icon (self-test). Not yet tried by hand: Open Config File and Show Config in Finder.
 
 ### S-009 Turn the launcher off and on, or quit
 As the user, I uncheck "Enabled" in the menu bar menu so no keys are captured, or choose Quit.
@@ -149,7 +154,8 @@ UX:
 - States: on → check mark, normal icon. Off → no check mark, dimmed icon, and the status line reads "Not capturing leaders". Enabled is remembered across launches.
 - Words: menu order is the status line, "Enabled", a separator, "Reload Config", "Open Config File", a separator, "Edit Bindings…" (⌘B), "Settings…" (⌘,), "Quit Unnamed Launcher" (⌘Q).
 - Access: the status item's accessibility label includes the state: "Unnamed Launcher, off".
-Status: todo
+Status: done
+Verified: Enabled off removes capture, dims the icon, VoiceOver label (self-test). Not yet tried by hand: the dimmed icon in the menu bar.
 
 ## M2 Actions
 

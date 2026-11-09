@@ -24,6 +24,9 @@ enum StatusIcon {
     static let off = "command"
     static let offOpacity = 0.4
     /// A permission is missing, the config has an error, or Secure Event
-    /// Input blocks keys.
+    /// Input blocks keys. Shown as a badge on the ready symbol; this symbol
+    /// is for places with room for a full icon.
     static let warning = "exclamationmark.triangle"
+    /// The warning badge: a dot this wide in the icon's top trailing corner.
+    static let badgeDiameter: CGFloat = 6
 }
