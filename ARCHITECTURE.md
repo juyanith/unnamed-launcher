@@ -38,8 +38,9 @@ ConfigStore (main) ── onLoad ─► EngineBox.replace(config)
 | `Launcher.start(captureKeys:)` | the real tap; no tap | Snapshots and the self-test never capture the keyboard |
 | `KeyEvent` into `SequenceEngine` | the event tap; unit tests | Every sequence rule is tested without a keyboard |
 
-Planned in M2: an `ActionPerformer` seam for open, launch, spawn and post-events, so the self-test can check actions without running them. See `docs/architecture-review-2026-11-08.md`.
+| `ActionPerformer` | `SystemPerformer` (NSWorkspace, Process, CGEvent); `RecordingPerformer` | The self-test checks action plans without launching or typing anything |
 
 ## Reviews
 
 - [docs/architecture-review-2026-11-08.md](docs/architecture-review-2026-11-08.md) (end of M1)
+- [docs/architecture-review-2026-11-08-m2.md](docs/architecture-review-2026-11-08-m2.md) (end of M2)
