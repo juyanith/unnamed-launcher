@@ -31,6 +31,7 @@ final class Launcher {
         return output.consume
     }
     @ObservationIgnored let guide = GuideController()
+    @ObservationIgnored var runner = ActionRunner()
     @ObservationIgnored private var permissionTimer: Timer?
     /// False in snapshots and the self-test, which never touch the keyboard.
     @ObservationIgnored private var capturesKeys = false
@@ -111,8 +112,8 @@ final class Launcher {
             guide.hide()
             guard let id = binding.action, let action = config.config.actions[id] else { return }
             Task {
-                do throws(ActionRunner.Failure) {
-                    try await ActionRunner.run(action, id: id)
+                do throws(PlanError) {
+                    try await runner.run(action, id: id)
                 } catch {
                     lastFailure = error.message
                     log.error("Action failed: \(error.message, privacy: .public)")

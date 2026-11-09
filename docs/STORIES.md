@@ -165,7 +165,7 @@ Depends: S-006
 Acceptance:
 - [unit] A leading `~` expands to the home folder, and nothing else is expanded.
 - [self] File URLs and web URLs both open through `NSWorkspace`.
-Status: todo
+Status: done
 
 ### S-011 Run a command
 As the user, I bind a key to `["zed", "~/notes"]` and it runs with no shell.

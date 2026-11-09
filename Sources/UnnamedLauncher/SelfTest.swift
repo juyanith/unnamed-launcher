@@ -1,4 +1,5 @@
 import AppKit
+import UnnamedLauncherKit
 
 /// Self-test for agents: runs the app's real functions against a test config,
 /// prints PASS or FAIL per check, and quits with exit code 0 or 1.
@@ -92,14 +93,31 @@ enum SelfTest {
         check("S-007 the Guide hides when the sequence ends", !guide.window.isVisible)
     }
 
-    /// S-006: a bundle id that isn't installed is reported, not ignored.
+    /// S-006, S-010: Open App and Open, through the real performer for
+    /// failures and the recording one for plans (nothing is launched).
     private static func actionChecks() async {
-        do throws(ActionRunner.Failure) {
-            try await ActionRunner.run(.application(bundleId: "net.unnamed.not-installed"), id: "missing")
+        let system = ActionRunner()
+        do throws(PlanError) {
+            try await system.run(.application(bundleId: "net.unnamed.not-installed"), id: "missing")
             check("S-006 a missing app is reported", false, "no failure")
         } catch {
             check("S-006 a missing app is reported", error.message == "Couldn't open net.unnamed.not-installed: not installed.", error.message)
         }
+        do throws(PlanError) {
+            try await system.run(.open(target: "~/net.unnamed.no-such-file"), id: "missing")
+            check("S-010 a missing file is reported", false, "no failure")
+        } catch {
+            check("S-010 a missing file is reported", error.message.hasSuffix("net.unnamed.no-such-file: it doesn't exist."), error.message)
+        }
+
+        let recorder = RecordingPerformer()
+        let runner = ActionRunner(performer: recorder, home: URL(fileURLWithPath: "/Users/someone"))
+        try? await runner.run(.open(target: "~/notes"), id: "notes")
+        try? await runner.run(.open(target: "https://example.com/a?b=1"), id: "web")
+        check("S-010 file paths and web URLs both open through NSWorkspace", recorder.plans == [
+            .open(URL(fileURLWithPath: "/Users/someone/notes")),
+            .open(URL(string: "https://example.com/a?b=1")!),
+        ], "\(recorder.plans)")
     }
 
     private static func check(_ name: String, _ ok: Bool, _ detail: String = "") {
