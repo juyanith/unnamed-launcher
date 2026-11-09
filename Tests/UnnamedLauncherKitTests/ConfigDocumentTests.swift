@@ -228,3 +228,25 @@ struct SettingsValueTests {
         #expect(SettingsValues.milliseconds(input) == expected)
     }
 }
+
+@Suite("Duplicate (S-043)")
+struct DuplicateTests {
+    @Test("Duplicating a menu copies it and everything under it to a free key, right after it")
+    func duplicate() throws {
+        var d = try ConfigDocument(data: Data("""
+        { "version": 1, "entries": [
+          { "keys": "Hyper+Space", "title": "Commands" },
+          { "keys": "Hyper+Space A", "title": "Apps" },
+          { "keys": "Hyper+Space A T", "title": "Terminal", "action": "t" },
+          { "keys": "Hyper+Space Z", "title": "Zed", "action": "t" }
+        ], "actions": { "t": { "type": "noop" } } }
+        """.utf8))
+        let duplicated = d.duplicateEntry(KeySequence(parsing: "Hyper+Space A")!)
+        let copy = try #require(duplicated)
+        #expect(copy.description == "Hyper+Space B")
+        #expect(d.config.entries.map(\.keys) == ["Hyper+Space", "Hyper+Space A", "Hyper+Space A T",
+                                                 "Hyper+Space B", "Hyper+Space B T", "Hyper+Space Z"])
+        #expect(d.entry(copy)?.title == "Apps Copy" && d.entry(KeySequence(parsing: "Hyper+Space B T")!)?.title == "Terminal")
+        #expect((try? d.validate().get()) != nil)
+    }
+}

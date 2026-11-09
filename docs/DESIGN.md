@@ -60,7 +60,7 @@ The status item menu acts as the menu bar while no window is open (menus.md, rul
 | Quit Unnamed Launcher | Menu bar menu and the app menu | ⌘Q |
 | New Binding / New Menu | File menu, the toolbar over the outline, and the context menu | ⌘N / ⇧⌘N |
 | New Action / New Context | File menu on their pages | ⌘N |
-| Record Key | Edit menu, and Space on a selected row | Space |
+| Record Key | Edit menu, the context menu, and Space on a selected row | ⌘K, Space |
 | Sort Alphabetically | Edit menu and the context menu (on a menu) | — |
 | Duplicate | Edit menu and the context menu | ⌘D |
 | Delete | Edit menu and the context menu | ⌫ |

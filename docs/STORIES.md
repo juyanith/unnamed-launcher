@@ -484,7 +484,8 @@ Screens: bindings
 Depends: S-024, S-027, S-029
 Acceptance:
 - [self] Every context menu item matches an item in the menu bar, with the same name and shortcut.
-Status: todo
+Status: done
+Verified: every right-click item is in the menu bar, and Duplicate copies a subtree (self-test, unit test). The add item is called New Binding, as in the File menu, rather than Add Binding Here, so the two names match. Menus also offer New Menu and Record Key (⌘K). Not yet tried by hand: right-clicking.
 
 ### S-044 Use the Bindings window from the keyboard
 As the user, I move through the outline with the arrow keys, press Return to edit a title, and press Space to record a key.

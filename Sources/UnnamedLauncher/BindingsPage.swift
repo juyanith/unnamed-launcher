@@ -165,7 +165,7 @@ private struct OutlineCells: View {
     }
 }
 
-/// The right-click menu on a row (S-043 adds the rest).
+/// The right-click menu on a row (S-043), from the same list as the menu bar.
 private struct OutlineMenu: View {
     @Environment(AppModel.self) private var model
     @Environment(\.undoManager) private var undo
@@ -174,14 +174,13 @@ private struct OutlineMenu: View {
 
     var body: some View {
         let editor = model.editor
-        let isMenu = editor.draft.entry(path)?.action == nil
-        if isMenu {
-            Button("Add Binding Here") { editor.selection = path; editor.addBinding(undo: undo) }
-            Button("Sort Alphabetically") { editor.sort(path, undo: undo) }
+        let isMenu = editor.draft.entry(path)?.action == nil && !editor.needsAction.contains(path)
+        ForEach(OutlineCommand.forRow(isMenu: isMenu)) { command in
+            if command == .delete { Divider() }
+            Button(command.title, role: command == .delete ? .destructive : nil) {
+                command.perform(on: path, editor: editor, undo: undo, requestDelete: { _ in onDelete() })
+            }
         }
-        Button("Record Key") { editor.select(path, focus: .key) }
-        Divider()
-        Button("Delete", role: .destructive, action: onDelete)
     }
 }
 

@@ -104,6 +104,25 @@ public struct ConfigDocument: Sendable, Equatable {
         return indexes.count
     }
 
+    /// Copies an entry and everything under it to the first free key in the
+    /// same menu, right after the original, titled "… Copy". Returns the copy's path.
+    @discardableResult
+    public mutating func duplicateEntry(_ path: KeySequence) -> KeySequence? {
+        let block = subtreeIndexes(path)
+        guard let last = block.last, let original = entry(path) else { return nil }
+        let copy = freePath(under: path.parent)
+        var entries: [Config.Entry] = []
+        for i in block {
+            guard let old = KeySequence(parsing: config.entries[i].keys) else { continue }
+            var duplicated = config.entries[i]
+            duplicated.keys = old.replacingPrefix(path, with: copy).description
+            if old == path { duplicated.title = original.title + " Copy" }
+            entries.append(duplicated)
+        }
+        config.entries.insert(contentsOf: entries, at: last + 1)
+        return copy
+    }
+
     public mutating func setTitle(_ path: KeySequence, _ title: String) {
         guard let i = index(of: path) else { return }
         config.entries[i].title = title

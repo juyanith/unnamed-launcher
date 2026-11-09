@@ -8,14 +8,8 @@ struct EditorCommands: Commands {
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
-            switch model.sidebar ?? .bindings {
-            case .bindings:
-                Button("New Binding") { model.editor.addBinding(undo: undoManager) }
-                    .keyboardShortcut("n")
-                Button("New Menu") { model.editor.addMenu(undo: undoManager) }
-                    .keyboardShortcut("n", modifiers: [.command, .shift])
-            case .actions, .contexts:
-                EmptyView()
+            if (model.sidebar ?? .bindings) == .bindings {
+                ForEach(OutlineCommand.menuBarFile) { item($0) }
             }
             Divider()
             Button("Reload Config") { model.store.reload() }
@@ -24,14 +18,7 @@ struct EditorCommands: Commands {
         }
         CommandGroup(after: .pasteboard) {
             Divider()
-            Button("Record Key") {
-                if let path = model.editor.selection { model.editor.select(path, focus: .key) }
-            }
-            .disabled(model.sidebar != .bindings || model.editor.selection == nil)
-            Button("Sort Alphabetically") {
-                model.editor.sort(model.editor.targetMenu, undo: undoManager)
-            }
-            .disabled(model.sidebar != .bindings || model.editor.targetMenu == nil)
+            ForEach(OutlineCommand.menuBarEdit) { item($0) }
         }
         CommandGroup(before: .sidebar) {
             ForEach(Array(SidebarItem.allCases.enumerated()), id: \.element) { index, page in
@@ -40,6 +27,18 @@ struct EditorCommands: Commands {
             }
             Divider()
         }
+    }
+
+    /// One outline command as a menu bar item, with its shortcut.
+    @ViewBuilder
+    private func item(_ command: OutlineCommand) -> some View {
+        let button = Button(command.title) {
+            command.perform(on: nil, editor: model.editor, undo: undoManager) { path in
+                model.editor.delete(path, undo: undoManager)
+            }
+        }
+        .disabled(model.sidebar != .bindings || (command != .newBinding && command != .newMenu && model.editor.selection == nil))
+        if let shortcut = command.shortcut { button.keyboardShortcut(shortcut) } else { button }
     }
 
     /// The key window's undo manager, so menu commands undo with ⌘Z.

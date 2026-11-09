@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 import OSLog
 import Synchronization
 import UnnamedLauncherKit
@@ -41,5 +42,10 @@ extension SelfTest {
               !WelcomeStatus(accessibility: true, inputMonitoring: true, ranSequence: false).isComplete
               && !WelcomeStatus(accessibility: true, inputMonitoring: false, ranSequence: true).isComplete
               && WelcomeStatus(accessibility: true, inputMonitoring: true, ranSequence: true).isComplete)
+
+        // S-043: every right-click item is in the menu bar, with the same name.
+        let contextItems = Set(OutlineCommand.forRow(isMenu: true) + OutlineCommand.forRow(isMenu: false))
+        check("S-043 every context menu item is also in the menu bar", contextItems.isSubset(of: Set(OutlineCommand.inMenuBar)))
+        check("S-043 Duplicate has ⌘D in the menu bar", OutlineCommand.duplicate.shortcut == KeyboardShortcut("d"))
     }
 }

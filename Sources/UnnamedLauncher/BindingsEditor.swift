@@ -174,6 +174,12 @@ final class BindingsEditor {
         return nil
     }
 
+    func duplicate(_ path: KeySequence, undo: UndoManager?) {
+        var copy: KeySequence?
+        change("Duplicate", undo: undo) { copy = $0.duplicateEntry(path) }
+        if let copy { selection = copy }
+    }
+
     func delete(_ path: KeySequence, undo: UndoManager?) {
         let next = draft.children(of: path.parent).drop { $0 != path }.dropFirst().first ?? path.parent
         change("Delete", undo: undo) { $0.removeEntry(path) }
