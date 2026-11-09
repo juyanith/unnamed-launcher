@@ -175,6 +175,7 @@ Acceptance:
 - [self] `cwd` defaults to the home folder, and `env` is added to the inherited environment.
 - [self] A program that can't be found ends the sequence with a failure, and the app doesn't wait for a program that does start.
 Status: done
+Tried by hand on 2026-11-08: `open -a Calculator`, and `sh -c` with cwd ~/Downloads.
 
 ### S-012 Send a shortcut to the app in front
 As the user, I bind Hyper+F F to send ⌘F to the app I was using.
@@ -184,7 +185,7 @@ Acceptance:
 - [self] Sent events carry only the chord's own modifier flags, even while Hyper is still held.
 - [manual] ⌘F reaches the app that was in front when the leader was pressed.
 Status: done
-Verified: chord parsing (unit tests), event flags, key codes and the marker (self-test, events built but not posted). Not yet tried by hand: ⌘F reaching the app in front.
+Verified: chord parsing (unit tests), event flags, key codes and the marker (self-test, events built but not posted). Tried by hand on 2026-11-08: ⌘F reached the app in front.
 
 ### S-013 Pick an action by the app in front
 As the user, I bind one key that sends ⌘L in a browser and ⌘F everywhere else.
@@ -195,7 +196,7 @@ Acceptance:
 - [snap] In the HUD, a contextual binding that's unavailable for the front app shows as dimmed.
 - [unit] Pressing an unavailable binding gives error feedback and runs nothing.
 Status: done
-Verified: context order, fallback, unavailable stays in the menu (unit tests); dimmed row (self-test, /tmp/UnnamedLauncher-shots/hud-light.png). Not yet tried by hand: ⌘L in a browser and ⌘F elsewhere.
+Verified: context order, fallback, unavailable stays in the menu (unit tests); dimmed row (self-test, /tmp/UnnamedLauncher-shots/hud-light.png). Tried by hand on 2026-11-08: ⌘L in Safari; dimmed, beeping and staying open in other apps.
 
 ### S-014 Reserve a key with a no-op
 As the user, I bind a key to `noop` to hold its place or show a note in the HUD.
@@ -212,6 +213,7 @@ Acceptance:
 - [snap] The HUD shows a red error line, such as "Couldn't open dev.zed.Zed: not installed", for 2 seconds, then closes.
 - [self] Every failure is written to the unified log under subsystem `net.unnamed.launcher`.
 Status: done
+Tried by hand on 2026-11-08: a missing bundle id showed the warning for two seconds.
 Verified: shown, closes after 2 s, logged (self-test); /tmp/UnnamedLauncher-shots/hud-error-light.png. The error line uses the warning color (orange) with a triangle, not red, per DESIGN-SYSTEM.md's one warning color.
 
 ## M3 Timing and feedback
