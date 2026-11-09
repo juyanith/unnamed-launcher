@@ -37,7 +37,6 @@ ConfigStore (main) ── onLoad ─► EngineBox.replace(config)
 | `ConfigLocation` (`APP_STORE`) | the real `~/.config/unnamed-launcher/config.json`; a file in `/tmp` | The self-test and snapshots never touch the real config |
 | `Launcher.start(captureKeys:)` | the real tap; no tap | Snapshots and the self-test never capture the keyboard |
 | `KeyEvent` into `SequenceEngine` | the event tap; unit tests | Every sequence rule is tested without a keyboard |
-
 | `ActionPerformer` | `SystemPerformer` (NSWorkspace, Process, CGEvent); `RecordingPerformer` | The self-test checks action plans without launching or typing anything |
 
 ## Reviews

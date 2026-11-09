@@ -32,6 +32,9 @@ final class Launcher {
     }
     @ObservationIgnored let guide = GuideController()
     @ObservationIgnored var runner = ActionRunner()
+    /// When the Guide shows, times out and flashes (S-016 to S-018, S-021).
+    @ObservationIgnored private(set) var schedule = GuideSchedule(runtime: .init(), ui: .init())
+    @ObservationIgnored private var scheduleTimer: Task<Void, Never>?
     @ObservationIgnored private var permissionTimer: Timer?
     /// False in snapshots and the self-test, which never touch the keyboard.
     @ObservationIgnored private var capturesKeys = false
@@ -40,6 +43,8 @@ final class Launcher {
         self.store = store
         store.onLoad = { [unowned self] config in
             engine.replace(config)
+            schedule = GuideSchedule(runtime: config.config.runtime, ui: config.config.ui)
+            scheduleTimer?.cancel()
             guide.hide()
         }
     }
@@ -112,33 +117,58 @@ final class Launcher {
     func report(_ message: String, title: String) {
         lastFailure = message
         log.error("Action “\(title, privacy: .public)” failed: \(message, privacy: .public)")
-        guide.showFailure(message, title: title)
+        // With the Guide turned off, failures go to the log only (S-021).
+        if store.loaded?.config.runtime.showHud ?? true { guide.showFailure(message, title: title) }
     }
 
-    private func apply(_ effect: SequenceEffect) {
-        guard let config = store.loaded else { return }
-        switch effect {
-        case let .showMenu(menu, path, frontApp):
-            if config.config.runtime.showHud {
+    /// Milliseconds on a clock that never jumps, for the schedule.
+    private static var nowMs: Double { ProcessInfo.processInfo.systemUptime * 1_000 }
+
+    /// Feeds one engine effect to the schedule, then runs the action if any.
+    func apply(_ effect: SequenceEffect) {
+        perform(schedule.handle(effect, at: Self.nowMs))
+        armScheduleTimer()
+        guard let config = store.loaded, case let .run(binding, frontApp) = effect else { return }
+        guard let id = binding.action, let chosen = config.config.actions[id],
+              let action = ContextResolver.resolve(chosen, frontApp: frontApp, contexts: config.config.contexts)
+        else { return }
+        Task {
+            do throws(PlanError) {
+                try await runner.run(action, id: id)
+            } catch {
+                report(error.message, title: binding.title)
+            }
+        }
+    }
+
+    private func perform(_ commands: [GuideCommand]) {
+        for command in commands {
+            switch command {
+            case let .show(menu, path, frontApp):
+                guard let config = store.loaded else { continue }
                 guide.show(GuideContent(menu: menu, path: path, config: config, frontApp: frontApp))
+            case .hide:
+                guide.hide()
+            case .flash:
+                guide.flash()
+            case .bell:
+                NSSound.beep()
+            case .endSequence:
+                engine.reset()
             }
-        case let .run(binding, frontApp):
-            guide.hide()
-            guard let id = binding.action, let chosen = config.config.actions[id],
-                  let action = ContextResolver.resolve(chosen, frontApp: frontApp, contexts: config.config.contexts)
-            else { return }
-            Task {
-                do throws(PlanError) {
-                    try await runner.run(action, id: id)
-                } catch {
-                    report(error.message, title: binding.title)
-                }
-            }
-        case .cancelled:
-            guide.hide()
-        case .unbound, .unavailable:
-            // Flash and timing arrive in M3 (S-018); the bell works now.
-            if config.config.ui.errorBell { NSSound.beep() }
+        }
+    }
+
+    /// One timer, for whichever comes first: the delay or the timeout.
+    private func armScheduleTimer() {
+        scheduleTimer?.cancel()
+        guard let deadline = schedule.nextDeadline else { return }
+        let wait = max(0, deadline - Self.nowMs)
+        scheduleTimer = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(wait))
+            guard !Task.isCancelled, let self else { return }
+            perform(schedule.tick(at: Self.nowMs))
+            armScheduleTimer()
         }
     }
 }

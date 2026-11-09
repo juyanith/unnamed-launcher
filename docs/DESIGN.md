@@ -88,7 +88,7 @@ The Guide never has an empty state, because validation forbids empty menus.
 ## The Guide
 
 Its look and behavior, as the base for design-system tokens and story S-005:
-- **Material:** a regular Liquid Glass panel. It counts as all control layer, so its rows sit directly on the glass with no cards or row backgrounds (rule 9). It has no tint, and the only accent color is on the highlighted keycap during the error flash.
+- **Material:** a regular Liquid Glass panel. It counts as all control layer, so its rows sit directly on the glass with no cards or row backgrounds (rule 9). It has no tint, and the only accent color is the outline that flashes for an unbound key.
 - **Shape:** a rounded rectangle with radius `Radius.guide` (26). Keycaps nested inside use `Radius.xs` (6), which is concentric with the panel's 20 pt padding (rule 14). Tokens: [design/DESIGN-SYSTEM.md](../design/DESIGN-SYSTEM.md).
 - **Layout:**
   - The path row comes first, in Headline style with the › separators in secondary text.

@@ -21,6 +21,9 @@ enum Motion {
         reduceMotion ? nil : .easeOut(duration: 0.18)
     }
 
+    /// How long the error flash stays before it fades back.
+    static let errorFlashHold: Duration = .milliseconds(180)
+
     /// Hover fills on custom rows and buttons in the Bindings window.
     static func hover(_ reduceMotion: Bool) -> Animation? {
         reduceMotion ? nil : .easeOut(duration: 0.1)

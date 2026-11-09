@@ -87,6 +87,7 @@ enum SelfTest {
         check("S-005 menus are marked, bindings aren't",
               content.rows.first { $0.key == "A" }?.isMenu == true && content.rows.first { $0.key == "E" }?.isMenu == false)
         check("S-005 the footer shows esc and delete", content.cancelKey == "esc" && content.backKey == "delete")
+        check("S-021 a Guide that's never shown makes no panel", !GuideController().hasPanel)
         let front = NSApp.keyWindow
         let guide = model.launcher.guide
         guide.show(content)
@@ -94,6 +95,10 @@ enum SelfTest {
         check("S-005 the Guide is on screen", guide.isVisible)
         check("S-005 the Guide never becomes the key window",
               !guide.window.canBecomeKey && !guide.window.isKeyWindow && NSApp.keyWindow === front)
+        guide.flash()
+        check("S-018 an unbound key flashes the Guide", guide.isFlashing)
+        try? await Task.sleep(for: Motion.errorFlashHold + .milliseconds(150))
+        check("S-018 the flash goes away by itself", !guide.isFlashing)
         guide.hide()
         try? await Task.sleep(for: .seconds(0.3))
         check("S-007 the Guide hides when the sequence ends", !guide.window.isVisible)

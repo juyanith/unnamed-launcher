@@ -57,6 +57,11 @@ enum Snapshot {
                     guide.show(SeedData.guideContent)
                     try? await Task.sleep(for: .seconds(0.8))
                     capture(to: "\(dir)/hud-\(mode).png", window: guide.window)
+                    // The error flash for an unbound key (S-018).
+                    guide.holdFlashForSnapshot(true)
+                    try? await Task.sleep(for: .seconds(0.3))
+                    capture(to: "\(dir)/hud-flash-\(mode).png", window: guide.window)
+                    guide.holdFlashForSnapshot(false)
                     guide.hide()
                     try? await Task.sleep(for: .seconds(0.3))
                 }

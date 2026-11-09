@@ -5,7 +5,7 @@ Which token to use, and when. The tokens are in `Sources/UnnamedLauncher/UI/`. A
 ## Theme.swift: accent
 - **The app follows the Mac's accent** (`ThemeStore.defaultID = "system"`), and there's no picker. `APP_ACCENT=<id>` is only for comparing snapshots.
 - **Read the accent through `.tint`, `Palette.accent`, `Palette.accentText` or `Palette.onAccent`.** Never hard-code a hex.
-- **The Guide uses the accent once**, on the keycap that flashes for an error. Everything else in the Guide is `.primary` or `.secondary`.
+- **The Guide uses the accent once**, on the outline that flashes for an unbound key. Everything else in the Guide is `.primary` or `.secondary`.
 - **A custom color needs four values:** light, dark and both high-contrast versions, via `Color(light:dark:highContrastLight:highContrastDark:)`.
 - **Never copy or redefine a semantic color.**
 
@@ -36,11 +36,10 @@ Which token to use, and when. The tokens are in `Sources/UnnamedLauncher/UI/`. A
 - **Every animation goes through `Motion`.** Pass `@Environment(\.accessibilityReduceMotion)`, and every token returns nil when Reduce Motion is on.
 - **The Guide** fades in with `Motion.guideAppear` and out with `Motion.guideDismiss` (both 120 ms). It never scales or slides.
 - **A menu change inside the Guide is instant.** Typing speed matters more than motion. Never animate the Guide's first layout.
-- **An unbound key** uses `Motion.errorFlash`. A failed action's message stays for `Motion.errorMessageHold`, then the Guide closes.
+- **An unbound key** uses `Motion.errorFlash`, held for `Motion.errorFlashHold`. A failed action's message stays for `Motion.errorMessageHold`, then the Guide closes.
 - **In the Bindings window,** rows added, moved or removed use `Motion.listChange`, and custom hover fills use `Motion.hover`. Hover never moves the selection.
 
 ## Still to add
-- **`Overlay.swift`:** the Guide panel builder (an `NSPanel` that is non-activating, borderless, never key, on all Spaces). It comes with S-005.
 - **`Components.swift`:** the `Keycap` view and the key recorder style, with S-005 and S-025. Style controls with `ButtonStyle` and `ToggleStyle`; never rebuild a control from shapes.
 
 ## Check

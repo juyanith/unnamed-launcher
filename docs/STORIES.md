@@ -224,7 +224,7 @@ Depends: S-005
 Acceptance:
 - [unit] The HUD shows only after the delay passes with no key press. Every key, including Back, restarts the delay.
 - [unit] Once shown, the HUD stays until the sequence ends.
-Status: todo
+Status: done
 
 ### S-017 Let an abandoned sequence time out
 As the user, I set `timeoutMs` to 5000 and a forgotten HUD closes by itself.
@@ -232,7 +232,7 @@ Depends: S-016
 Acceptance:
 - [unit] The timeout runs only while the HUD is visible, and every key press restarts it.
 - [unit] When `showHud` is false, the timeout never fires.
-Status: todo
+Status: done
 
 ### S-018 Get feedback for a key that isn't bound
 As the user, a wrong key flashes the HUD and beeps, and the sequence stays where it was.
@@ -243,7 +243,8 @@ Acceptance:
 - [snap] With `errorFlash` true, the HUD shows a flash state.
 - [unit] With `errorBell` true, an error decision plays the system alert sound, and with it false, no sound plays.
 - [unit] If the HUD was still waiting for its delay, it appears at once.
-Status: todo
+Status: done
+Verified: schedule rules (unit tests), flash on and off (self-test), /tmp/UnnamedLauncher-shots/hud-flash-light.png. The flash outlines the Guide in the accent.
 
 ### S-019 Choose where the HUD appears
 As the user, I set `position` to center, top or bottom on the display of the app I'm using.
@@ -267,7 +268,8 @@ As the user, I set `showHud` to false and never see the panel.
 Depends: S-016
 Acceptance:
 - [unit] With `showHud` false, sequences still resolve, errors still beep, and no panel is created.
-Status: todo
+Status: done
+Verified: schedule rules (unit tests), no panel until first shown (self-test). Failures go to the log only when the Guide is off.
 
 ### S-022 Choose my own cancel and back keys
 As the user, I set `cancelKey` to Q and `backKey` to an empty string to turn Back off.

@@ -68,6 +68,8 @@ struct GuideContent: Equatable {
 /// The Guide: the path, the next keys, and how to cancel or go back.
 struct GuideView: View {
     let content: GuideContent
+    /// The error flash for an unbound key (S-018).
+    var isFlashing = false
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     var body: some View {
@@ -83,6 +85,12 @@ struct GuideView: View {
         .padding(Space.margin)
         .fixedSize()
         .background { background }
+        .overlay {
+            // The flash outlines the Guide in the accent, the Guide's one use of it.
+            RoundedRectangle(cornerRadius: Radius.guide)
+                .strokeBorder(Palette.accent, lineWidth: Space.xs / 2)
+                .opacity(isFlashing ? 1 : 0)
+        }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(content.failure ?? content.announcement)
     }
@@ -164,107 +172,6 @@ struct GuideView: View {
             RoundedRectangle(cornerRadius: Radius.guide).fill(.regularMaterial)
         } else {
             Color.clear.glassEffect(.regular, in: .rect(cornerRadius: Radius.guide))
-        }
-    }
-}
-
-/// The panel that holds the Guide. Non-activating and never key, so the
-/// app in front keeps its focus; keys come from the event tap, not here.
-final class GuidePanel: NSPanel {
-    init() {
-        super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel],
-                   backing: .buffered, defer: true)
-        isFloatingPanel = true
-        level = .popUpMenu
-        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
-        isOpaque = false
-        backgroundColor = .clear
-        hasShadow = false
-        hidesOnDeactivate = false
-        isReleasedWhenClosed = false
-        animationBehavior = .none
-    }
-
-    override var canBecomeKey: Bool { false }
-    override var canBecomeMain: Bool { false }
-}
-
-/// Shows, updates and hides the Guide.
-final class GuideController {
-    private let panel = GuidePanel()
-    private let host = NSHostingView(rootView: GuideView(content: .placeholder))
-    private(set) var content: GuideContent?
-    /// Whether the Guide is meant to be up. Kept separately from the panel,
-    /// because a fade doesn't finish while the display is asleep.
-    private var isShown = false
-
-    init() {
-        host.sizingOptions = [.intrinsicContentSize]
-        panel.contentView = host
-    }
-
-    var isVisible: Bool { isShown && panel.isVisible }
-    var window: NSWindow { panel }
-
-    func show(_ content: GuideContent) {
-        let wasVisible = isVisible
-        isShown = true
-        self.content = content
-        host.rootView = GuideView(content: content)
-        host.layoutSubtreeIfNeeded()
-        let size = host.fittingSize
-        panel.setContentSize(size)
-        // Center on the main screen. S-019 picks the front app's screen and position.
-        if let screen = NSScreen.main {
-            let frame = screen.visibleFrame
-            panel.setFrameOrigin(NSPoint(x: frame.midX - size.width / 2, y: frame.midY - size.height / 2))
-        }
-        if !wasVisible {
-            panel.alphaValue = 0
-            panel.orderFrontRegardless()
-            fade(to: 1)
-        }
-        NSAccessibility.post(element: panel, notification: .announcementRequested,
-                             userInfo: [.announcement: content.announcement, .priority: NSAccessibilityPriorityLevel.high.rawValue])
-    }
-
-    /// Shows why an action failed for Motion.errorMessageHold, then closes (S-015).
-    func showFailure(_ message: String, title: String) {
-        let content = GuideContent(path: [title], rows: [], cancelKey: "", backKey: nil, failure: message)
-        show(content)
-        let shown = content
-        Task { [weak self] in
-            try? await Task.sleep(for: Motion.errorMessageHold)
-            // Only close it if nothing newer took its place.
-            if self?.content == shown { self?.hide() }
-        }
-    }
-
-    func hide() {
-        guard isShown else { return }
-        isShown = false
-        content = nil
-        fade(to: 0)
-        // Order out after the fade by the clock, not the animation's
-        // completion, which never comes while the display is asleep.
-        DispatchQueue.main.asyncAfter(deadline: .now() + Motion.guideFadeSeconds) { [weak self] in
-            MainActor.assumeIsolated {
-                guard let self, !self.isShown else { return }
-                self.panel.orderOut(nil)
-                self.panel.alphaValue = 0
-            }
-        }
-    }
-
-    /// A fade from Motion; instant under Reduce Motion.
-    private func fade(to alpha: CGFloat) {
-        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
-            panel.alphaValue = alpha
-            return
-        }
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = Motion.guideFadeSeconds
-            panel.animator().alphaValue = alpha
         }
     }
 }
