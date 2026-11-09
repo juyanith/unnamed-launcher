@@ -118,6 +118,30 @@ enum SelfTest {
             .open(URL(fileURLWithPath: "/Users/someone/notes")),
             .open(URL(string: "https://example.com/a?b=1")!),
         ], "\(recorder.plans)")
+
+        // S-011: a real run, through sh only because this check asks for it.
+        let marker = "/tmp/UnnamedLauncher-exec.txt"
+        try? FileManager.default.removeItem(atPath: marker)
+        let started = ContinuousClock.now
+        do throws(PlanError) {
+            try await system.run(.exec(command: ["sh", "-c", "pwd > \(marker); echo \"$UL_CHECK\" >> \(marker); sleep 3"],
+                                       cwd: nil, env: ["UL_CHECK": "from env"]), id: "exec")
+        } catch {
+            check("S-011 a command runs", false, error.message)
+        }
+        check("S-011 the app doesn't wait for a program that starts", ContinuousClock.now - started < .milliseconds(500))
+        try? await Task.sleep(for: .seconds(1))
+        let lines = ((try? String(contentsOfFile: marker, encoding: .utf8)) ?? "").split(separator: "\n").map(String.init)
+        let homePath = ActionPlanner.expandTilde("~", home: .homeDirectory)
+        check("S-011 cwd defaults to the home folder", lines.first == homePath, "\(lines)")
+        check("S-011 env is added to the inherited environment", lines.dropFirst().first == "from env", "\(lines)")
+        do throws(PlanError) {
+            try await system.run(.exec(command: ["net-unnamed-no-such-program"], cwd: nil, env: [:]), id: "missing")
+            check("S-011 a program that can't be found is reported", false, "no failure")
+        } catch {
+            check("S-011 a program that can't be found is reported",
+                  error.message == "Couldn't run net-unnamed-no-such-program: it isn't in PATH.", error.message)
+        }
     }
 
     private static func check(_ name: String, _ ok: Bool, _ detail: String = "") {

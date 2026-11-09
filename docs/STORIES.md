@@ -174,7 +174,7 @@ Acceptance:
 - [unit] Arguments are passed literally. Only a leading `~` in `command` and `cwd` is expanded.
 - [self] `cwd` defaults to the home folder, and `env` is added to the inherited environment.
 - [self] A program that can't be found ends the sequence with a failure, and the app doesn't wait for a program that does start.
-Status: todo
+Status: done
 
 ### S-012 Send a shortcut to the app in front
 As the user, I bind Hyper+F F to send ⌘F to the app I was using.

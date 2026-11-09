@@ -29,9 +29,41 @@ struct SystemPerformer: ActionPerformer {
             try await open(url)
         case .nothing:
             return
-        case .spawn, .send:
+        case let .spawn(program, arguments, cwd, env):
+            try spawn(program, arguments: arguments, cwd: cwd, env: env)
+        case .send:
             throw PlanError("This kind of action isn't available yet.")
         }
+    }
+
+    /// Starts a program directly, with no shell, and doesn't wait for it
+    /// (S-011). A name without a slash is looked up in PATH plus the usual
+    /// Homebrew and user folders.
+    private func spawn(_ program: String, arguments: [String], cwd: URL, env: [String: String]) throws(PlanError) {
+        let environment = ProcessInfo.processInfo.environment
+        let searchPath = ActionPlanner.searchPath(environmentPath: environment["PATH"], home: .homeDirectory)
+        guard let path = ActionPlanner.locate(program, searchPath: searchPath,
+                                              isExecutable: FileManager.default.isExecutableFile(atPath:)) else {
+            throw PlanError(program.contains("/") ? "Couldn't run \(program): it doesn't exist or can't be run."
+                                                  : "Couldn't run \(program): it isn't in PATH.")
+        }
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: path)
+        process.arguments = arguments
+        process.currentDirectoryURL = cwd
+        var merged = environment
+        merged["PATH"] = searchPath.joined(separator: ":")
+        merged.merge(env) { _, new in new }
+        process.environment = merged
+        process.standardInput = FileHandle.nullDevice
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        do {
+            try process.run()
+        } catch {
+            throw PlanError("Couldn't run \(program): \(error.localizedDescription)")
+        }
+        log.info("Started \(path, privacy: .public)")
     }
 
     /// Brings the app forward if it's running, otherwise launches it. Going

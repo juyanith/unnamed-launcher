@@ -40,3 +40,46 @@ struct NoopPlanTests {
         #expect(try ActionPlanner.plan(.noop, home: testHome) == .nothing)
     }
 }
+
+@Suite("Run Command (S-011)")
+struct ExecPlanTests {
+    @Test("Arguments pass literally; only a leading ~ in command and cwd expands")
+    func literal() throws {
+        let plan = try ActionPlanner.plan(.exec(command: ["~/bin/tool", "~/notes", "$HOME", "*.md", "a b", "x~/y"],
+                                                cwd: "~/work", env: ["K": "~/v"]), home: testHome)
+        #expect(plan == .spawn(program: "/Users/someone/bin/tool",
+                               arguments: ["/Users/someone/notes", "$HOME", "*.md", "a b", "x~/y"],
+                               cwd: URL(fileURLWithPath: "/Users/someone/work", isDirectory: true),
+                               env: ["K": "~/v"]))
+    }
+
+    @Test("cwd defaults to the home folder")
+    func defaultCwd() throws {
+        guard case let .spawn(_, _, cwd, _) = try ActionPlanner.plan(.exec(command: ["zed"], cwd: nil, env: [:]), home: testHome) else {
+            Issue.record("not a spawn"); return
+        }
+        #expect(cwd == testHome)
+    }
+
+    @Test("An empty command is an error")
+    func empty() {
+        #expect(throws: PlanError.self) { try ActionPlanner.plan(.exec(command: [], cwd: nil, env: [:]), home: testHome) }
+    }
+
+    @Test("Programs are found in the search path, in order; paths are checked as given")
+    func locate() {
+        let files: Set<String> = ["/opt/homebrew/bin/zed", "/usr/local/bin/zed", "/usr/bin/true"]
+        let path = ["/usr/bin", "/opt/homebrew/bin", "/usr/local/bin"]
+        #expect(ActionPlanner.locate("zed", searchPath: path, isExecutable: files.contains) == "/opt/homebrew/bin/zed")
+        #expect(ActionPlanner.locate("/usr/bin/true", searchPath: [], isExecutable: files.contains) == "/usr/bin/true")
+        #expect(ActionPlanner.locate("nope", searchPath: path, isExecutable: files.contains) == nil)
+    }
+
+    @Test("The search path keeps PATH first and adds the usual folders once")
+    func searchPath() {
+        let dirs = ActionPlanner.searchPath(environmentPath: "/usr/bin:/bin:/custom", home: testHome)
+        #expect(Array(dirs.prefix(3)) == ["/usr/bin", "/bin", "/custom"])
+        #expect(dirs.contains("/opt/homebrew/bin") && dirs.contains("/Users/someone/.local/bin"))
+        #expect(dirs.filter { $0 == "/usr/bin" }.count == 1)
+    }
+}
