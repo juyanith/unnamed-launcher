@@ -150,17 +150,21 @@ final class GuideController {
     private let panel = GuidePanel()
     private let host = NSHostingView(rootView: GuideView(content: .placeholder))
     private(set) var content: GuideContent?
+    /// Whether the Guide is meant to be up. Kept separately from the panel,
+    /// because a fade doesn't finish while the display is asleep.
+    private var isShown = false
 
     init() {
         host.sizingOptions = [.intrinsicContentSize]
         panel.contentView = host
     }
 
-    var isVisible: Bool { panel.isVisible && panel.alphaValue > 0 }
+    var isVisible: Bool { isShown && panel.isVisible }
     var window: NSWindow { panel }
 
     func show(_ content: GuideContent) {
         let wasVisible = isVisible
+        isShown = true
         self.content = content
         host.rootView = GuideView(content: content)
         host.layoutSubtreeIfNeeded()
@@ -181,23 +185,30 @@ final class GuideController {
     }
 
     func hide() {
-        guard panel.isVisible else { return }
+        guard isShown else { return }
+        isShown = false
         content = nil
-        fade(to: 0) { [panel] in panel.orderOut(nil) }
+        fade(to: 0)
+        // Order out after the fade by the clock, not the animation's
+        // completion, which never comes while the display is asleep.
+        DispatchQueue.main.asyncAfter(deadline: .now() + Motion.guideFadeSeconds) { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self, !self.isShown else { return }
+                self.panel.orderOut(nil)
+                self.panel.alphaValue = 0
+            }
+        }
     }
 
     /// A fade from Motion; instant under Reduce Motion.
-    private func fade(to alpha: CGFloat, then done: (@MainActor () -> Void)? = nil) {
+    private func fade(to alpha: CGFloat) {
         if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
             panel.alphaValue = alpha
-            done?()
             return
         }
         NSAnimationContext.runAnimationGroup { context in
             context.duration = Motion.guideFadeSeconds
             panel.animator().alphaValue = alpha
-        } completionHandler: {
-            MainActor.assumeIsolated { done?() }
         }
     }
 }
