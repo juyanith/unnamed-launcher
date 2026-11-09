@@ -169,3 +169,22 @@ struct ContextSequenceTests {
         #expect(binding.title == "Address Bar" && frontApp == "com.apple.Safari")
     }
 }
+
+@Suite("Do Nothing in a sequence (S-014)")
+struct NoopSequenceTests {
+    @Test("A noop binding ends the sequence and does nothing else")
+    func noop() throws {
+        let text = json(entries: """
+        { "keys": "Hyper+Space", "title": "Commands" },
+        { "keys": "Hyper+Space R", "title": "Reserved", "action": "reserved" }
+        """, actions: #"{ "reserved": { "type": "noop" } }"#)
+        let config = try load(text).get()
+        var engine = SequenceEngine(config: config)
+        _ = engine.handle(.down(keyCode: KeyName.space.keyCode!, modifiers: .hyper, isRepeat: false))
+        guard case let .run(binding, _) = engine.handle(.down(keyCode: KeyName.r.keyCode!, modifiers: [], isRepeat: false)).effect else {
+            Issue.record("no run"); return
+        }
+        #expect(!engine.isActive)
+        #expect(try ActionPlanner.plan(config.config.actions[binding.action!]!, home: testHome) == .nothing)
+    }
+}

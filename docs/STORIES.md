@@ -202,7 +202,7 @@ As the user, I bind a key to `noop` to hold its place or show a note in the HUD.
 Depends: S-004
 Acceptance:
 - [unit] A `noop` binding ends the sequence and does nothing else.
-Status: todo
+Status: done
 
 ### S-015 See why an action failed
 As the user, when an app isn't installed or a command can't start, the HUD tells me and the log records it.
