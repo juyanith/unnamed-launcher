@@ -466,7 +466,8 @@ As the user, I can tell at a glance whether the launcher is ready, off, or needs
 Screens: menubar, menubar-warning, welcome
 Acceptance:
 - [snap] An app icon (Icon Composer, light, dark and tinted) and a template menu bar symbol with normal, dimmed and warning states.
-Status: todo
+Status: done
+Verified: design/icon-review.png (the app icon in Default, Dark, Tinted, Clear and at 32 and 16 pt) and design/menubar-icons.png (ready, off and warning on light and dark menu bars).
 
 ### S-042 Empty states in the Bindings window
 As the user, an empty page tells me what to add and how.

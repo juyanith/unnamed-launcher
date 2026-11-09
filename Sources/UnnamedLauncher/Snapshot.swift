@@ -85,6 +85,13 @@ enum Snapshot {
                     try? await Task.sleep(for: .seconds(0.3))
                 }
             }
+            if only == nil || only?.contains("menubar-icons") == true {
+                // S-041: ready, off and warning on a light and a dark menu bar.
+                if let png = MenuBarIcon.contactSheet() {
+                    try? png.write(to: URL(fileURLWithPath: "\(dir)/menubar-icons.png"))
+                    print("SNAPSHOT \(dir)/menubar-icons.png")
+                }
+            }
             if only == nil || only?.contains("welcome") == true {
                 // S-040: the first-run window.
                 let before = Set(NSApp.windows.map(ObjectIdentifier.init))

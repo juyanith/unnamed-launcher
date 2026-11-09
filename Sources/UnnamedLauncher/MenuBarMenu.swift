@@ -157,3 +157,40 @@ private extension NSBezierPath {
         NSGraphicsContext.current?.compositingOperation = .sourceOver
     }
 }
+
+extension MenuBarIcon {
+    /// The three states side by side on a light and a dark menu bar, as a
+    /// PNG, for snapshots (S-041). Template images take the bar's color.
+    static func contactSheet() -> Data? {
+        let states: [MenuBarStatus.Icon] = [.ready, .off, .warning]
+        let cell = NSSize(width: 44, height: 28)
+        let scale: CGFloat = 4
+        let size = NSSize(width: cell.width * CGFloat(states.count), height: cell.height * 2)
+        guard let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width * scale), pixelsHigh: Int(size.height * scale),
+                                         bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                                         colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0) else { return nil }
+        rep.size = size
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        for (row, dark) in [false, true].enumerated() {
+            let y = size.height - cell.height * CGFloat(row + 1)
+            (dark ? NSColor(white: 0.12, alpha: 1) : NSColor(white: 0.93, alpha: 1)).setFill()
+            NSRect(x: 0, y: y, width: size.width, height: cell.height).fill()
+            for (column, state) in states.enumerated() {
+                let icon = image(for: state)
+                let tinted = NSImage(size: icon.size, flipped: false) { rect in
+                    icon.draw(in: rect)
+                    (dark ? NSColor.white : NSColor.black).set()
+                    rect.fill(using: .sourceAtop)
+                    return true
+                }
+                let origin = NSPoint(x: CGFloat(column) * cell.width + (cell.width - icon.size.width) / 2,
+                                     y: y + (cell.height - icon.size.height) / 2)
+                tinted.draw(at: origin, from: .zero, operation: .sourceOver, fraction: 1)
+            }
+        }
+        NSGraphicsContext.restoreGraphicsState()
+        return rep.representation(using: .png, properties: [:])
+    }
+}
+
