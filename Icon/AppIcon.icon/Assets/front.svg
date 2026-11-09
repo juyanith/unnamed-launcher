@@ -1,3 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <rect x="262" y="372" width="500" height="380" rx="72" fill="#FFFFFF"/>
+  <!-- The front keycap with a "›" cut out: press a key, go to the next. -->
+  <path fill="#FFFFFF" fill-rule="evenodd" d="
+    M 409 303 H 659 A 106 106 0 0 1 765 409 V 659 A 106 106 0 0 1 659 765 H 409 A 106 106 0 0 1 303 659 V 409 A 106 106 0 0 1 409 303 Z
+    M 462 380 L 565 380 L 680 534 L 565 688 L 462 688 L 577 534 Z"/>
 </svg>
