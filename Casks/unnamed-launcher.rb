@@ -15,12 +15,11 @@ cask "unnamed-launcher" do
   # Quit the running copy before an upgrade or uninstall replaces it.
   uninstall quit: "net.unnamed.launcher"
 
-  postflight do
+  postflight_steps do
     # The app is signed with the project's own certificate, not notarized, so
     # Gatekeeper would block it. Clear the download mark Homebrew adds.
-    system_command "/usr/bin/xattr",
-                   args: ["-dr", "com.apple.quarantine", "#{appdir}/UnnamedLauncher.app"]
+    run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{appdir}}/UnnamedLauncher.app"]
     # Start it again after an install or upgrade.
-    system_command "/usr/bin/open", args: ["#{appdir}/UnnamedLauncher.app"]
+    run "/usr/bin/open", args: ["{{appdir}}/UnnamedLauncher.app"]
   end
 end
