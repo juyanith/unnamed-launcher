@@ -22,17 +22,28 @@ If you finish the sequence quickly, nothing appears on screen. If you pause, a s
 
 - macOS 27 or later.
 - Swift 6.2 or later (the Xcode 27 command line tools).
-- **Accessibility** and **Input Monitoring** permissions. The launcher reads keys through an event tap and doesn't capture anything until both are granted. The menu bar menu links to the right pane in System Settings.
+- **Device Control and Data Access** (called Accessibility before macOS 27) and **Input Monitoring** permissions. The launcher reads keys through an event tap and doesn't capture anything until both are granted. The menu bar menu links to the right pane in System Settings.
 
-## Build and install
+## Install
+
+With Homebrew:
+
+```sh
+brew tap juyanith/unnamed-launcher https://github.com/juyanith/unnamed-launcher
+brew install --cask unnamed-launcher
+```
+
+`brew upgrade` then keeps it up to date, and restarts it after an update. Every release is signed with the same certificate, so macOS keeps the permissions granted across updates.
+
+## Build from source
 
 ```sh
 ./build.sh --open
 ```
 
-This builds a release version, signs it (with your Apple Development certificate if you have one, otherwise ad hoc), installs it to `~/Applications/UnnamedLauncher.app` and opens it. Build products go to `~/Library/Developer/UnnamedLauncher`, outside the repo.
+This builds a release version, signs it, installs it to `~/Applications/UnnamedLauncher.app` and opens it. Build products go to `~/Library/Developer/UnnamedLauncher`, outside the repo.
 
-With an ad hoc signature, macOS may ask for the permissions again after each rebuild.
+It signs with the "Unnamed Launcher Code Signing" certificate when it's in your keychain, so a local build has the same signature as the releases. Otherwise it uses your Apple Development certificate, or signs ad hoc. With an ad hoc signature, macOS asks for the permissions again after each rebuild.
 
 ## Config
 
@@ -84,12 +95,19 @@ git tag v0.2.0 && git push origin v0.2.0
 
 `.github/workflows/release.yml` builds the app with that version, zips it, and attaches it to a GitHub Release. A tag with a hyphen, such as `v0.2.0-beta.1`, makes a pre-release.
 
-Without signing secrets, the release is signed ad hoc, and macOS blocks it on first open. To sign with Developer ID and notarize, add these repository secrets (Settings > Secrets and variables > Actions):
+It then updates `Casks/unnamed-launcher.rb` to the new version, so `brew upgrade` picks it up. Pre-releases leave the cask alone.
+
+Releases are signed with the certificate in these repository secrets (Settings > Secrets and variables > Actions). Without them, a release is signed ad hoc and macOS asks for the permissions again after each update.
 
 | Secret | Value |
 |---|---|
-| `MACOS_CERTIFICATE_P12` | Your "Developer ID Application" certificate and key, exported as .p12, then `base64 -i cert.p12` |
+| `MACOS_CERTIFICATE_P12` | The "Unnamed Launcher Code Signing" certificate and key, exported from Keychain Access as .p12, then `base64 -i cert.p12`. A "Developer ID Application" certificate works too. |
 | `MACOS_CERTIFICATE_PASSWORD` | The .p12 password |
+
+The self-signed certificate keeps the signature the same across releases, but the app isn't notarized, so Gatekeeper blocks a copy downloaded with a browser. The cask clears that. To notarize instead, use a Developer ID certificate (Apple Developer Program) and add:
+
+| Secret | Value |
+|---|---|
 | `NOTARY_KEY_P8` | An App Store Connect API key (Users and Access > Integrations), `base64 -i AuthKey_XXXX.p8` |
 | `NOTARY_KEY_ID` | That key's ID |
 | `NOTARY_ISSUER_ID` | The issuer ID shown above the keys |

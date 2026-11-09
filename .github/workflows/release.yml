@@ -1,10 +1,16 @@
-# Builds UnnamedLauncher.app when you push a version tag (v1.2.3) and attaches
-# a zip to a GitHub Release. A tag with a hyphen (v1.2.0-beta.1) makes a pre-release.
+# Builds UnnamedLauncher.app when you push a version tag (v1.2.3), attaches a
+# zip to a GitHub Release, and points the Homebrew cask (Casks/) at it.
+# A tag with a hyphen (v1.2.0-beta.1) makes a pre-release and leaves the cask alone.
 #
 # Signing: ad hoc unless these repository secrets exist.
-#   MACOS_CERTIFICATE_P12        base64 of a "Developer ID Application" .p12
+#   MACOS_CERTIFICATE_P12        base64 of a .p12 with a code signing certificate and its key:
+#                                the self-signed "Unnamed Launcher Code Signing" one, or a
+#                                "Developer ID Application" one
 #   MACOS_CERTIFICATE_PASSWORD   its password
-# Notarization (needs the certificate too):
+# Every release signed with the same certificate has the same signature, so
+# macOS keeps Device Control and Input Monitoring granted across updates.
+#
+# Notarization (Developer ID only):
 #   NOTARY_KEY_P8                base64 of an App Store Connect API key (.p8)
 #   NOTARY_KEY_ID                the key ID
 #   NOTARY_ISSUER_ID             the issuer ID
@@ -28,6 +34,7 @@ jobs:
       NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
       NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
       NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+      SIGN_IDENTITY: '-'
     steps:
       - uses: actions/checkout@v5
 
@@ -48,7 +55,7 @@ jobs:
       - name: Unit tests
         run: swift test --scratch-path ~/Library/Developer/UnnamedLauncher/test-build
 
-      - name: Import the Developer ID certificate
+      - name: Import the signing certificate
         if: env.CERT_P12 != ''
         run: |
           keychain="$RUNNER_TEMP/signing.keychain-db"
@@ -61,17 +68,20 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain" > /dev/null
           security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
           rm "$RUNNER_TEMP/cert.p12"
-          identity=$(security find-identity -v -p codesigning "$keychain" | grep -m1 -o '"Developer ID Application: [^"]*"' | tr -d '"')
-          [[ -n "$identity" ]] || { echo "no Developer ID Application identity in the certificate"; exit 1; }
+          # Without -v: a self-signed certificate isn't trusted, and codesign uses it anyway.
+          identity=$(security find-identity -p codesigning "$keychain" | grep -m1 -o '"[^"]*"' | tr -d '"')
+          [[ -n "$identity" ]] || { echo "no code signing identity in the certificate"; exit 1; }
+          echo "Signing with: $identity"
           echo "SIGN_IDENTITY=$identity" >> "$GITHUB_ENV"
+          if [[ "$identity" == "Developer ID Application"* && -n "$NOTARY_KEY_P8" ]]; then
+            echo "NOTARIZE=1" >> "$GITHUB_ENV"
+          fi
 
       - name: Build
-        run: |
-          [[ -n "${SIGN_IDENTITY:-}" ]] || echo "SIGN_IDENTITY=-" >> "$GITHUB_ENV"
-          SIGN_IDENTITY="${SIGN_IDENTITY:--}" ./build.sh --out dist
+        run: ./build.sh --out dist
 
       - name: Notarize
-        if: env.CERT_P12 != '' && env.NOTARY_KEY_P8 != ''
+        if: env.NOTARIZE == '1'
         run: |
           key="$RUNNER_TEMP/notary.p8"
           echo "$NOTARY_KEY_P8" | base64 --decode > "$key"
@@ -82,18 +92,43 @@ jobs:
           rm "$key"
 
       - name: Zip
-        run: ditto -c -k --keepParent dist/UnnamedLauncher.app "dist/$ZIP"
+        run: |
+          ditto -c -k --keepParent dist/UnnamedLauncher.app "dist/$ZIP"
+          echo "SHA256=$(shasum -a 256 "dist/$ZIP" | cut -d' ' -f1)" >> "$GITHUB_ENV"
 
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          notes_flag=()
-          [[ "$SIGN_IDENTITY" == "-" ]] && notes_flag=(--notes "This build is signed ad hoc. macOS blocks it on first open: open it once, then allow it in System Settings > Privacy & Security, or run \`xattr -dr com.apple.quarantine UnnamedLauncher.app\`.")
+          install="Install or update with Homebrew:
+          \`\`\`
+          brew tap juyanith/unnamed-launcher https://github.com/juyanith/unnamed-launcher
+          brew install --cask unnamed-launcher
+          \`\`\`"
+          if [[ "${NOTARIZE:-}" == 1 ]]; then
+            notes="$install"
+          else
+            notes="$install
+
+          This build isn't notarized, so macOS blocks it when it's downloaded with a browser. Homebrew clears that for you. Otherwise run \`xattr -dr com.apple.quarantine UnnamedLauncher.app\` before opening it."
+          fi
           prerelease=()
           [[ "$GITHUB_REF_NAME" == *-* ]] && prerelease=(--prerelease)
           gh release create "$GITHUB_REF_NAME" "dist/$ZIP" \
-            --title "Unnamed Launcher $APP_VERSION" --generate-notes "${notes_flag[@]}" "${prerelease[@]}"
+            --title "Unnamed Launcher $APP_VERSION" --generate-notes --notes "$notes" "${prerelease[@]}"
+
+      - name: Point the Homebrew cask at this release
+        if: ${{ !contains(github.ref_name, '-') }}
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
+          sed -i '' -e "s/^  version \".*\"/  version \"$APP_VERSION\"/" \
+                    -e "s/^  sha256 \".*\"/  sha256 \"$SHA256\"/" Casks/unnamed-launcher.rb
+          git diff --quiet && { echo "cask already up to date"; exit 0; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Update the Homebrew cask to $APP_VERSION"
+          git push origin main
 
       - name: Remove the signing keychain
         if: always() && env.CERT_P12 != ''

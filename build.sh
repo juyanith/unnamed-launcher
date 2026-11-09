@@ -30,9 +30,19 @@ while (( $# )); do
 done
 version="${APP_VERSION:-0.1}"
 
-# Sign with your Apple Development certificate when you have one (Xcode >
-# Settings > Accounts). Otherwise sign ad hoc, which is fine for your own Mac.
+# Signing, first match wins:
+#   1. SIGN_IDENTITY
+#   2. "Unnamed Launcher Code Signing", the self-signed certificate the GitHub
+#      releases are signed with. Local builds then have the same signature as
+#      the releases, so macOS keeps Device Control and Input Monitoring granted
+#      across rebuilds and updates. It isn't trusted, so look without -v.
+#   3. Your Apple Development certificate (Xcode > Settings > Accounts).
+#   4. Ad hoc, which macOS treats as a new app after every build.
+self_signed="Unnamed Launcher Code Signing"
 identity="${SIGN_IDENTITY:-}"
+if [[ -z "$identity" ]] && security find-identity -p codesigning 2>/dev/null | grep -q "\"$self_signed\""; then
+  identity=$self_signed
+fi
 if [[ -z "$identity" ]]; then
   identity=$(security find-identity -v -p codesigning 2>/dev/null | grep -m1 -o '"Apple Development: [^"]*"' | tr -d '"' || true)
 fi
