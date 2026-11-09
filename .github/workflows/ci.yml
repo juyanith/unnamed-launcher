@@ -23,7 +23,7 @@ jobs:
     env:
       XCODE_APP: /Applications/Xcode_27.2.app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Select Xcode
         run: |
@@ -40,6 +40,13 @@ jobs:
 
       - name: Unit tests
         run: swift test --scratch-path ~/Library/Developer/UnnamedLauncher/test-build
+
+      # S-019 places the Guide on the screen of the front app's window, and a
+      # fresh runner has no app window in front. Open one.
+      - name: Open a Finder window
+        run: |
+          open -a Finder "$HOME"
+          sleep 3
 
       - name: Self-test
         timeout-minutes: 5
