@@ -186,6 +186,15 @@ struct ValidationTests {
             == ["hudDelayMs can't be negative.", "timeoutMs can't be negative."])
     }
 
+    @Test("Position and theme must be known values")
+    func uiValues() {
+        let text = #"{ "version": 1, "ui": { "position": "left", "theme": "sepia" }, "entries": [\#(minimalEntries)], "actions": \#(minimalActions) }"#
+        #expect(errors(text) == [
+            "The position “left” isn't one the Guide knows. Use center, top or bottom.",
+            "The theme “sepia” isn't one the Guide knows. Use system, light or dark.",
+        ])
+    }
+
     @Test("An empty back key turns Back off")
     func noBack() throws {
         #expect(try load(json(entries: minimalEntries, actions: minimalActions, runtime: #"{ "backKey": "" }"#)).get().backKey == nil)

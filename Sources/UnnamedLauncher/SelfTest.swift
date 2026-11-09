@@ -95,6 +95,12 @@ enum SelfTest {
         check("S-005 the Guide is on screen", guide.isVisible)
         check("S-005 the Guide never becomes the key window",
               !guide.window.canBecomeKey && !guide.window.isKeyWindow && NSApp.keyWindow === front)
+        if let screen = GuideController.frontScreen() {
+            check("S-019 the Guide is on the screen of the front app's window",
+                  screen.frame.contains(guide.window.frame), "\(guide.window.frame) not in \(screen.frame)")
+        } else {
+            check("S-019 the front app's window is found", false, "no front window")
+        }
         guide.flash()
         check("S-018 an unbound key flashes the Guide", guide.isFlashing)
         try? await Task.sleep(for: Motion.errorFlashHold + .milliseconds(150))
@@ -102,6 +108,19 @@ enum SelfTest {
         guide.hide()
         try? await Task.sleep(for: .seconds(0.3))
         check("S-007 the Guide hides when the sequence ends", !guide.window.isVisible)
+
+        // S-019: top and bottom sit a fifth of the way in from that edge.
+        for position in [GuidePlacement.Position.top, .bottom] {
+            guide.position = position
+            guide.show(content)
+            let visible = (GuideController.frontScreen() ?? NSScreen.main!).visibleFrame
+            let expected = GuidePlacement.origin(size: guide.window.frame.size, in: visible, position: position)
+            check("S-019 \(position.rawValue) puts the Guide where it should be", guide.window.frame.origin == expected,
+                  "\(guide.window.frame.origin) vs \(expected)")
+            guide.hide()
+            try? await Task.sleep(for: .seconds(0.3))
+        }
+        guide.position = .center
     }
 
     /// S-006, S-010: Open App and Open, through the real performer for

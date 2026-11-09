@@ -44,6 +44,7 @@ final class Launcher {
         store.onLoad = { [unowned self] config in
             engine.replace(config)
             schedule = GuideSchedule(runtime: config.config.runtime, ui: config.config.ui)
+            guide.position = GuidePlacement.Position(rawValue: config.config.ui.position.lowercased()) ?? .center
             scheduleTimer?.cancel()
             guide.hide()
         }

@@ -253,7 +253,8 @@ Depends: S-005
 Acceptance:
 - [self] The HUD appears on the screen that holds the front app's key window, not the main screen.
 - [snap] Center, top and bottom positions each have a snapshot.
-Status: todo
+Status: done
+Verified: screen choice and positions (unit tests), the front app's screen and the top and bottom frames (self-test). Position snapshots were replaced by frame checks, because snapshots capture the panel alone, not the screen around it. Not yet tried by hand: a second display.
 
 ### S-020 Set the HUD theme
 As the user, I set `theme` to system, light or dark.

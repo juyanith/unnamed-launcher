@@ -48,6 +48,9 @@ final class GuideController {
     /// because a fade doesn't finish while the display is asleep.
     private var isShown = false
 
+    /// Where on the screen the Guide goes (ui.position).
+    var position: GuidePlacement.Position = .center
+
     /// True once a panel exists.
     var hasPanel: Bool { made != nil }
     var isVisible: Bool { isShown && (made?.panel.isVisible ?? false) }
@@ -73,10 +76,13 @@ final class GuideController {
         host.layoutSubtreeIfNeeded()
         let size = host.fittingSize
         panel.setContentSize(size)
-        // Center on the main screen. S-019 picks the front app's screen and position.
-        if let screen = NSScreen.main {
-            let frame = screen.visibleFrame
-            panel.setFrameOrigin(NSPoint(x: frame.midX - size.width / 2, y: frame.midY - size.height / 2))
+        if !wasVisible, let screen = Self.frontScreen() ?? NSScreen.main {
+            // Placed once per sequence, so the Guide doesn't jump between menus.
+            panel.setFrameOrigin(GuidePlacement.origin(size: size, in: screen.visibleFrame, position: position))
+        } else if wasVisible {
+            // Keep the top edge still while the size changes.
+            let top = panel.frame.maxY
+            panel.setFrameOrigin(NSPoint(x: (panel.frame.midX - size.width / 2).rounded(), y: top - size.height))
         }
         if !wasVisible {
             panel.alphaValue = 0
@@ -132,6 +138,22 @@ final class GuideController {
                 panel.alphaValue = 0
             }
         }
+    }
+
+    /// The screen that holds the front app's key window: its frontmost
+    /// normal window in the window list, which is ordered front to back.
+    static func frontScreen() -> NSScreen? {
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
+              let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+                as? [[String: Any]],
+              let info = windows.first(where: { ($0[kCGWindowOwnerPID as String] as? pid_t) == pid
+                                                && ($0[kCGWindowLayer as String] as? Int) == 0 }),
+              let boundsInfo = info[kCGWindowBounds as String] as? NSDictionary,
+              let bounds = CGRect(dictionaryRepresentation: boundsInfo),
+              let primary = NSScreen.screens.first else { return nil }
+        let window = GuidePlacement.appKitRect(fromWindowList: bounds, primaryScreenHeight: primary.frame.height)
+        let screens = NSScreen.screens
+        return GuidePlacement.screen(for: window, in: screens.map(\.frame)).map { screens[$0] }
     }
 
     /// A fade from Motion; instant under Reduce Motion.

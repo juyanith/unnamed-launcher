@@ -72,6 +72,12 @@ public enum ConfigValidator {
             error("The cancel key and the back key are both \(cancelKey.name). Choose two different keys.")
         }
         if config.runtime.hudDelayMs < 0 { error("hudDelayMs can't be negative.") }
+        if !["center", "top", "bottom"].contains(config.ui.position.lowercased()) {
+            error("The position “\(config.ui.position)” isn't one the Guide knows. Use center, top or bottom.")
+        }
+        if !["system", "light", "dark"].contains(config.ui.theme.lowercased()) {
+            error("The theme “\(config.ui.theme)” isn't one the Guide knows. Use system, light or dark.")
+        }
         if config.runtime.timeoutMs < 0 { error("timeoutMs can't be negative.") }
 
         // Entries: parse, find duplicates.
