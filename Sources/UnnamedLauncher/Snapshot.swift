@@ -43,6 +43,21 @@ enum Snapshot {
                     capture(to: "\(dir)/\(page.rawValue)-\(mode).png")
                 }
             }
+            if only == nil || only?.contains("empty") == true {
+                // S-042: each page with nothing in it.
+                model.editor.preview(ConfigDocument(config: Config(entries: [])))
+                model.actionSelection = nil
+                model.contextSelection = nil
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    for page in SidebarItem.allCases {
+                        model.sidebar = page
+                        try? await Task.sleep(for: .seconds(0.8))
+                        capture(to: "\(dir)/empty-\(page.rawValue)-\(mode).png")
+                    }
+                }
+                model.editor.endPreview()
+            }
             if only == nil || only?.contains("bindings-error") == true {
                 // S-023: a broken file shows the banner over the last valid outline.
                 let good = try? Data(contentsOf: model.store.url)

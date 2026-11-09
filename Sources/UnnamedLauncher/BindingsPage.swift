@@ -49,7 +49,7 @@ struct BindingsPage: View {
     private var outline: some View {
         @Bindable var editor = editor
         return VStack(spacing: 0) {
-            OutlineHeader()
+            if !editor.draft.config.entries.isEmpty { OutlineHeader() }
             List(selection: $editor.selection) {
                 ForEach(editor.draft.children(of: nil), id: \.self) { leader in
                     OutlineRow(path: leader)

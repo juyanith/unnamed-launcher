@@ -198,6 +198,17 @@ final class BindingsEditor {
         change(name, undo: undo, edit)
     }
 
+    /// Shows a document without saving it, for snapshots of empty pages (S-042).
+    func preview(_ document: ConfigDocument) {
+        draft = document
+        selection = nil
+    }
+
+    /// Puts back what's in the file after a preview.
+    func endPreview() {
+        draft = saved
+    }
+
     // MARK: - Recording
 
     func startRecording(_ path: KeySequence) {

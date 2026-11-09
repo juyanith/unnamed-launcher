@@ -475,7 +475,8 @@ Screens: bindings, actions, contexts
 Depends: S-023
 Acceptance:
 - [snap] Each empty list shows one line of explanation and an Add button.
-Status: todo
+Status: done
+Verified: /tmp/UnnamedLauncher-shots/empty-bindings-light.png, empty-actions-*.png and empty-contexts-*.png: one line of explanation and a New Menu, New Action or New Context button.
 
 ### S-043 Context menus in the outline
 As the user, I right-click an entry to Add Binding Here, Duplicate, Sort Alphabetically or Delete.
