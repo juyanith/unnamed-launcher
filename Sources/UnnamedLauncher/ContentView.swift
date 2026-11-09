@@ -9,9 +9,14 @@ struct ContentView: View {
         NavigationSplitView {
             sidebar
         } detail: {
-            BindingsPage(page: model.sidebar ?? .bindings)
+            switch model.sidebar ?? .bindings {
+            case .bindings: BindingsPage()
+            case .actions: ActionsPage()
+            case .contexts: ContextsPage()
+            }
         }
         .noInitialFocus()
+        .onChange(of: model.store.revision) { model.editor.reloadFromStore() }
         .task {
             SelfTest.runIfRequested(model: model)
             Snapshot.runIfRequested(model: model, openSettings: openSettings)
@@ -28,18 +33,3 @@ struct ContentView: View {
     }
 }
 
-/// One page of the Bindings window. Each is an empty state until its story
-/// is built (Bindings S-023, Actions S-030, Contexts S-031).
-struct BindingsPage: View {
-    let page: SidebarItem
-
-    var body: some View {
-        ContentUnavailableView(
-            "No \(page.title) Yet",
-            systemImage: page.symbol,
-            description: Text(page.emptyMessage)
-        )
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle(page.title)
-    }
-}

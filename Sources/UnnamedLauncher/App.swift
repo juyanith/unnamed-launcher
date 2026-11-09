@@ -43,7 +43,7 @@ struct UnnamedLauncherApp: App {
         .windowToolbarStyle(.unified)
         .commands {
             SidebarCommands()
-            CommandGroup(replacing: .newItem) {}
+            EditorCommands(model: model)
         }
 
         Settings {

@@ -36,8 +36,12 @@ final class ConfigStore {
 
     /// Writes the starter config if there is no file, loads it, and starts
     /// watching for changes made outside the app.
-    func start() {
+    /// `seed` replaces the starter, for snapshots.
+    func start(seed: String? = nil) {
         do {
+            if let seed, !FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) {
+                try Data(seed.utf8).write(to: url)
+            }
             createdStarter = try ConfigLoader.writeStarterIfMissing(at: url)
             if createdStarter { log.info("Wrote the starter config to \(self.url.path, privacy: .public)") }
         } catch {

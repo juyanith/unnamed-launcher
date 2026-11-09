@@ -51,13 +51,19 @@ final class Launcher {
         }
     }
 
+    /// Lets every key through while the Bindings window records a key.
+    func setRecording(_ recording: Bool) {
+        engine.setPaused(recording)
+        if recording { guide.hide() }
+    }
+
     /// True while leaders are being captured.
     var isCapturing: Bool { capture.isRunning }
 
     /// Loads the config and starts capturing. Snapshots and the self-test
     /// pass `captureKeys: false`, so they never touch the real keyboard.
-    func start(captureKeys: Bool) {
-        store.start()
+    func start(captureKeys: Bool, seed: String? = nil) {
+        store.start(seed: seed)
         capturesKeys = captureKeys
         guard captureKeys else { return }
         updateCapture()

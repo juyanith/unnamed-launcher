@@ -1,6 +1,7 @@
 import AppKit
 import IOKit.pwr_mgt
 import SwiftUI
+import UnnamedLauncherKit
 
 /// Screenshot mode for agents.
 ///   APP_STORE=/tmp/test.json APP_SNAPSHOT=/tmp/shots ~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher
@@ -32,11 +33,29 @@ enum Snapshot {
             try? await Task.sleep(for: .seconds(1.5))
             for mode in ["light", "dark"] {
                 NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                // A row selected on each page, so the editor pane shows a form.
+                model.editor.selection = KeySequence(parsing: "Hyper+Space A T")
+                model.actionSelection = "find"
+                model.contextSelection = "browser"
                 for page in SidebarItem.allCases where only?.contains(page.rawValue) ?? true {
                     model.sidebar = page
                     try? await Task.sleep(for: .seconds(0.8))
                     capture(to: "\(dir)/\(page.rawValue)-\(mode).png")
                 }
+            }
+            if only == nil || only?.contains("bindings-error") == true {
+                // S-023: a broken file shows the banner over the last valid outline.
+                let good = try? Data(contentsOf: model.store.url)
+                try? Data(#"{ "version": 1, "entries": [{ "keys": "Hyper+Spcae", "title": "C" }] }"#.utf8).write(to: model.store.url)
+                model.store.reload()
+                model.sidebar = .bindings
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/bindings-error-\(mode).png")
+                }
+                if let good { try? good.write(to: model.store.url) }
+                model.store.reload()
             }
             if only == nil || only?.contains("settings") == true {
                 let main = NSApp.windows.first { $0.canBecomeMain && !$0.isSheet }

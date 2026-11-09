@@ -174,10 +174,19 @@ extension Modifiers {
 /// the main thread swaps in a new config.
 nonisolated final class EngineBox: Sendable {
     private let engine = Mutex<SequenceEngine?>(nil)
+    /// While a key is being recorded in the Bindings window, every key
+    /// passes through, so the recorder sees the leader too.
+    private let paused = Mutex(false)
+
+    func setPaused(_ value: Bool) {
+        paused.withLock { $0 = value }
+        if value { reset() }
+    }
 
     /// Called on the tap thread for every event.
     func handle(_ event: KeyEvent) -> SequenceOutput {
-        engine.withLock { engine in
+        if paused.withLock({ $0 }) { return .pass }
+        return engine.withLock { engine in
             guard var current = engine else { return .pass }
             let output = current.handle(event)
             engine = current

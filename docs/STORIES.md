@@ -290,7 +290,8 @@ Depends: S-001
 Acceptance:
 - [snap] A sidebar with Bindings, Actions and Contexts. Bindings shows an outline with key, title and action columns, in file order.
 - [snap] An invalid config shows a banner above the outline listing the errors, and the outline shows the last valid config.
-Status: todo
+Status: done
+Verified: /tmp/UnnamedLauncher-shots/bindings-light.png and bindings-error-dark.png (the banner over the last valid outline). Key, Title and Action columns; the action's type is in the Action cell's tooltip.
 
 ### S-024 Add a menu or binding
 As the user, I select a menu and choose Add Binding or Add Menu (⌘N and ⇧⌘N).
@@ -299,7 +300,8 @@ Depends: S-023, S-033
 Acceptance:
 - [self] The new entry is added at the end of the selected menu, with its key recorder focused.
 - [unit] Saving an entry with no key, or a key that's already taken in that menu, is blocked and the reason is shown inline.
-Status: todo
+Status: done
+Verified: added at the end of the selected menu with the recorder on; not saved until it has an action, and says why (self-test).
 
 ### S-025 Record a key
 As the user, I click a key field and press the chord or key I want.
@@ -309,7 +311,8 @@ Acceptance:
 - [self] For a leader, the recorder captures a full chord. For a step, it captures one key with no modifiers.
 - [unit] Recorded keys are stored in canonical form ("Hyper+Space", "A").
 - [snap] A conflict with a sibling entry, or with the cancel or back key, is shown in red under the field.
-Status: todo
+Status: done
+Verified: taken keys, modifiers inside a menu and the cancel key are refused with the reason; keys are stored in canonical form (self-test, unit tests). Not yet tried by hand: recording Hyper+Space as a leader.
 
 ### S-026 Edit a binding's title and action
 As the user, I change a binding's title or pick a different action from a popup.
@@ -318,7 +321,8 @@ Depends: S-024, S-030
 Acceptance:
 - [self] Changing the title or action rewrites only that entry in the file.
 - [unit] The action popup lists every defined action, plus "New Action…".
-Status: todo
+Status: done
+Verified: the action popup's choices, and a title change rewrites one line (self-test).
 
 ### S-027 Delete an entry
 As the user, I press Delete on a selected entry to remove it.
@@ -326,7 +330,8 @@ Screens: bindings
 Depends: S-023, S-033
 Acceptance:
 - [self] Deleting a menu that has children asks first and names how many entries will go. ⌘Z restores them.
-Status: todo
+Status: done
+Verified: counts entries under a menu, deletes them, ⌘Z restores (self-test). Not yet tried by hand: the confirmation dialog.
 
 ### S-028 Reorder a menu's items by dragging
 As the user, I drag a binding up or down within its menu.
@@ -335,7 +340,8 @@ Depends: S-023, S-033
 Acceptance:
 - [self] The new order is written to the file, and the HUD then lists the items in that order.
 - [self] An item can't be dropped into a different menu by dragging, because that would change its key path.
-Status: todo
+Status: done
+Verified: the new order is saved and the Guide follows; no moving into another menu (self-test). Not yet tried by hand: dragging in the outline.
 
 ### S-029 Sort a menu alphabetically
 As the user, I choose Sort Alphabetically on a menu.
@@ -344,7 +350,8 @@ Depends: S-028
 Acceptance:
 - [unit] The children are sorted in three groups: named keys alphabetically with F-keys by number, then digits, then letters.
 - [self] The command can be undone.
-Status: todo
+Status: done
+Verified: sort order (unit tests), undo (self-test).
 
 ### S-030 Create and edit actions
 As the user, I add an action, pick its type, and fill in a form for that type.
@@ -354,7 +361,8 @@ Acceptance:
 - [snap] A list of actions with their type and how many bindings use each, plus a form that changes with the type.
 - [self] For `application`, the bundle id comes from an app picker (an Open panel limited to apps) or is typed in.
 - [self] Renaming an action id updates every binding that uses it. Deleting an action that's in use is blocked and lists its users.
-Status: todo
+Status: done
+Verified: /tmp/UnnamedLauncher-shots/actions-light.png; rename updates bindings, delete in use is blocked (self-test). Not yet tried by hand: the app picker.
 
 ### S-031 Define contexts
 As the user, I create a "browser" context and add Chrome and Firefox to it.
@@ -363,7 +371,8 @@ Depends: S-030
 Acceptance:
 - [snap] A list of contexts in order, each showing its apps with their icons and names.
 - [self] Contexts can be reordered by dragging, and the order is saved because it decides which variant wins.
-Status: todo
+Status: done
+Verified: /tmp/UnnamedLauncher-shots/contexts-dark.png; reordering is saved (self-test). Not yet tried by hand: dragging contexts.
 
 ### S-032 Change general settings
 As the user, I open Settings… (⌘,) and set the Guide delay, timeout, position, theme, cancel and back keys, and feedback options.
@@ -372,7 +381,8 @@ Depends: S-023, S-033
 Acceptance:
 - [snap] One grouped Form, 520 pt wide, with sections Guide, Keys, Feedback and Startup, and a short help line in each section footer.
 - [unit] A negative delay can't be entered.
-Status: todo
+Status: done
+Verified: /tmp/UnnamedLauncher-shots/settings-dark.png; negative delays become 0 (unit test); settings are written to the file (self-test).
 
 ### S-033 Save edits back to the config file
 As the user, every change I make in the Bindings window or Settings is written to `config.json` right away.
@@ -391,7 +401,8 @@ Screens: bindings
 Depends: S-023
 Acceptance:
 - [self] Clicking an error selects the right row and focuses the field with the problem.
-Status: todo
+Status: done
+Verified: clicking an error selects its row and focuses the field (self-test).
 
 ## M5 System
 
@@ -409,7 +420,8 @@ Screens: settings
 Depends: S-032
 Acceptance:
 - [self] The switch uses `SMAppService.mainApp` and reflects its current `status`. If you turn it off in System Settings, the switch shows off.
-Status: todo
+Status: done
+Done with S-032: Open at Login in Settings › Startup uses SMAppService.mainApp and reads its status each time Settings opens. Not yet tried by hand.
 
 ### S-037 Recover when macOS turns off the event tap
 As the user, I never lose my leader keys because macOS paused the tap.

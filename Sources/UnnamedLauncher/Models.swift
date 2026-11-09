@@ -52,6 +52,11 @@ final class AppModel {
                                        home: URL.homeDirectory)
     let store: ConfigStore
     let launcher: Launcher
+    /// The draft the Bindings window and Settings edit.
+    let editor: BindingsEditor
+    /// The selected action and context on their pages.
+    var actionSelection: String?
+    var contextSelection: String?
 
     /// The one model, for the app delegate.
     private(set) static weak var current: AppModel?
@@ -59,10 +64,19 @@ final class AppModel {
     init() {
         store = ConfigStore(url: configURL)
         launcher = Launcher(store: store)
-        Self.current = self
         // Snapshots and the self-test never capture the real keyboard.
-        let isTestRun = SelfTest.requested || !(ProcessInfo.processInfo.environment["APP_SNAPSHOT"] ?? "").isEmpty
-        launcher.start(captureKeys: !isTestRun)
+        let isSnapshot = !(ProcessInfo.processInfo.environment["APP_SNAPSHOT"] ?? "").isEmpty
+        // Snapshots show the sample config, so every page has content.
+        launcher.start(captureKeys: !SelfTest.requested && !isSnapshot, seed: isSnapshot ? SeedData.fixtureJSON : nil)
+        editor = BindingsEditor(store: store)
+        editor.onRecordingChange = { [launcher] in launcher.setRecording($0) }
+        Self.current = self
+    }
+
+    /// Shows an action on the Actions page.
+    func showAction(_ id: String) {
+        actionSelection = id
+        sidebar = .actions
     }
 }
 

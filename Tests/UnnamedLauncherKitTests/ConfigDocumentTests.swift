@@ -220,3 +220,11 @@ struct ActionEditTests {
         #expect(variants["browser"] != nil && variants["web"] == nil)
     }
 }
+
+@Suite("Settings values (S-032)")
+struct SettingsValueTests {
+    @Test("A negative delay can't be entered", arguments: [(-500, 0), (0, 0), (250, 250), (90_000, 60_000)])
+    func clamp(_ input: Int, expected: Int) {
+        #expect(SettingsValues.milliseconds(input) == expected)
+    }
+}

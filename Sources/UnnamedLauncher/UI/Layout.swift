@@ -4,12 +4,24 @@ import SwiftUI
 enum Layout {
     /// The Settings window's single Form.
     static let settingsWidth: CGFloat = 520
+    /// Settings grows to this height before it scrolls, so all four sections fit.
+    static let settingsMaxHeight: CGFloat = 840
     /// Bindings window sidebar.
     static let sidebarMin: CGFloat = 180
     static let sidebarIdeal: CGFloat = 200
     /// Bindings window minimum and first-open size.
-    static let windowMin = CGSize(width: 680, height: 440)
-    static let windowDefault = CGSize(width: 900, height: 600)
+    static let windowMin = CGSize(width: 900, height: 480)
+    static let windowDefault = CGSize(width: 1180, height: 680)
+
+    /// The Bindings window's editor pane beside the outline.
+    static let editorPaneWidth: CGFloat = 280
+    /// The outline's Key column, and the key recorder.
+    static let keyColumnWidth: CGFloat = 112
+    static let keyRecorderWidth: CGFloat = 160
+    /// The outline's Action column.
+    static let actionColumnWidth: CGFloat = 148
+    /// The Actions and Contexts pages' list beside the form.
+    static let listPaneWidth: CGFloat = 280
 
     /// The Guide: rows per column before it adds a column (12, then 24).
     static let guideRowsPerColumn = 12

@@ -32,7 +32,7 @@ A **menu bar extra, the Guide panel, a Bindings window, and a Settings window** 
 | Actions | `bolt` | A list of actions plus a form for the selected one, which changes with its type (S-030) |
 | Contexts | `macwindow.on.rectangle` | An ordered list of contexts with their apps (S-031) |
 
-The window title names the page ("Bindings", "Actions", "Contexts"), not the app (rule 19). Selection details show in the detail column. There's no inspector for now.
+The window title names the page ("Bindings", "Actions", "Contexts"), not the app (rule 19). Each page puts its list on the left and a form for the selection on the right, 280 pt wide on Bindings. There's no inspector.
 
 **Settings, one pane** (S-032, S-036), as grouped sections:
 - **Guide:** Show Guide (toggle), delay before showing, timeout, position (Center, Top, Bottom), theme (System, Light, Dark).
