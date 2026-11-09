@@ -77,7 +77,11 @@ enum SelfTest {
     private static func guideChecks(_ model: AppModel) async {
         let content = SeedData.guideContent
         check("S-005 the Guide lists the leader's keys in file order",
-              content.rows.map(\.key) == ["Space", "E", "B", "A", "N", "S"])
+              content.rows.map(\.key) == ["Space", "E", "B", "A", "N", "S", "L", "F"])
+        let addressBar = content.rows.first { $0.key == "L" }
+        check("S-013 a Choose by App binding with nothing for the app in front is dimmed",
+              addressBar?.isAvailable == false && addressBar?.note == "not available in Notes"
+              && content.rows.first { $0.key == "F" }?.isAvailable == true)
         check("S-005 menus are marked, bindings aren't",
               content.rows.first { $0.key == "A" }?.isMenu == true && content.rows.first { $0.key == "E" }?.isMenu == false)
         check("S-005 the footer shows esc and delete", content.cancelKey == "esc" && content.backKey == "delete")

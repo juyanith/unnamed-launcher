@@ -187,11 +187,27 @@ nonisolated final class EngineBox: Sendable {
 
     func replace(_ config: LoadedConfig) {
         engine.withLock { engine in
-            if engine == nil { engine = SequenceEngine(config: config) } else { engine?.replaceConfig(config) }
+            if engine == nil {
+                engine = SequenceEngine(config: config)
+                engine?.setFrontApp(frontApp)
+            } else {
+                engine?.replaceConfig(config)
+            }
         }
     }
 
     func reset() {
         engine.withLock { $0?.reset() }
     }
+
+    /// The app in front, for Choose by App (S-013).
+    func setFrontApp(_ bundleId: String?) {
+        engine.withLock { engine in
+            frontApp = bundleId
+            engine?.setFrontApp(bundleId)
+        }
+    }
+
+    /// Kept so a config that loads later starts with the right app.
+    private nonisolated(unsafe) var frontApp: String?
 }

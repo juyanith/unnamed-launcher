@@ -194,7 +194,8 @@ Acceptance:
 - [unit] The first context in `contexts` order that matches the front app's bundle id and has a variant wins. Otherwise `fallback` runs, and with no fallback the action is unavailable.
 - [snap] In the HUD, a contextual binding that's unavailable for the front app shows as dimmed.
 - [unit] Pressing an unavailable binding gives error feedback and runs nothing.
-Status: todo
+Status: done
+Verified: context order, fallback, unavailable stays in the menu (unit tests); dimmed row (self-test, /tmp/UnnamedLauncher-shots/hud-light.png). Not yet tried by hand: ⌘L in a browser and ⌘F elsewhere.
 
 ### S-014 Reserve a key with a no-op
 As the user, I bind a key to `noop` to hold its place or show a note in the HUD.

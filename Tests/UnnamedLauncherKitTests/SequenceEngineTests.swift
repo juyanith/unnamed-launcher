@@ -34,7 +34,7 @@ struct SequenceEngineTests {
         #expect(e.handle(.up(keyCode: code(.e))) == .pass)
         let out = e.handle(down(.space, .hyper))
         #expect(out.consume)
-        guard case let .showMenu(menu, path) = out.effect else { Issue.record("no menu"); return }
+        guard case let .showMenu(menu, path, _) = out.effect else { Issue.record("no menu"); return }
         #expect(menu.title == "Commands" && path == ["Commands"])
         #expect(e.isActive)
     }
@@ -54,9 +54,9 @@ struct SequenceEngineTests {
     func steps() throws {
         var e = try engine()
         _ = e.handle(down(.space, .hyper))
-        guard case let .showMenu(menu, path) = e.handle(down(.a)).effect else { Issue.record("no menu"); return }
+        guard case let .showMenu(menu, path, _) = e.handle(down(.a)).effect else { Issue.record("no menu"); return }
         #expect(menu.title == "Applications" && path == ["Commands", "Applications"])
-        guard case let .run(binding) = e.handle(down(.t)).effect else { Issue.record("no run"); return }
+        guard case let .run(binding, _) = e.handle(down(.t)).effect else { Issue.record("no run"); return }
         #expect(binding.title == "Terminal" && binding.action == "edit")
         #expect(!e.isActive)
         // The key-up of the binding key is still consumed after the sequence ends.
@@ -108,7 +108,7 @@ struct SequenceEngineTests {
         _ = e.handle(down(.space, .hyper))
         for key: KeyName in [.a, .d, .e, .p] { _ = e.handle(down(key)) }
         #expect(e.path.count == 5)
-        guard case let .run(binding) = e.handle(down(.x)).effect else { Issue.record("no run"); return }
+        guard case let .run(binding, _) = e.handle(down(.x)).effect else { Issue.record("no run"); return }
         #expect(binding.path.steps.count == 5 && binding.title == "Six")
     }
 
@@ -127,7 +127,7 @@ struct SequenceEngineTests {
         var e = try engine()
         _ = e.handle(down(.space, .hyper))
         _ = e.handle(down(.a))
-        guard case let .showMenu(menu, path) = e.handle(down(.backspace)).effect else { Issue.record("no parent"); return }
+        guard case let .showMenu(menu, path, _) = e.handle(down(.backspace)).effect else { Issue.record("no parent"); return }
         #expect(menu.title == "Commands" && path == ["Commands"])
         #expect(e.handle(down(.backspace)).effect == .cancelled)
         #expect(!e.isActive)

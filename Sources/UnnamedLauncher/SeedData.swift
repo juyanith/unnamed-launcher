@@ -18,6 +18,8 @@ enum SeedData {
         { "keys": "Hyper+Space A M", "title": "Messages", "action": "open-messages" },
         { "keys": "Hyper+Space N", "title": "Notes for the weekly planning meeting", "action": "notes" },
         { "keys": "Hyper+Space S", "title": "Screenshot", "action": "screenshot" },
+        { "keys": "Hyper+Space L", "title": "Address Bar", "action": "address-bar" },
+        { "keys": "Hyper+Space F", "title": "Find", "action": "find" },
         { "keys": "Ctrl+Alt+W", "title": "Workspace" },
         { "keys": "Ctrl+Alt+W 1", "title": "Workspace 1", "action": "workspace-1" }
       ],
@@ -29,8 +31,17 @@ enum SeedData {
         "open-messages": { "type": "application", "bundleId": "com.apple.MobileSMS" },
         "notes": { "type": "open", "target": "~/Documents/Notes" },
         "screenshot": { "type": "send", "keys": "Cmd+Shift+4" },
-        "workspace-1": { "type": "send", "keys": "Ctrl+1" }
-      }
+        "workspace-1": { "type": "send", "keys": "Ctrl+1" },
+        "address-bar": { "type": "contextual", "variants": { "browser": { "type": "send", "keys": "Cmd+L" } } },
+        "find": {
+          "type": "contextual",
+          "variants": { "browser": { "type": "send", "keys": "Cmd+F" } },
+          "fallback": { "type": "send", "keys": "Cmd+F" }
+        }
+      },
+      "contexts": [
+        { "id": "browser", "apps": ["com.apple.Safari", "com.google.Chrome"] }
+      ]
     }
     """
 
@@ -43,6 +54,8 @@ enum SeedData {
     static var guideContent: GuideContent {
         let config = fixture
         let leader = config.leaders[0]
-        return GuideContent(menu: leader, path: [leader.title], config: config)
+        // In Notes, so the browser-only Address Bar shows as unavailable.
+        return GuideContent(menu: leader, path: [leader.title], config: config,
+                            frontApp: "com.apple.Notes", frontAppName: "Notes")
     }
 }

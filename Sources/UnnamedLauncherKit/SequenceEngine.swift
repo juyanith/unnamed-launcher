@@ -11,9 +11,13 @@ public enum KeyEvent: Sendable, Equatable {
 /// What the app should do after one event.
 public enum SequenceEffect: Sendable, Equatable {
     /// A sequence started or moved into a menu, including Back. Show it.
-    case showMenu(BindingNode, path: [String])
-    /// A binding was selected: run its action. The sequence has ended.
-    case run(BindingNode)
+    /// `frontApp` is the app that was in front when the leader was pressed.
+    case showMenu(BindingNode, path: [String], frontApp: String?)
+    /// A binding was selected: run its action for `frontApp`. The sequence has ended.
+    case run(BindingNode, frontApp: String?)
+    /// A Choose by App binding with nothing to run for the app in front.
+    /// The sequence stays in its menu (S-013).
+    case unavailable(BindingNode, path: [String])
     /// Cancel, or Back from a leader's menu. The sequence has ended.
     case cancelled
     /// A key that isn't bound. The sequence stays in `menu`.
@@ -40,6 +44,10 @@ public struct SequenceEngine: Sendable {
     private var heldLeaderModifiers: Modifiers = []
     /// Key-downs that were consumed, so their key-ups are consumed too.
     private var consumedKeys: Set<UInt16> = []
+    /// The app in front right now, kept up to date by the app.
+    private var frontApp: String?
+    /// The app that was in front when the leader was pressed.
+    public private(set) var sequenceFrontApp: String?
 
     public init(config: LoadedConfig) {
         self.config = config
@@ -54,6 +62,11 @@ public struct SequenceEngine: Sendable {
     public mutating func replaceConfig(_ config: LoadedConfig) {
         self.config = config
         stack = []
+    }
+
+    /// The bundle id of the app in front. Call it whenever that changes.
+    public mutating func setFrontApp(_ bundleId: String?) {
+        frontApp = bundleId
     }
 
     /// Ends the sequence from outside (for example, Enabled turned off).
@@ -91,8 +104,9 @@ public struct SequenceEngine: Sendable {
         if isRepeat { return .consumed() }
         consumedKeys.insert(keyCode)
         heldLeaderModifiers = modifiers
+        sequenceFrontApp = frontApp
         stack = [leader]
-        return .consumed(.showMenu(leader, path: path))
+        return .consumed(.showMenu(leader, path: path, frontApp: sequenceFrontApp))
     }
 
     private mutating func step(keyCode: UInt16, modifiers: Modifiers) -> SequenceOutput {
@@ -110,16 +124,20 @@ public struct SequenceEngine: Sendable {
                 reset()
                 return .consumed(.cancelled)
             }
-            return .consumed(.showMenu(parent, path: path))
+            return .consumed(.showMenu(parent, path: path, frontApp: sequenceFrontApp))
         }
         guard extra.isEmpty, let child = menu.child(for: key) else {
             return .consumed(.unbound(menu, path: path))
         }
         if child.isMenu {
             stack.append(child)
-            return .consumed(.showMenu(child, path: path))
+            return .consumed(.showMenu(child, path: path, frontApp: sequenceFrontApp))
         }
+        guard config.isAvailable(child, frontApp: sequenceFrontApp) else {
+            return .consumed(.unavailable(child, path: path))
+        }
+        let app = sequenceFrontApp
         reset()
-        return .consumed(.run(child))
+        return .consumed(.run(child, frontApp: app))
     }
 }

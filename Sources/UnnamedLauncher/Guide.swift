@@ -8,6 +8,10 @@ struct GuideContent: Equatable {
         var key: String
         var title: String
         var isMenu: Bool
+        /// False for Choose by App with nothing to run in the app in front.
+        var isAvailable = true
+        /// "not available in Notes", shown on an unavailable row.
+        var note: String?
         var id: String { key }
     }
 
@@ -17,13 +21,23 @@ struct GuideContent: Equatable {
     /// nil when Back is turned off.
     var backKey: String?
 
-    init(menu: BindingNode, path: [String], config: LoadedConfig) {
+    init(menu: BindingNode, path: [String], config: LoadedConfig, frontApp: String?, frontAppName: String? = nil) {
         self.path = path
+        let appName = frontAppName ?? frontApp.flatMap(Self.appName) ?? "this app"
         rows = menu.children.compactMap { child in
-            child.path.lastStep.map { Row(key: $0.key.name, title: child.title, isMenu: child.isMenu) }
+            child.path.lastStep.map { step in
+                let available = child.isMenu || config.isAvailable(child, frontApp: frontApp)
+                return Row(key: step.key.name, title: child.title, isMenu: child.isMenu,
+                           isAvailable: available, note: available ? nil : "not available in \(appName)")
+            }
         }
         cancelKey = Self.footerLabel(config.cancelKey)
         backKey = config.backKey.map(Self.footerLabel)
+    }
+
+    /// The name people know an app by, from its bundle id.
+    private static func appName(_ bundleId: String) -> String? {
+        NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).first?.localizedName
     }
 
     /// "esc" and "delete", as printed on a Mac keyboard, for the default
@@ -86,16 +100,25 @@ struct GuideView: View {
         GridRow {
             Keycap(label: row.key)
                 .gridColumnAlignment(.leading)
-            Text(row.title)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(row.title)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                if let note = row.note {
+                    Text(note)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
             Text("›")
                 .foregroundStyle(.secondary)
                 .opacity(row.isMenu ? 1 : 0)
         }
+        .opacity(row.isAvailable ? 1 : Surfaces.unavailableOpacity)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(row.key), \(row.title)\(row.isMenu ? ", menu" : "")")
+        .accessibilityLabel("\(row.key), \(row.title)\(row.isMenu ? ", menu" : "")\(row.note.map { ", \($0)" } ?? "")")
     }
 
     private var footer: some View {

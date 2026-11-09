@@ -63,6 +63,13 @@ final class Launcher {
                                                queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.refreshPermissions() }
         }
+        // Choose by App needs the app in front at the moment a leader is pressed (S-013).
+        engine.setFrontApp(NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification,
+                                                          object: nil, queue: .main) { [engine] note in
+            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            engine.setFrontApp(app?.bundleIdentifier)
+        }
     }
 
     func refreshPermissions() {
@@ -104,13 +111,15 @@ final class Launcher {
     private func apply(_ effect: SequenceEffect) {
         guard let config = store.loaded else { return }
         switch effect {
-        case let .showMenu(menu, path):
+        case let .showMenu(menu, path, frontApp):
             if config.config.runtime.showHud {
-                guide.show(GuideContent(menu: menu, path: path, config: config))
+                guide.show(GuideContent(menu: menu, path: path, config: config, frontApp: frontApp))
             }
-        case let .run(binding):
+        case let .run(binding, frontApp):
             guide.hide()
-            guard let id = binding.action, let action = config.config.actions[id] else { return }
+            guard let id = binding.action, let chosen = config.config.actions[id],
+                  let action = ContextResolver.resolve(chosen, frontApp: frontApp, contexts: config.config.contexts)
+            else { return }
             Task {
                 do throws(PlanError) {
                     try await runner.run(action, id: id)
@@ -121,7 +130,7 @@ final class Launcher {
             }
         case .cancelled:
             guide.hide()
-        case .unbound:
+        case .unbound, .unavailable:
             // Flash and timing arrive in M3 (S-018); the bell works now.
             if config.config.ui.errorBell { NSSound.beep() }
         }

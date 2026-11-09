@@ -98,3 +98,74 @@ struct SendPlanTests {
         #expect(throws: PlanError.self) { try ActionPlanner.chords(keys) }
     }
 }
+
+@Suite("Choose by App (S-013)")
+struct ContextTests {
+    let contexts = [
+        Config.Context(id: "browser", apps: ["com.google.Chrome", "com.apple.Safari"]),
+        Config.Context(id: "chromium", apps: ["com.google.Chrome"]),
+        Config.Context(id: "editor", apps: ["dev.zed.Zed"]),
+    ]
+    let cmdL = Config.Action.send(keys: "Cmd+L")
+    let chromeOnly = Config.Action.send(keys: "Cmd+Shift+L")
+    let cmdF = Config.Action.send(keys: "Cmd+F")
+
+    @Test("The first context in contexts order with the app and a variant wins")
+    func order() {
+        let action = Config.Action.contextual(variants: ["chromium": chromeOnly, "browser": cmdL], fallback: cmdF)
+        #expect(ContextResolver.resolve(action, frontApp: "com.google.Chrome", contexts: contexts) == cmdL)
+        #expect(ContextResolver.resolve(action, frontApp: "com.apple.Safari", contexts: contexts) == cmdL)
+        // A context with the app but no variant is skipped.
+        let skip = Config.Action.contextual(variants: ["chromium": chromeOnly], fallback: nil)
+        #expect(ContextResolver.resolve(skip, frontApp: "com.google.Chrome", contexts: contexts) == chromeOnly)
+    }
+
+    @Test("Otherwise the fallback runs; with no fallback the action is unavailable")
+    func fallback() {
+        let withFallback = Config.Action.contextual(variants: ["browser": cmdL], fallback: cmdF)
+        #expect(ContextResolver.resolve(withFallback, frontApp: "com.apple.Notes", contexts: contexts) == cmdF)
+        #expect(ContextResolver.resolve(withFallback, frontApp: nil, contexts: contexts) == cmdF)
+        let without = Config.Action.contextual(variants: ["browser": cmdL], fallback: nil)
+        #expect(ContextResolver.resolve(without, frontApp: "com.apple.Notes", contexts: contexts) == nil)
+    }
+
+    @Test("Other kinds of action are always available")
+    func plain() {
+        #expect(ContextResolver.resolve(cmdF, frontApp: nil, contexts: []) == cmdF)
+    }
+}
+
+@Suite("Choose by App in a sequence (S-013)")
+struct ContextSequenceTests {
+    let text = json(entries: """
+    { "keys": "Hyper+Space", "title": "Commands" },
+    { "keys": "Hyper+Space L", "title": "Address Bar", "action": "address" }
+    """, actions: #"{ "address": { "type": "contextual", "variants": { "browser": { "type": "send", "keys": "Cmd+L" } } } }"#,
+    contexts: #"[{ "id": "browser", "apps": ["com.apple.Safari"] }]"#)
+
+    func start(in app: String) throws -> SequenceEngine {
+        var engine = SequenceEngine(config: try load(text).get())
+        engine.setFrontApp(app)
+        _ = engine.handle(.down(keyCode: KeyName.space.keyCode!, modifiers: .hyper, isRepeat: false))
+        return engine
+    }
+
+    @Test("Pressing an unavailable binding gives error feedback, runs nothing, and stays")
+    func unavailable() throws {
+        var engine = try start(in: "com.apple.Notes")
+        let output = engine.handle(.down(keyCode: KeyName.l.keyCode!, modifiers: [], isRepeat: false))
+        guard case let .unavailable(binding, path) = output.effect else { Issue.record("\(String(describing: output.effect))"); return }
+        #expect(output.consume && binding.title == "Address Bar" && path == ["Commands"] && engine.isActive)
+    }
+
+    @Test("In a matching app the binding runs, for the app that was in front at the leader")
+    func available() throws {
+        var engine = try start(in: "com.apple.Safari")
+        // Switching apps mid-sequence doesn't change the answer.
+        engine.setFrontApp("com.apple.Notes")
+        guard case let .run(binding, frontApp) = engine.handle(.down(keyCode: KeyName.l.keyCode!, modifiers: [], isRepeat: false)).effect else {
+            Issue.record("no run"); return
+        }
+        #expect(binding.title == "Address Bar" && frontApp == "com.apple.Safari")
+    }
+}
