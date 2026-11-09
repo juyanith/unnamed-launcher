@@ -187,4 +187,5 @@ public enum ConfigValidator {
 /// Every error that stopped a config from loading, in file order.
 public struct ConfigErrors: Error, Sendable, Equatable {
     public var issues: [ConfigIssue]
+    public init(issues: [ConfigIssue]) { self.issues = issues }
 }

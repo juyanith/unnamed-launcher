@@ -382,7 +382,8 @@ Acceptance:
 - [unit] Output is pretty-printed with a stable key order, so edits make small diffs.
 - [self] The write is atomic. A write that would produce an invalid config is refused, and the file isn't changed.
 - [self] If the file changes on disk while the window is open, the window reloads it.
-Status: todo
+Status: done
+Verified: round trip, layout, small diffs (unit tests); atomic save, refused invalid save, reload on disk change (self-test).
 
 ### S-034 Fix validation errors from the Bindings window
 As the user, I click an error in the banner and the entry or action it names is selected.
@@ -399,7 +400,8 @@ As the user, I save the config in my editor, or chezmoi rewrites it, and the new
 Depends: S-008
 Acceptance:
 - [self] A change to the file, including an atomic replace (write to a temp file, then rename), triggers a reload within 1 second.
-Status: todo
+Status: done
+Done with S-033: the store watches the config's folder and reloads within about 150 ms of a change, including an atomic replace (self-test).
 
 ### S-036 Start at login
 As the user, I turn on "Open at Login" in Settings.

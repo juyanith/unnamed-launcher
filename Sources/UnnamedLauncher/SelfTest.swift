@@ -67,6 +67,29 @@ enum SelfTest {
               fixed.statusLine?.hasPrefix("Config loaded at") == true || fixed.statusLine == "Created config file"
               || !fixed.missingPermissions.isEmpty, fixed.statusLine ?? "nil")
 
+        // S-033: saving. A valid edit is written atomically; an invalid one is refused.
+        if var document = store.document {
+            document.setTitle(KeySequence(parsing: "Hyper+Space F")!, "Files")
+            let saved = store.save(document)
+            let text = (try? String(contentsOf: store.url, encoding: .utf8)) ?? ""
+            check("S-033 a valid edit is saved to the file", (try? saved.get()) != nil && text.contains(#""title": "Files""#))
+            var broken = document
+            broken.setAction(KeySequence(parsing: "Hyper+Space F")!, "no-such-action")
+            let refused = store.save(broken)
+            let after = (try? String(contentsOf: store.url, encoding: .utf8)) ?? ""
+            check("S-033 an invalid edit is refused and the file isn't changed", (try? refused.get()) == nil && after == text)
+
+            // Another program changes the file: the store reloads within a second.
+            let revision = store.revision
+            try? text.replacingOccurrences(of: #""title": "Files""#, with: #""title": "Finder""#)
+                .write(to: store.url, atomically: true, encoding: .utf8)
+            for _ in 0..<20 where store.revision == revision { try? await Task.sleep(for: .milliseconds(100)) }
+            check("S-033 a change on disk reloads", store.revision > revision
+                  && store.document?.entry(KeySequence(parsing: "Hyper+Space F")!)?.title == "Finder")
+        } else {
+            check("S-033 the config loads as a document", false)
+        }
+
         launcher.isEnabled = false
         let off = MenuBarStatus(launcher: launcher, store: store)
         check("S-009 turning Enabled off dims the icon and says so",

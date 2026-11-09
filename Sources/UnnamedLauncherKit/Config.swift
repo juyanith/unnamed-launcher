@@ -6,6 +6,8 @@ import Foundation
 public struct Config: Sendable, Equatable {
     public static let supportedVersion = 1
 
+    /// The `$schema` line for editors (S-039), kept as written.
+    public var schema: String?
     public var version: Int
     public var runtime: Runtime
     public var ui: UI
@@ -136,6 +138,7 @@ extension Config: Decodable {
         let c = try decoder.container(keyedBy: AnyKey.self)
         // "$schema" lets editors find config.schema.json (S-039).
         try c.rejectUnknown(allowed: ["$schema", "version", "runtime", "ui", "entries", "actions", "contexts"], at: "the file")
+        schema = try c.decodeIfPresent(String.self, forKey: AnyKey("$schema"))
         version = try c.required("version")
         runtime = try c.value("runtime", default: Runtime())
         ui = try c.value("ui", default: UI())
