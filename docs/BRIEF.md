@@ -9,7 +9,7 @@ Sol, which is used only to launch apps. Spotlight still handles search, and pane
 
 ## Main jobs
 1. **Run a binding by key sequence.** For example Hyper+Space → E opens the editor. If you finish the sequence quickly, nothing appears on screen. If you pause, the HUD shows breadcrumbs and the next options. The app in front never loses focus.
-2. **See and edit bindings in a settings window.** It shows the menus and bindings as a tree, records chords and step keys, and edits actions and contexts. Every change is written back to the config file.
+2. **See and edit bindings in a settings window.** It shows the menus and bindings as a tree, records chords and step keys, reorders a menu's items (by drag, or Sort Alphabetically), and edits actions and contexts. Every change is written back to the config file.
 3. **Check status from the menu bar.** Turn the app on or off, reload the config, open the file, see the permission status with links to System Settings, see the last error, and quit.
 
 ## Data

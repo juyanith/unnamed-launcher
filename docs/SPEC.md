@@ -9,7 +9,7 @@ This is the source of truth for how sequences, actions and the config file behav
 - **Every entry is either a menu or a binding.** A menu has children and no action. A binding has an action and no children. A leader is always a menu.
 - **Each key press is decided as soon as it arrives.** Which entry a key selects never depends on a timer, so there are no ambiguous prefixes.
 - **There's no depth limit.** Two or three levels below the leader is typical.
-- **Children are listed in config file order.**
+- **Children are listed in config file order**, so you choose the order. The settings window has a "Sort Alphabetically" command for a menu. It rewrites that menu's children in three groups: named keys such as `Space` and `Tab` alphabetically (F-keys by number), then digits, then letters.
 
 ### During a sequence
 | Key | Result |
