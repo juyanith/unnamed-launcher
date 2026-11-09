@@ -389,6 +389,11 @@ enum SelfTest {
               == (secured.missingPermissions.isEmpty ? "Unnamed Launcher, keyboard is secured" : "Unnamed Launcher, needs permission"))
         launcher.setSecureInputForTesting(false)
         check("S-038 the warning goes when Secure Input is off", !MenuBarStatus(launcher: launcher, store: model.store).keyboardIsSecured)
+
+        // S-039: the schema is written next to the config, and the starter points at it.
+        let schemaURL = model.store.url.deletingLastPathComponent().appending(path: ConfigSchema.fileName)
+        check("S-039 config.schema.json is written next to the config",
+              (try? Data(contentsOf: schemaURL)) == Data(ConfigSchema.json.utf8), schemaURL.path)
     }
 
     /// True when this run's log has a line containing `text`.

@@ -34,9 +34,19 @@ public enum ConfigLoader {
         return true
     }
 
+    /// Writes config.schema.json next to the config when it's missing or
+    /// out of date, so the starter's "$schema" line finds it (S-039).
+    public static func writeSchema(nextTo configURL: URL) throws {
+        let url = configURL.deletingLastPathComponent().appending(path: ConfigSchema.fileName)
+        let data = Data(ConfigSchema.json.utf8)
+        guard (try? Data(contentsOf: url)) != data else { return }
+        try data.write(to: url, options: .atomic)
+    }
+
     /// One leader with two bindings (S-001, UX).
     public static let starterJSON = """
     {
+      "$schema": "./config.schema.json",
       "version": 1,
       "entries": [
         { "keys": "Hyper+Space", "title": "Commands" },

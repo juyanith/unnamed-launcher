@@ -43,6 +43,7 @@ final class ConfigStore {
                 try Data(seed.utf8).write(to: url)
             }
             createdStarter = try ConfigLoader.writeStarterIfMissing(at: url)
+            try ConfigLoader.writeSchema(nextTo: url)
             if createdStarter { log.info("Wrote the starter config to \(self.url.path, privacy: .public)") }
         } catch {
             log.error("Unable to write the starter config: \(error.localizedDescription, privacy: .public)")

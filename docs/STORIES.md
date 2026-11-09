@@ -446,7 +446,8 @@ Depends: S-001
 Acceptance:
 - [unit] `config.schema.json` accepts the fixture config and rejects one sample of each type error.
 - [self] The starter config includes a `$schema` reference, and loading ignores the `$schema` field.
-Status: todo
+Status: done
+Verified: key paths the app accepts and rejects match the schema's pattern, action types match, delays have minimum 0 (unit tests); the schema is written next to the config (self-test). The tests check the schema's parts against the app rather than running a full JSON Schema validator, which would need a dependency.
 
 ## M6 Polish
 
