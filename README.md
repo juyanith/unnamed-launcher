@@ -73,3 +73,7 @@ tools/snap.sh                                                              # lig
 - `Sources/UnnamedLauncher/` is the app. `Sources/UnnamedLauncherKit/` holds the rules and config logic, with no UI, and has the unit tests.
 - [ARCHITECTURE.md](ARCHITECTURE.md) covers the targets, threads and seams.
 - [docs/](docs/) has the brief, the spec, the stories, the glossary and the design notes.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
