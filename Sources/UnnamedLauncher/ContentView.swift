@@ -4,6 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         NavigationSplitView {
@@ -19,7 +20,8 @@ struct ContentView: View {
         .onChange(of: model.store.revision) { model.editor.reloadFromStore() }
         .task {
             SelfTest.runIfRequested(model: model)
-            Snapshot.runIfRequested(model: model, openSettings: openSettings)
+            Snapshot.runIfRequested(model: model, openSettings: openSettings,
+                                    openWelcome: { openWindow(id: WindowID.welcome) })
         }
     }
 

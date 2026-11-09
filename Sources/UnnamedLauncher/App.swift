@@ -19,6 +19,14 @@ struct UnnamedLauncherApp: App {
         SelfTest.requested || !(ProcessInfo.processInfo.environment["APP_SNAPSHOT"] ?? "").isEmpty
     }
 
+    /// The welcome window opens on its own until permissions are granted
+    /// and a sequence has run. Never in snapshots or the self-test.
+    private static var showsWelcome: Bool {
+        guard !opensWindowAtLaunch else { return false }
+        let ran = UserDefaults.standard.bool(forKey: "ranSequence")
+        return !(ran && Permission.missing.isEmpty)
+    }
+
     var body: some Scene {
         MenuBarExtra {
             MenuBarMenu()
@@ -46,6 +54,16 @@ struct UnnamedLauncherApp: App {
             EditorCommands(model: model)
         }
 
+        // First-run setup (S-040). Opens at launch until setup is done.
+        Window("Welcome to Unnamed Launcher", id: WindowID.welcome) {
+            WelcomeView()
+                .environment(model)
+                .themed()
+                .countsAsOpenWindow(model)
+        }
+        .windowResizability(.contentSize)
+        .defaultLaunchBehavior(Self.showsWelcome ? .presented : .suppressed)
+
         Settings {
             SettingsView()
                 .environment(model)
@@ -58,6 +76,7 @@ struct UnnamedLauncherApp: App {
 
 enum WindowID {
     static let bindings = "bindings"
+    static let welcome = "welcome"
 }
 
 extension View {

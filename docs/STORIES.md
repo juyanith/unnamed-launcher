@@ -458,7 +458,8 @@ Depends: S-002, S-001
 Acceptance:
 - [snap] A small window with three steps: grant Accessibility, grant Input Monitoring, try Hyper+Space. Each step shows a check mark once done.
 - [self] It shows only until both permissions are granted and you've run one sequence.
-Status: todo
+Status: done
+Verified: /tmp/UnnamedLauncher-shots/welcome-light.png; the show-until-done rule (self-test). Steps get a check mark as each is done. "Later" closes it for now; it opens again at the next launch until setup is done. Not yet tried by hand: a real first launch.
 
 ### S-041 App icon and menu bar icon states
 As the user, I can tell at a glance whether the launcher is ready, off, or needs attention.

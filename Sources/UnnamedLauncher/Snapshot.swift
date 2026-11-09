@@ -11,7 +11,7 @@ import UnnamedLauncherKit
 /// APP_SNAPSHOT_PAGES=bindings,settings,hud limits the pages. "hud" is the Guide.
 /// Add APP_ACCENT=<id> to see the pages in another accent.
 enum Snapshot {
-    static func runIfRequested(model: AppModel, openSettings: OpenSettingsAction) {
+    static func runIfRequested(model: AppModel, openSettings: OpenSettingsAction, openWelcome: @escaping () -> Void) {
         let env = ProcessInfo.processInfo.environment
         guard let dir = env["APP_SNAPSHOT"], !dir.isEmpty else { return }
         // Snapshots never run against the real config file.
@@ -84,6 +84,19 @@ enum Snapshot {
                     guide.hide()
                     try? await Task.sleep(for: .seconds(0.3))
                 }
+            }
+            if only == nil || only?.contains("welcome") == true {
+                // S-040: the first-run window.
+                let before = Set(NSApp.windows.map(ObjectIdentifier.init))
+                openWelcome()
+                try? await Task.sleep(for: .seconds(1))
+                let welcome = NSApp.windows.first { !before.contains(ObjectIdentifier($0)) && $0.isVisible }
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/welcome-\(mode).png", window: welcome)
+                }
+                welcome?.close()
             }
             if only == nil || only?.contains("hud-theme") == true {
                 // S-020: a fixed theme wins over the Mac's mode.

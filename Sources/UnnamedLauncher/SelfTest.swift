@@ -39,6 +39,7 @@ enum SelfTest {
             await failureChecks(model)
             await editorChecks(model)
             systemChecks(model)
+            polishChecks(model)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)

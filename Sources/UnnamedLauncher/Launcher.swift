@@ -14,6 +14,9 @@ final class Launcher {
     /// fields do, so no keys reach the tap (S-038).
     private(set) var secureInputIsOn = false
 
+    /// True once any binding has run, ever (S-040, the welcome window).
+    private(set) var hasRunSequence = UserDefaults.standard.bool(forKey: "ranSequence")
+
     /// The last failed action, for the log and the Guide (S-015).
     private(set) var lastFailure: String?
 
@@ -149,6 +152,10 @@ final class Launcher {
         perform(schedule.handle(effect, at: Self.nowMs))
         armScheduleTimer()
         guard let config = store.loaded, case let .run(binding, frontApp) = effect else { return }
+        if !hasRunSequence {
+            hasRunSequence = true
+            if !Store.isOverridden { UserDefaults.standard.set(true, forKey: "ranSequence") }
+        }
         guard let id = binding.action, let chosen = config.config.actions[id],
               let action = ContextResolver.resolve(chosen, frontApp: frontApp, contexts: config.config.contexts)
         else { return }

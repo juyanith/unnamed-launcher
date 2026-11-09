@@ -6,6 +6,8 @@ enum Layout {
     static let settingsWidth: CGFloat = 520
     /// Settings grows to this height before it scrolls, so all four sections fit.
     static let settingsMaxHeight: CGFloat = 840
+    /// The first-run welcome window.
+    static let welcomeWidth: CGFloat = 520
     /// Bindings window sidebar.
     static let sidebarMin: CGFloat = 180
     static let sidebarIdeal: CGFloat = 200

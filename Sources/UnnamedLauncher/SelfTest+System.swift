@@ -33,4 +33,13 @@ extension SelfTest {
         check("S-039 config.schema.json is written next to the config",
               (try? Data(contentsOf: schemaURL)) == Data(ConfigSchema.json.utf8), schemaURL.path)
     }
+
+    /// M6: the welcome window, icons, context menus, keyboard.
+    static func polishChecks(_ model: AppModel) {
+        // S-040: the welcome window shows until both permissions and one sequence are done.
+        check("S-040 the welcome window shows until setup is done",
+              !WelcomeStatus(accessibility: true, inputMonitoring: true, ranSequence: false).isComplete
+              && !WelcomeStatus(accessibility: true, inputMonitoring: false, ranSequence: true).isComplete
+              && WelcomeStatus(accessibility: true, inputMonitoring: true, ranSequence: true).isComplete)
+    }
 }
