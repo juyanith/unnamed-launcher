@@ -27,6 +27,8 @@ final class ConfigStore {
     var onLoad: ((LoadedConfig) -> Void)?
 
     @ObservationIgnored private var watcher: DispatchSourceFileSystemObject?
+    /// The file itself, for programs that rewrite it in place (no folder event).
+    @ObservationIgnored private var fileWatcher: DispatchSourceFileSystemObject?
     /// The bytes last read or written, so our own saves don't reload twice.
     @ObservationIgnored private var lastData: Data?
 
@@ -91,6 +93,7 @@ final class ConfigStore {
             return .failure(ConfigErrors(issues: [ConfigIssue(.error, "Unable to save \(url.path): \(error.localizedDescription)")]))
         }
         lastData = data
+        watchFile()  // the atomic write replaced the file
         loaded = config
         self.document = document
         errors = []
@@ -101,8 +104,10 @@ final class ConfigStore {
     }
 
     /// Watches the file's folder, because editors and chezmoi replace the
-    /// file rather than writing into it (S-033, S-035).
+    /// file rather than writing into it (S-033, S-035), and the file itself,
+    /// for programs that write into it.
     private func watch() {
+        watchFile()
         let folder = url.deletingLastPathComponent()
         let descriptor = open(folder.path(percentEncoded: false), O_EVTONLY)
         guard descriptor >= 0 else { return }
@@ -116,6 +121,23 @@ final class ConfigStore {
         watcher = source
     }
 
+    /// Watches the file now at the path. A replaced file is a new file, so
+    /// this runs again after every change and every save.
+    private func watchFile() {
+        fileWatcher?.cancel()
+        fileWatcher = nil
+        let descriptor = open(url.path(percentEncoded: false), O_EVTONLY)
+        guard descriptor >= 0 else { return }
+        let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: descriptor,
+                                                               eventMask: [.write, .extend, .delete, .rename], queue: .main)
+        source.setEventHandler { [weak self] in
+            MainActor.assumeIsolated { self?.fileMaybeChanged() }
+        }
+        source.setCancelHandler { close(descriptor) }
+        source.resume()
+        fileWatcher = source
+    }
+
     @ObservationIgnored private var pendingCheck: Task<Void, Never>?
 
     /// Waits a moment for the writer to finish, then reloads if the bytes changed.
@@ -123,7 +145,9 @@ final class ConfigStore {
         pendingCheck?.cancel()
         pendingCheck = Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(150))
-            guard let self, !Task.isCancelled, let data = try? Data(contentsOf: url), data != lastData else { return }
+            guard let self, !Task.isCancelled else { return }
+            watchFile()
+            guard let data = try? Data(contentsOf: url), data != lastData else { return }
             log.info("The config file changed on disk; reloading")
             reload()
         }

@@ -49,6 +49,20 @@ extension SelfTest {
             for _ in 0..<30 where store.revision == revision { try? await Task.sleep(for: .milliseconds(100)) }
             check("S-033 a change on disk reloads", store.revision > revision
                   && store.document?.entry(KeySequence(parsing: "Hyper+Space F")!)?.title == "Finder")
+
+            // Rewritten in place (same file, no rename): still reloads, also after the
+            // atomic replace above swapped the file for a new one.
+            let inPlace = store.revision
+            if let handle = try? FileHandle(forWritingTo: store.url),
+               let current = try? String(contentsOf: store.url, encoding: .utf8) {
+                let changed = current.replacingOccurrences(of: #""title": "Finder""#, with: #""title": "Files""#)
+                try? handle.truncate(atOffset: 0)
+                try? handle.write(contentsOf: Data(changed.utf8))
+                try? handle.close()
+            }
+            for _ in 0..<30 where store.revision == inPlace { try? await Task.sleep(for: .milliseconds(100)) }
+            check("S-033 a file rewritten in place reloads", store.revision > inPlace
+                  && store.document?.entry(KeySequence(parsing: "Hyper+Space F")!)?.title == "Files")
         } else {
             check("S-033 the config loads as a document", false)
         }
