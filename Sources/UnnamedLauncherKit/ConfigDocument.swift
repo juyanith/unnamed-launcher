@@ -19,6 +19,21 @@ public struct ConfigDocument: Sendable, Equatable {
         self.init(config: config, actionOrder: JSONKeyOrder.keys(ofTopLevelObject: "actions", in: data))
     }
 
+    /// Every action id in alphabetical order, for lists (S-045): case doesn't
+    /// matter and numbers sort by value, so "open-2" comes before "open-10".
+    /// The file keeps `actionOrder`.
+    public var sortedActionIDs: [String] {
+        config.actions.keys.sorted(by: Self.alphabetical)
+    }
+
+    static func alphabetical(_ a: String, _ b: String) -> Bool {
+        switch a.compare(b, options: [.caseInsensitive, .numeric]) {
+        case .orderedAscending: true
+        case .orderedDescending: false
+        case .orderedSame: a < b
+        }
+    }
+
     public func data() -> Data {
         Data(ConfigWriter.write(config, actionOrder: actionOrder).utf8)
     }

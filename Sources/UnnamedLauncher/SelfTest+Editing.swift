@@ -45,7 +45,14 @@ extension SelfTest {
 
             // S-026: choosing an action saves it, changing only that line.
             check("S-026 the action popup lists every action and New Action…",
-                  editor.actionChoices == editor.draft.actionOrder.filter { editor.draft.config.actions[$0] != nil } + [BindingsEditor.newActionTag])
+                  editor.actionChoices == editor.draft.sortedActionIDs + [BindingsEditor.newActionTag])
+            // S-045: lists are alphabetical even where the file isn't. A new
+            // action goes at the end of the file but sorts first in the list.
+            var later = editor.draft
+            later.setAction(id: "a-first", .noop)
+            check("S-045 actions are listed alphabetically, not in file order",
+                  later.actionOrder.last == "a-first" && later.sortedActionIDs.first == "a-first"
+                  && later.sortedActionIDs == later.actionOrder.sorted { $0.compare($1, options: [.caseInsensitive, .numeric]) == .orderedAscending })
             step { editor.setAction(renamed, "open-finder", undo: undo) }
             let withBinding = fileLines()
             check("S-026 a binding with its action is saved", editor.draftErrors.isEmpty

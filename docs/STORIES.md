@@ -497,6 +497,19 @@ Acceptance:
 Status: done
 Verified: VoiceOver row labels and Return to edit the title (self-test). Arrows move through the outline, Space and ⌘K record a key, ⌫ deletes, and every command is in the menu bar. Not yet tried by hand: the whole window and Settings with the keyboard only, and with VoiceOver on.
 
+## M7 Refinements
+
+### S-045 Actions listed alphabetically
+As the user, I find an action by name, because every list of actions is in alphabetical order.
+Screens: actions, bindings
+Depends: S-026, S-030
+Acceptance:
+- [unit] Action ids sort without regard to case, and numbers sort by value ("open-2" before "open-10").
+- [self] The Actions page and the action popup in the Bindings editor list actions in that order, wherever each action is in the file.
+- [unit] The file keeps the order of its `actions` object; only the lists are sorted.
+Status: done
+Verified: sort order and file order (unit tests), the popup's choices and a new action sorting first (self-test), the Actions page in light and dark (snapshots). Not yet tried by hand: the action popup in the Bindings editor.
+
 ## Later
 - Import and export a single menu as a JSON snippet.
 - A Windows version that reads the same config.

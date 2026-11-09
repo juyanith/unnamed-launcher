@@ -53,7 +53,7 @@ struct EntryEditor: View {
 
     private func actionPicker(_ path: KeySequence, _ entry: Config.Entry) -> some View {
         let document = editor.draft
-        let ids = document.actionOrder.filter { document.config.actions[$0] != nil }
+        let ids = document.sortedActionIDs
         return Picker("Action", selection: Binding(
             get: { entry.action ?? "" },
             set: { id in
@@ -79,8 +79,8 @@ extension BindingsEditor {
     /// The popup tag for "New Action…", which no action id can be.
     static let newActionTag = "\u{0}new"
 
-    /// The action popup's choices: every action, then New Action… (S-026).
+    /// The action popup's choices: every action in alphabetical order (S-045), then New Action… (S-026).
     var actionChoices: [String] {
-        draft.actionOrder.filter { draft.config.actions[$0] != nil } + [Self.newActionTag]
+        draft.sortedActionIDs + [Self.newActionTag]
     }
 }

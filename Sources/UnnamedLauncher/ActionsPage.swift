@@ -15,7 +15,7 @@ struct ActionsPage: View {
     var body: some View {
         @Bindable var model = model
         let document = editor.draft
-        let ids = document.actionOrder.filter { document.config.actions[$0] != nil }
+        let ids = document.sortedActionIDs
         HStack(spacing: 0) {
             List(selection: $model.actionSelection) {
                 ForEach(ids, id: \.self) { id in

@@ -250,3 +250,22 @@ struct DuplicateTests {
         #expect((try? d.validate().get()) != nil)
     }
 }
+
+@Suite("Actions listed alphabetically (S-045)")
+struct SortedActionTests {
+    @Test("Lists sort actions by name while the file keeps its order")
+    func sortedForLists() throws {
+        let d = try doc()
+        #expect(d.sortedActionIDs == ["browse", "mail", "term", "zed"])
+        #expect(d.actionOrder == ["zed", "term", "browse", "mail"])
+        let written = String(decoding: d.data(), as: UTF8.self)
+        let positions = ["zed", "term", "browse", "mail"].compactMap { written.range(of: "\"\($0)\": {")?.lowerBound }
+        #expect(positions.count == 4 && positions == positions.sorted())
+    }
+
+    @Test("Case doesn't matter and numbers sort by value")
+    func caseAndNumbers() {
+        let ids = ["open-10", "Zed", "open-2", "apps", "Browser", "open-1"]
+        #expect(ids.sorted(by: ConfigDocument.alphabetical) == ["apps", "Browser", "open-1", "open-2", "open-10", "Zed"])
+    }
+}
