@@ -20,8 +20,16 @@ final class Launcher {
         }
     }
 
-    @ObservationIgnored private var engine: SequenceEngine?
-    @ObservationIgnored private lazy var capture = KeyCapture { [unowned self] event in handle(event) }
+    /// The engine runs on the tap thread; effects come back to the main queue.
+    @ObservationIgnored private let engine = EngineBox()
+    @ObservationIgnored private lazy var capture = KeyCapture { [engine, weak self] event in
+        let output = engine.handle(event)
+        if let effect = output.effect {
+            // The main queue keeps effects in order: show, then run.
+            DispatchQueue.main.async { MainActor.assumeIsolated { self?.apply(effect) } }
+        }
+        return output.consume
+    }
     @ObservationIgnored let guide = GuideController()
     @ObservationIgnored private var permissionTimer: Timer?
     /// False in snapshots and the self-test, which never touch the keyboard.
@@ -30,7 +38,7 @@ final class Launcher {
     init(store: ConfigStore) {
         self.store = store
         store.onLoad = { [unowned self] config in
-            if engine == nil { engine = SequenceEngine(config: config) } else { engine?.replaceConfig(config) }
+            engine.replace(config)
             guide.hide()
         }
     }
@@ -69,7 +77,7 @@ final class Launcher {
             if needsRelaunch == started { needsRelaunch = !started }
         } else {
             capture.stop()
-            engine?.reset()
+            engine.reset()
             guide.hide()
             if needsRelaunch { needsRelaunch = false }
         }
@@ -91,15 +99,6 @@ final class Launcher {
     }
 
     // MARK: - Events
-
-    /// Called by the tap for every key event. Decides at once.
-    private func handle(_ event: KeyEvent) -> Bool {
-        guard var engine else { return false }
-        let output = engine.handle(event)
-        self.engine = engine
-        if let effect = output.effect { apply(effect) }
-        return output.consume
-    }
 
     private func apply(_ effect: SequenceEffect) {
         guard let config = store.loaded else { return }

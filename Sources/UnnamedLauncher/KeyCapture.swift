@@ -1,19 +1,20 @@
 import AppKit
 import CoreGraphics
+import Synchronization
 import UnnamedLauncherKit
 
-/// The session-level event tap (SPEC.md, Permissions and lifecycle). It
-/// sends every key event to `handler`, which decides at once whether to
-/// consume it. The tap's source is on the main run loop, so the handler
-/// runs on the main thread and must never block.
+/// The session-level event tap (SPEC.md, Permissions and lifecycle). It runs
+/// on its own thread with its own run loop, so a busy main thread never
+/// delays a keystroke anywhere on the Mac. `handler` is called on that
+/// thread for every key event and decides at once whether to consume it.
 final class KeyCapture {
-    /// Returns true to consume the event.
-    private let handler: (KeyEvent) -> Bool
+    private let context: TapContext
     private var tap: CFMachPort?
-    private var source: CFRunLoopSource?
+    private var loop: TapLoop?
 
-    init(handler: @escaping (KeyEvent) -> Bool) {
-        self.handler = handler
+    /// `handler` runs on the tap thread. Return true to consume the event.
+    init(handler: @escaping @Sendable (KeyEvent) -> Bool) {
+        context = TapContext(handler: handler)
     }
 
     var isRunning: Bool { tap != nil }
@@ -28,15 +29,15 @@ final class KeyCapture {
         guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap,
                                           options: .defaultTap, eventsOfInterest: mask,
                                           callback: keyCaptureCallback,
-                                          userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
+                                          userInfo: Unmanaged.passUnretained(context).toOpaque()),
+              let source = CFMachPortCreateRunLoopSource(nil, tap, 0) else {
             log.error("macOS refused the event tap")
             return false
         }
-        let source = CFMachPortCreateRunLoopSource(nil, tap, 0)
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+        context.setTap(tap)
+        loop = TapLoop(source: source)
         CGEvent.tapEnable(tap: tap, enable: true)
         self.tap = tap
-        self.source = source
         log.info("Capturing leader keys")
         return true
     }
@@ -45,19 +46,37 @@ final class KeyCapture {
     func stop() {
         guard let tap else { return }
         CGEvent.tapEnable(tap: tap, enable: false)
-        if let source { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes) }
+        loop?.stop()
         CFMachPortInvalidate(tap)
+        context.setTap(nil)
         self.tap = nil
-        source = nil
+        loop = nil
         log.info("Stopped capturing keys")
     }
+}
 
-    fileprivate func handle(_ raw: RawKeyEvent) -> Bool {
+/// What the C callback reaches through `userInfo`. Lives as long as the
+/// KeyCapture that owns it.
+nonisolated final class TapContext: Sendable {
+    let handler: @Sendable (KeyEvent) -> Bool
+    /// The tap, so the callback can turn it back on. Set on the main thread,
+    /// read on the tap thread.
+    private let tap = Mutex<UncheckedTap?>(nil)
+
+    init(handler: @escaping @Sendable (KeyEvent) -> Bool) {
+        self.handler = handler
+    }
+
+    func setTap(_ port: CFMachPort?) {
+        tap.withLock { $0 = port.map(UncheckedTap.init) }
+    }
+
+    func handle(_ raw: RawKeyEvent) -> Bool {
         switch raw.type {
         case .tapDisabledByTimeout, .tapDisabledByUserInput:
             // macOS turned the tap off (S-037). Turn it back on.
             log.notice("macOS turned off the event tap (\(raw.type.rawValue)); turning it back on")
-            if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
+            if let port = tap.withLock({ $0?.port }) { CGEvent.tapEnable(tap: port, enable: true) }
             return false
         case .keyDown:
             return handler(.down(keyCode: raw.keyCode, modifiers: Modifiers(raw.flags), isRepeat: raw.isRepeat))
@@ -71,29 +90,67 @@ final class KeyCapture {
     }
 }
 
-/// The parts of a CGEvent the tap needs, copied out so they can cross to
-/// the main actor.
-struct RawKeyEvent: Sendable {
+/// CFMachPort isn't marked Sendable. CGEvent allows enabling a tap from
+/// any thread.
+nonisolated struct UncheckedTap: @unchecked Sendable {
+    let port: CFMachPort
+}
+
+/// A thread that runs the tap's run loop source until stopped.
+nonisolated final class TapLoop: Sendable {
+    private let runLoop: UncheckedRunLoop
+
+    init(source: CFRunLoopSource) {
+        let start = LoopStart(source: source)
+        let thread = Thread {
+            let loop = CFRunLoopGetCurrent()!
+            CFRunLoopAddSource(loop, start.source.source, .commonModes)
+            start.loop.withLock { $0 = UncheckedRunLoop(loop: loop) }
+            start.ready.signal()
+            CFRunLoopRun()
+        }
+        thread.name = "net.unnamed.launcher.event-tap"
+        thread.qualityOfService = .userInteractive
+        thread.start()
+        start.ready.wait()
+        runLoop = start.loop.withLock { $0! }
+    }
+
+    func stop() {
+        CFRunLoopStop(runLoop.loop)
+    }
+
+    private final class LoopStart: Sendable {
+        let source: UncheckedSource
+        let loop = Mutex<UncheckedRunLoop?>(nil)
+        let ready = DispatchSemaphore(value: 0)
+        init(source: CFRunLoopSource) { self.source = UncheckedSource(source: source) }
+    }
+}
+
+/// CF run loop types aren't marked Sendable. A run loop may be stopped
+/// from any thread, and the source is only added on the tap thread.
+nonisolated struct UncheckedRunLoop: @unchecked Sendable { let loop: CFRunLoop }
+nonisolated struct UncheckedSource: @unchecked Sendable { let source: CFRunLoopSource }
+
+/// The parts of a CGEvent the tap needs, as plain values.
+nonisolated struct RawKeyEvent: Sendable {
     var type: CGEventType
     var keyCode: UInt16
     var isRepeat: Bool
     var flags: CGEventFlags
 }
 
-/// The C callback. It runs on the main run loop, where the tap's source is.
+/// The C callback. It runs on the tap thread.
 nonisolated private func keyCaptureCallback(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent,
                                             userInfo: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
     guard let userInfo else { return Unmanaged.passUnretained(event) }
+    let context = Unmanaged<TapContext>.fromOpaque(userInfo).takeUnretainedValue()
     let raw = RawKeyEvent(type: type,
                           keyCode: UInt16(truncatingIfNeeded: event.getIntegerValueField(.keyboardEventKeycode)),
                           isRepeat: event.getIntegerValueField(.keyboardEventAutorepeat) != 0,
                           flags: event.flags)
-    let address = UInt(bitPattern: userInfo)
-    let consume = MainActor.assumeIsolated {
-        let capture = Unmanaged<KeyCapture>.fromOpaque(UnsafeRawPointer(bitPattern: address)!).takeUnretainedValue()
-        return capture.handle(raw)
-    }
-    return consume ? nil : Unmanaged.passUnretained(event)
+    return context.handle(raw) ? nil : Unmanaged.passUnretained(event)
 }
 
 extension Modifiers {
@@ -105,5 +162,31 @@ extension Modifiers {
         if flags.contains(.maskShift) { modifiers.insert(.shift) }
         if flags.contains(.maskCommand) { modifiers.insert(.command) }
         self = modifiers
+    }
+}
+
+/// The sequence engine behind a lock, so the tap thread can run it while
+/// the main thread swaps in a new config.
+nonisolated final class EngineBox: Sendable {
+    private let engine = Mutex<SequenceEngine?>(nil)
+
+    /// Called on the tap thread for every event.
+    func handle(_ event: KeyEvent) -> SequenceOutput {
+        engine.withLock { engine in
+            guard var current = engine else { return .pass }
+            let output = current.handle(event)
+            engine = current
+            return output
+        }
+    }
+
+    func replace(_ config: LoadedConfig) {
+        engine.withLock { engine in
+            if engine == nil { engine = SequenceEngine(config: config) } else { engine?.replaceConfig(config) }
+        }
+    }
+
+    func reset() {
+        engine.withLock { $0?.reset() }
     }
 }

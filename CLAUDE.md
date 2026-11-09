@@ -14,6 +14,7 @@ does and how: `docs/BRIEF.md`, `docs/SPEC.md`, `docs/STORIES.md`,
 - `build.sh` builds, signs, and installs `~/Applications/UnnamedLauncher.app`.
 - `Icon/AppIcon.icon` the app icon, an Icon Composer file (JSON plus SVG layers). `build.sh` compiles it with `tools/make_icon.sh`; `tools/icon_review.sh` renders every look into one PNG.
 - `docs/` the brief, the spec, the stories, the glossary, and research.
+- `ARCHITECTURE.md` targets, threads (the event tap has its own), and seams.
 
 ## Build and check
 

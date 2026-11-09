@@ -57,7 +57,7 @@ UX:
 - Words: a section header "Needs Permission", then rows "Accessibility — Open Settings…" and "Input Monitoring — Open Settings…". Under them, a disabled line in sentence case: "Unnamed Launcher needs both to capture your leader keys."
 - Access: the menu is fully keyboard-operable as a standard NSMenu. The warning badge is also announced: the status item's accessibility label is "Unnamed Launcher, needs permission".
 Status: done
-Verified: no tap without permissions (self-test), menu status model (self-test). Not yet tried by hand: granting both and capture starting without relaunch; the menu snapshot (menus can't be captured without Screen Recording).
+Verified: no tap without permissions (self-test), menu status model (self-test), and by hand on 2026-11-08: after granting both, the warning dot cleared and Hyper+Space showed the Guide with no relaunch. Not yet checked: the menu snapshot (menus can't be captured without Screen Recording).
 
 ### S-003 Start a sequence with a leader chord
 As the user, I press Hyper+Space anywhere and the launcher takes over the keyboard until the sequence ends.

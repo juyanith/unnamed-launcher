@@ -2,7 +2,7 @@ import AppKit
 import OSLog
 import UnnamedLauncherKit
 
-let log = Logger(subsystem: "net.unnamed.launcher", category: "launcher")
+nonisolated let log = Logger(subsystem: "net.unnamed.launcher", category: "launcher")
 
 /// The config file, loaded and checked (S-001, S-008). A reload with errors
 /// keeps the last valid config running.
