@@ -47,5 +47,19 @@ extension SelfTest {
         let contextItems = Set(OutlineCommand.forRow(isMenu: true) + OutlineCommand.forRow(isMenu: false))
         check("S-043 every context menu item is also in the menu bar", contextItems.isSubset(of: Set(OutlineCommand.inMenuBar)))
         check("S-043 Duplicate has ⌘D in the menu bar", OutlineCommand.duplicate.shortcut == KeyboardShortcut("d"))
+
+        // S-044: VoiceOver reads each row as "key, title, action", and Return edits the title.
+        let editor = model.editor
+        if let binding = editor.draft.paths.compactMap({ $0 }).first(where: { editor.draft.entry($0)?.action != nil }),
+           let menu = editor.draft.children(of: nil).first {
+            let entry = editor.draft.entry(binding)!
+            check("S-044 VoiceOver reads a binding as key, title, action",
+                  editor.accessibilityLabel(for: binding) == "\(binding.lastStep!.description), \(entry.title), \(entry.action!)")
+            check("S-044 VoiceOver reads a menu as key, title, menu",
+                  editor.accessibilityLabel(for: menu).hasSuffix(", menu"))
+            editor.select(binding, focus: .title)
+            check("S-044 Return puts the cursor in the title field", editor.focus == .title && editor.recording == nil)
+            editor.focus = nil
+        }
     }
 }

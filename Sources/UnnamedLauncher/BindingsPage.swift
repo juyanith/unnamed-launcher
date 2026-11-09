@@ -58,6 +58,12 @@ struct BindingsPage: View {
             }
             .listStyle(.inset)
             .onDeleteCommand { requestDelete() }
+            .onKeyPress(.return) {
+                // Return edits the selected row's title (S-044).
+                guard let selection = editor.selection else { return .ignored }
+                editor.select(selection, focus: .title)
+                return .handled
+            }
             .onKeyPress(.space) {
                 guard let selection = editor.selection else { return .ignored }
                 editor.select(selection, focus: .key)
@@ -161,7 +167,7 @@ private struct OutlineCells: View {
             .frame(width: Layout.actionColumnWidth, alignment: .leading)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\((path.lastStep ?? path.leader).description), \(entry?.title ?? ""), \(entry?.action ?? "menu")")
+        .accessibilityLabel(model.editor.accessibilityLabel(for: path))
     }
 }
 

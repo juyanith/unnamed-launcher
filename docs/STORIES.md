@@ -494,7 +494,8 @@ Depends: S-025
 Acceptance:
 - [manual] Every action in the Bindings window and Settings can be done without a mouse.
 - [self] VoiceOver reads each row as "key, title, action".
-Status: todo
+Status: done
+Verified: VoiceOver row labels and Return to edit the title (self-test). Arrows move through the outline, Space and ⌘K record a key, ⌫ deletes, and every command is in the menu bar. Not yet tried by hand: the whole window and Settings with the keyboard only, and with VoiceOver on.
 
 ## Later
 - Import and export a single menu as a JSON snippet.

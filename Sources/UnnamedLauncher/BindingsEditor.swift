@@ -215,6 +215,14 @@ final class BindingsEditor {
         draft = saved
     }
 
+    /// What VoiceOver reads for a row: "key, title, action" (S-044).
+    func accessibilityLabel(for path: KeySequence) -> String {
+        let entry = draft.entry(path)
+        let key = (path.lastStep ?? path.leader).description
+        let action = entry?.action ?? (needsAction.contains(path) ? "no action yet" : "menu")
+        return "\(key), \(entry?.title ?? ""), \(action)"
+    }
+
     // MARK: - Recording
 
     func startRecording(_ path: KeySequence) {
