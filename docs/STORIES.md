@@ -278,7 +278,8 @@ As the user, I set `cancelKey` to Q and `backKey` to an empty string to turn Bac
 Depends: S-007
 Acceptance:
 - [unit] The configured keys work, an empty `backKey` turns Back off, and binding a step to either key fails validation.
-Status: todo
+Status: done
+Verified: custom cancel key and Back off (engine unit test), step keys that clash fail validation (unit tests), footer labels (self-test).
 
 ## M4 Bindings window and Settings
 

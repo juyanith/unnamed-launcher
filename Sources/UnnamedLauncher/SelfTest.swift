@@ -87,6 +87,14 @@ enum SelfTest {
         check("S-005 menus are marked, bindings aren't",
               content.rows.first { $0.key == "A" }?.isMenu == true && content.rows.first { $0.key == "E" }?.isMenu == false)
         check("S-005 the footer shows esc and delete", content.cancelKey == "esc" && content.backKey == "delete")
+        let customText = #"{ "version": 1, "runtime": { "cancelKey": "Q", "backKey": "" }, "entries": [{ "keys": "Hyper+Space", "title": "C" }, { "keys": "Hyper+Space E", "title": "E", "action": "n" }], "actions": { "n": { "type": "noop" } } }"#
+        if let custom = try? ConfigLoader.load(Data(customText.utf8)).get() {
+            let footer = GuideContent(menu: custom.leaders[0], path: ["C"], config: custom, frontApp: nil)
+            check("S-022 the footer shows a custom cancel key and hides Back when it's off",
+                  footer.cancelKey == "Q" && footer.backKey == nil)
+        } else {
+            check("S-022 a config with custom keys loads", false)
+        }
         check("S-021 a Guide that's never shown makes no panel", !GuideController().hasPanel)
         let front = NSApp.keyWindow
         let guide = model.launcher.guide
