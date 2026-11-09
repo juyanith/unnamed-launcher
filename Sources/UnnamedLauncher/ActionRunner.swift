@@ -31,8 +31,8 @@ struct SystemPerformer: ActionPerformer {
             return
         case let .spawn(program, arguments, cwd, env):
             try spawn(program, arguments: arguments, cwd: cwd, env: env)
-        case .send:
-            throw PlanError("This kind of action isn't available yet.")
+        case let .send(chords):
+            try SendShortcut.post(chords)
         }
     }
 

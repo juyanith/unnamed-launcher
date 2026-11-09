@@ -72,6 +72,8 @@ nonisolated final class TapContext: Sendable {
     }
 
     func handle(_ raw: RawKeyEvent) -> Bool {
+        // Shortcuts the launcher sends itself (S-012) go straight through.
+        if raw.isFromLauncher { return false }
         switch raw.type {
         case .tapDisabledByTimeout, .tapDisabledByUserInput:
             // macOS turned the tap off (S-037). Turn it back on.
@@ -139,6 +141,8 @@ nonisolated struct RawKeyEvent: Sendable {
     var keyCode: UInt16
     var isRepeat: Bool
     var flags: CGEventFlags
+    /// Posted by Send Shortcut, marked with SendShortcut.marker.
+    var isFromLauncher: Bool
 }
 
 /// The C callback. It runs on the tap thread.
@@ -149,7 +153,8 @@ nonisolated private func keyCaptureCallback(proxy: CGEventTapProxy, type: CGEven
     let raw = RawKeyEvent(type: type,
                           keyCode: UInt16(truncatingIfNeeded: event.getIntegerValueField(.keyboardEventKeycode)),
                           isRepeat: event.getIntegerValueField(.keyboardEventAutorepeat) != 0,
-                          flags: event.flags)
+                          flags: event.flags,
+                          isFromLauncher: event.getIntegerValueField(.eventSourceUserData) == SendShortcut.marker)
     return context.handle(raw) ? nil : Unmanaged.passUnretained(event)
 }
 

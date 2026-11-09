@@ -183,7 +183,8 @@ Acceptance:
 - [unit] `send` parses one or more chords, and `Primary` maps to ⌘.
 - [self] Sent events carry only the chord's own modifier flags, even while Hyper is still held.
 - [manual] ⌘F reaches the app that was in front when the leader was pressed.
-Status: todo
+Status: done
+Verified: chord parsing (unit tests), event flags, key codes and the marker (self-test, events built but not posted). Not yet tried by hand: ⌘F reaching the app in front.
 
 ### S-013 Pick an action by the app in front
 As the user, I bind one key that sends ⌘L in a browser and ⌘F everywhere else.

@@ -83,3 +83,18 @@ struct ExecPlanTests {
         #expect(dirs.filter { $0 == "/usr/bin" }.count == 1)
     }
 }
+
+@Suite("Send Shortcut (S-012)")
+struct SendPlanTests {
+    @Test("send parses one or more chords, and Primary maps to ⌘")
+    func chords() throws {
+        #expect(try ActionPlanner.plan(.send(keys: "Primary+F"), home: testHome) == .send([Chord(modifiers: .command, key: .f)]))
+        #expect(try ActionPlanner.chords("Cmd+K  S") == [Chord(modifiers: .command, key: .k), Chord(key: .s)])
+        #expect(try ActionPlanner.chords("Hyper+1") == [Chord(modifiers: .hyper, key: .d1)])
+    }
+
+    @Test("Bad or empty keys are errors", arguments: ["", "Cmd+Spcae", "Super+F"])
+    func bad(_ keys: String) {
+        #expect(throws: PlanError.self) { try ActionPlanner.chords(keys) }
+    }
+}

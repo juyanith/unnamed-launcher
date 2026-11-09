@@ -135,6 +135,21 @@ enum SelfTest {
         let homePath = ActionPlanner.expandTilde("~", home: .homeDirectory)
         check("S-011 cwd defaults to the home folder", lines.first == homePath, "\(lines)")
         check("S-011 env is added to the inherited environment", lines.dropFirst().first == "from env", "\(lines)")
+        // S-012: build the events without posting them, so nothing is typed.
+        do throws(PlanError) {
+            let chords = try ActionPlanner.chords("Primary+F Cmd+K S")
+            let events = try SendShortcut.events(for: chords)
+            let flags = events.map(\.flags)
+            let codes = events.map { $0.getIntegerValueField(.keyboardEventKeycode) }
+            check("S-012 each chord sends a key-down and a key-up", events.count == 6
+                  && codes == [0x03, 0x03, 0x28, 0x28, 0x01, 0x01], "\(codes)")
+            check("S-012 sent events carry only the chord's own modifiers",
+                  flags == [.maskCommand, .maskCommand, .maskCommand, .maskCommand, [], []], "\(flags.map(\.rawValue))")
+            check("S-012 sent events are marked so the tap lets them through",
+                  events.allSatisfy { $0.getIntegerValueField(.eventSourceUserData) == SendShortcut.marker })
+        } catch {
+            check("S-012 a shortcut builds its events", false, error.message)
+        }
         do throws(PlanError) {
             try await system.run(.exec(command: ["net-unnamed-no-such-program"], cwd: nil, env: [:]), id: "missing")
             check("S-011 a program that can't be found is reported", false, "no failure")
