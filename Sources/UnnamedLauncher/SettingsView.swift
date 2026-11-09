@@ -17,7 +17,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .fitsContent()
-        .frame(width: 520)
+        .frame(width: Layout.settingsWidth)
         .noInitialFocus()
     }
 }

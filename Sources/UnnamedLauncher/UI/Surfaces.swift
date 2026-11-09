@@ -1,0 +1,29 @@
+import SwiftUI
+
+/// Custom surfaces and states. System materials and semantic colors first:
+/// these exist only where the system has nothing.
+enum Surfaces {
+    /// A keycap's fill in the Guide: a little translucent, so it picks up
+    /// the glass behind it.
+    static let keycap = Color.primary.opacity(0.08)
+    /// A keycap's outline.
+    static let keycapStroke = Color.primary.opacity(0.14)
+    /// The one warning color: missing permission, config error, failed
+    /// action. Always paired with a symbol or words, never color alone.
+    static let warning = Color.orange
+    /// A dimmed (unavailable) row in the Guide.
+    static let unavailableOpacity = 0.45
+}
+
+/// The menu bar icon in each state (DESIGN.md, Archetype). Template symbols,
+/// so they follow the menu bar's look.
+enum StatusIcon {
+    /// Ready and capturing leaders.
+    static let ready = "command"
+    /// Enabled is off: the same symbol, drawn dimmed.
+    static let off = "command"
+    static let offOpacity = 0.4
+    /// A permission is missing, the config has an error, or Secure Event
+    /// Input blocks keys.
+    static let warning = "exclamationmark.triangle"
+}

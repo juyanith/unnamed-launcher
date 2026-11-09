@@ -20,7 +20,7 @@ struct UnnamedLauncherApp: App {
     }
 
     var body: some Scene {
-        MenuBarExtra("Unnamed Launcher", systemImage: "command") {
+        MenuBarExtra("Unnamed Launcher", systemImage: StatusIcon.ready) {
             MenuBarMenu()
         }
 
@@ -32,9 +32,9 @@ struct UnnamedLauncherApp: App {
                 .themed()
                 .countsAsOpenWindow(model)
                 .overlay { if GridOverlay.enabled { GridOverlay() } }
-                .frame(minWidth: 680, minHeight: 440)
+                .frame(minWidth: Layout.windowMin.width, minHeight: Layout.windowMin.height)
         }
-        .defaultSize(width: 900, height: 600)
+        .defaultSize(Layout.windowDefault)
         .defaultLaunchBehavior(Self.opensWindowAtLaunch ? .presented : .suppressed)
         .windowToolbarStyle(.unified)
         .commands {

@@ -3,7 +3,8 @@ import Observation
 import SwiftUI
 
 /// One accent color in three shades. Everything else is Apple's look.
-/// People pick the accent in Settings > Appearance (AppearanceSettings.swift).
+/// The app follows the accent set for the Mac ("system"); there is no picker
+/// (BRIEF.md, Look). The other accents exist only to compare in snapshots.
 /// Light and dark mode follow the Mac: there is no app-specific mode setting.
 ///   APP_ACCENT=mint UnnamedLauncher     run with another accent, to compare
 struct Theme: Identifiable, Hashable {

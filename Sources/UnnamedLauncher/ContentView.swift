@@ -24,7 +24,7 @@ struct ContentView: View {
             Label(page.title, systemImage: page.symbol)
                 .tag(page)
         }
-        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+        .navigationSplitViewColumnWidth(min: Layout.sidebarMin, ideal: Layout.sidebarIdeal)
     }
 }
 
