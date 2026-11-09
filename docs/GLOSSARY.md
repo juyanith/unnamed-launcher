@@ -1,0 +1,30 @@
+# Glossary
+
+One name per idea. Use these words in the UI, the docs, the log and VoiceOver labels.
+
+| Term | Means | Not |
+| --- | --- | --- |
+| Leader | The global chord that starts a sequence, such as Hyper+Space. Each leader opens its own top-level menu. | trigger, hotkey, prefix, activator |
+| Key | A single key pressed after the leader to pick a menu or binding (in the config, a "step key"). | step, shortcut, letter |
+| Sequence | Everything from pressing a leader until a binding runs, you cancel, or it times out. | chord chain, session, combo |
+| Menu | A named group of keys inside a sequence, such as Applications. It opens more choices and runs nothing itself. | folder, group, submenu, category |
+| Binding | A key that runs an action, such as E → Editor. | shortcut, command, item, mapping, hotkey |
+| Entry | Config-file word for a menu or binding. Never shown in the UI; say "binding" or "menu". | (UI) |
+| Action | What a binding does: open an app, open a file or URL, run a command, send a shortcut, choose by app, or nothing. | command, task, handler |
+| Open App | The `application` action: bring the app forward, launching it first if needed. | launch, activate, focus, switch to |
+| Open | The `open` action: open a file, folder or URL in its default app. | launch, browse |
+| Run Command | The `exec` action: start a program with arguments. | execute, exec, shell, script |
+| Send Shortcut | The `send` action: press one or more key combinations in the app you were using. | send keys, keystroke, type, simulate |
+| Choose by App | The `contextual` action: run a different action depending on the app in front. | contextual, conditional, smart action |
+| Do Nothing | The `noop` action. | noop, placeholder, empty |
+| Context | A named set of apps, such as "browser", that Choose by App checks against. | app group, profile, scope |
+| App in front | The app that was active when you pressed the leader. Actions go to it. | focused app, frontmost, target app |
+| Guide | The small panel that shows where you are in a sequence and which keys come next (HUD in the code). | HUD, overlay, popup, palette, cheat sheet |
+| Path | The breadcrumb row at the top of the guide: "Commands › Applications". | breadcrumbs, trail, location |
+| Back | Go up one menu (Backspace by default). | up, previous, return |
+| Cancel | End the sequence without running anything (Escape by default). | close, abort, exit, dismiss |
+| Config file | `~/.config/unnamed-launcher/config.json`, the one source of truth for bindings and settings. | settings file, preferences, profile, keymap |
+| Reload Config | Read the config file again and use it if it's valid. | refresh, restart, re-read |
+| Enabled | Whether Unnamed Launcher is capturing leaders. When it's off, no keys are captured. | active, running, paused, armed |
+| Permissions | The Accessibility and Input Monitoring access in System Settings that the app needs to capture keys. Use Apple's names for each one. | rights, access, privileges |
+| Settings | The settings window (Settings… ⌘,). | Preferences, options, config editor |
