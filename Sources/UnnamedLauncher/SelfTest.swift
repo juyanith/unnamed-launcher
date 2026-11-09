@@ -1,5 +1,6 @@
 import AppKit
 import OSLog
+import Synchronization
 import UnnamedLauncherKit
 
 /// Self-test for agents: runs the app's real functions against a test config,
@@ -37,6 +38,7 @@ enum SelfTest {
             await actionChecks()
             await failureChecks(model)
             await editorChecks(model)
+            systemChecks(model)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
@@ -363,6 +365,27 @@ enum SelfTest {
             check("S-034 clicking an error selects its row and focuses the field",
                   editor.selection?.description == issue.subject && editor.focus == .action, issue.message)
         }
+    }
+
+    /// M5: recovering the tap, Secure Event Input, the JSON Schema.
+    private static func systemChecks(_ model: AppModel) {
+        // S-037: a "tap disabled" event turns the tap back on, passes, and is logged.
+        let handled = Mutex(0)
+        let context = TapContext { _ in handled.withLock { $0 += 1 }; return true }
+        var passes = true
+        for type in [CGEventType.tapDisabledByTimeout, .tapDisabledByUserInput] {
+            passes = passes && !context.handle(RawKeyEvent(type: type, keyCode: 0, isRepeat: false, flags: [], isFromLauncher: false))
+        }
+        check("S-037 a disabled-tap event is handled by the tap, not the engine", passes && handled.withLock { $0 } == 0)
+        check("S-037 turning the tap back on is logged", logContains("turning it back on"))
+    }
+
+    /// True when this run's log has a line containing `text`.
+    private static func logContains(_ text: String) -> Bool {
+        (try? OSLogStore(scope: .currentProcessIdentifier))
+            .flatMap { try? $0.getEntries(at: $0.position(timeIntervalSinceLatestBoot: 0)) }?  // grid: ok OSLogStore, not a view
+            .compactMap { $0 as? OSLogEntryLog }
+            .contains { $0.subsystem == "net.unnamed.launcher" && $0.composedMessage.contains(text) } ?? false
     }
 
     private static func check(_ name: String, _ ok: Bool, _ detail: String = "") {

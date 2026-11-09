@@ -428,7 +428,8 @@ As the user, I never lose my leader keys because macOS paused the tap.
 Depends: S-003
 Acceptance:
 - [self] On `tapDisabledByTimeout` or `tapDisabledByUserInput`, the tap is turned back on and the event is logged.
-Status: todo
+Status: done
+Verified: both disabled-tap events are handled by the tap and logged (self-test). Turning a real tap back on can't be forced in a test; the code calls CGEvent.tapEnable on the stored port.
 
 ### S-038 Know when a password field is blocking keys
 As the user, the menu bar tells me when Secure Event Input is on, so I know why the leader doesn't work.
