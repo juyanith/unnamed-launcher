@@ -3,15 +3,32 @@
 # Build products live in ~/Library/Developer/UnnamedLauncher, outside the repo
 # (and outside Dropbox or iCloud, which would try to sync them).
 #
-# Usage: ./build.sh            release build, install
-#        ./build.sh --debug    debug build, install
-#        ./build.sh --open     install, then quit the running copy and open the new one
+# Usage: ./build.sh              release build, install
+#        ./build.sh --debug      debug build, install
+#        ./build.sh --open       install, then quit the running copy and open the new one
+#        ./build.sh --out DIR    put the app in DIR instead of ~/Applications (CI, releases)
+#
+# Environment:
+#   APP_VERSION     CFBundleShortVersionString (default 0.1); releases set it from the tag
+#   SIGN_IDENTITY   codesign identity; a "Developer ID Application" identity also turns on
+#                   the hardened runtime and a secure timestamp, which notarization needs
 set -euo pipefail
 here=${0:A:h}
 name="UnnamedLauncher"
 scratch="$HOME/Library/Developer/$name/build"
 config=release
-[[ " $* " == *" --debug "* ]] && config=debug
+out="$HOME/Applications"
+open_after=0
+while (( $# )); do
+  case "$1" in
+    --debug) config=debug ;;
+    --open) open_after=1 ;;
+    --out) [[ $# -ge 2 ]] || { echo "--out needs a directory"; exit 2; }; out=$2; shift ;;
+    *) echo "unknown option: $1"; exit 2 ;;
+  esac
+  shift
+done
+version="${APP_VERSION:-0.1}"
 
 # Sign with your Apple Development certificate when you have one (Xcode >
 # Settings > Accounts). Otherwise sign ad hoc, which is fine for your own Mac.
@@ -37,12 +54,12 @@ if [[ -n "$stale" ]]; then
   exit 1
 fi
 
-app="$HOME/Applications/$name.app"
-mkdir -p "$HOME/Applications"
+mkdir -p "$out"
+app="${out:A}/$name.app"
 rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$bin" "$app/Contents/MacOS/$name"
-sed -e "s/__BUILD__/$(date +%Y%m%d%H%M)/" "$here/Info.plist.in" > "$app/Contents/Info.plist"
+sed -e "s/__BUILD__/$(date +%Y%m%d%H%M)/" -e "s/__VERSION__/$version/" "$here/Info.plist.in" > "$app/Contents/Info.plist"
 # The icon: Icon/AppIcon.icon -> Resources/Assets.car + AppIcon.icns, rebuilt when it changed.
 if [[ -d "$here/Icon/AppIcon.icon" ]]; then
   car="$here/Resources/Assets.car"
@@ -52,10 +69,13 @@ if [[ -d "$here/Icon/AppIcon.icon" ]]; then
   cp -X "$car" "$here/Resources/AppIcon.icns" "$app/Contents/Resources/"
 fi
 xattr -cr "$app"
-codesign --force --sign "$identity" "$app" 2>&1 | grep -v "replacing existing signature" || true
-echo "installed $app (signed: ${identity})"
+sign_opts=()
+[[ "$identity" == "Developer ID Application"* ]] && sign_opts=(--options runtime --timestamp)
+codesign --force "${sign_opts[@]}" --sign "$identity" "$app" 2>&1 | grep -v "replacing existing signature" || true
+codesign --verify --strict "$app" || { echo "signature check failed"; exit 1; }
+echo "installed $app (version $version, signed: ${identity})"
 
-if [[ " $* " == *" --open "* ]]; then
+if (( open_after )); then
   osascript -e "quit app \"$name\"" 2>/dev/null || true
   sleep 0.5
   open "$app"

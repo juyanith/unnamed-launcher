@@ -1,0 +1,46 @@
+# Builds the app, runs the unit tests and the self-test on every push and pull request.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    # macOS 27 with Xcode 27 (a GitHub public preview image). Switch to a
+    # macos-27 label once GitHub ships one.
+    runs-on: xcode-27
+    timeout-minutes: 30
+    env:
+      XCODE_APP: /Applications/Xcode_27.2.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE_APP"
+          swift --version
+
+      # Checkout gives every file a fresh date. Keep the committed icon newer
+      # than its source so build.sh doesn't rebuild it.
+      - name: Keep the committed icon
+        run: touch Resources/Assets.car Resources/AppIcon.icns
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Unit tests
+        run: swift test --scratch-path ~/Library/Developer/UnnamedLauncher/test-build
+
+      - name: Self-test
+        timeout-minutes: 5
+        run: tools/selftest.sh

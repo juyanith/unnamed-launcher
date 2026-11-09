@@ -74,6 +74,28 @@ tools/snap.sh                                                              # lig
 - [ARCHITECTURE.md](ARCHITECTURE.md) covers the targets, threads and seams.
 - [docs/](docs/) has the brief, the spec, the stories, the glossary and the design notes.
 
+## Releases
+
+GitHub Actions builds and tests every push and pull request (`.github/workflows/ci.yml`). To publish a release, push a version tag:
+
+```sh
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+`.github/workflows/release.yml` builds the app with that version, zips it, and attaches it to a GitHub Release. A tag with a hyphen, such as `v0.2.0-beta.1`, makes a pre-release.
+
+Without signing secrets, the release is signed ad hoc, and macOS blocks it on first open. To sign with Developer ID and notarize, add these repository secrets (Settings > Secrets and variables > Actions):
+
+| Secret | Value |
+|---|---|
+| `MACOS_CERTIFICATE_P12` | Your "Developer ID Application" certificate and key, exported as .p12, then `base64 -i cert.p12` |
+| `MACOS_CERTIFICATE_PASSWORD` | The .p12 password |
+| `NOTARY_KEY_P8` | An App Store Connect API key (Users and Access > Integrations), `base64 -i AuthKey_XXXX.p8` |
+| `NOTARY_KEY_ID` | That key's ID |
+| `NOTARY_ISSUER_ID` | The issuer ID shown above the keys |
+
+To build a release locally: `APP_VERSION=0.2.0 ./build.sh --out dist`.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

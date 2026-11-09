@@ -1,0 +1,100 @@
+# Builds UnnamedLauncher.app when you push a version tag (v1.2.3) and attaches
+# a zip to a GitHub Release. A tag with a hyphen (v1.2.0-beta.1) makes a pre-release.
+#
+# Signing: ad hoc unless these repository secrets exist.
+#   MACOS_CERTIFICATE_P12        base64 of a "Developer ID Application" .p12
+#   MACOS_CERTIFICATE_PASSWORD   its password
+# Notarization (needs the certificate too):
+#   NOTARY_KEY_P8                base64 of an App Store Connect API key (.p8)
+#   NOTARY_KEY_ID                the key ID
+#   NOTARY_ISSUER_ID             the issuer ID
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: xcode-27
+    timeout-minutes: 45
+    env:
+      XCODE_APP: /Applications/Xcode_27.2.app
+      CERT_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+      CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+      NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+      NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE_APP"
+          swift --version
+
+      - name: Read the version from the tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          echo "APP_VERSION=$version" >> "$GITHUB_ENV"
+          echo "ZIP=UnnamedLauncher-$version.zip" >> "$GITHUB_ENV"
+
+      - name: Keep the committed icon
+        run: touch Resources/Assets.car Resources/AppIcon.icns
+
+      - name: Unit tests
+        run: swift test --scratch-path ~/Library/Developer/UnnamedLauncher/test-build
+
+      - name: Import the Developer ID certificate
+        if: env.CERT_P12 != ''
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password=$(uuidgen)
+          echo "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$RUNNER_TEMP/cert.p12" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+          identity=$(security find-identity -v -p codesigning "$keychain" | grep -m1 -o '"Developer ID Application: [^"]*"' | tr -d '"')
+          [[ -n "$identity" ]] || { echo "no Developer ID Application identity in the certificate"; exit 1; }
+          echo "SIGN_IDENTITY=$identity" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          [[ -n "${SIGN_IDENTITY:-}" ]] || echo "SIGN_IDENTITY=-" >> "$GITHUB_ENV"
+          SIGN_IDENTITY="${SIGN_IDENTITY:--}" ./build.sh --out dist
+
+      - name: Notarize
+        if: env.CERT_P12 != '' && env.NOTARY_KEY_P8 != ''
+        run: |
+          key="$RUNNER_TEMP/notary.p8"
+          echo "$NOTARY_KEY_P8" | base64 --decode > "$key"
+          ditto -c -k --keepParent dist/UnnamedLauncher.app "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" \
+            --key "$key" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" --wait
+          xcrun stapler staple dist/UnnamedLauncher.app
+          rm "$key"
+
+      - name: Zip
+        run: ditto -c -k --keepParent dist/UnnamedLauncher.app "dist/$ZIP"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes_flag=()
+          [[ "$SIGN_IDENTITY" == "-" ]] && notes_flag=(--notes "This build is signed ad hoc. macOS blocks it on first open: open it once, then allow it in System Settings > Privacy & Security, or run \`xattr -dr com.apple.quarantine UnnamedLauncher.app\`.")
+          prerelease=()
+          [[ "$GITHUB_REF_NAME" == *-* ]] && prerelease=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" "dist/$ZIP" \
+            --title "Unnamed Launcher $APP_VERSION" --generate-notes "${notes_flag[@]}" "${prerelease[@]}"
+
+      - name: Remove the signing keychain
+        if: always() && env.CERT_P12 != ''
+        run: security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
