@@ -437,7 +437,8 @@ Screens: menubar-warning
 Depends: S-002
 Acceptance:
 - [snap] While `IsSecureEventInputEnabled()` is true, the menu shows "Keyboard is secured by another app" with a short explanation.
-Status: todo
+Status: done
+Verified: the menu section, warning icon and VoiceOver label (self-test, with Secure Input simulated). The state is read every two seconds with IsSecureEventInputEnabled(). Not yet tried by hand: a real password field.
 
 ### S-039 Get editor help from a JSON Schema
 As the user, my editor validates and autocompletes `config.json`.

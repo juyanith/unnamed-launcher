@@ -12,6 +12,8 @@ struct MenuBarStatus: Equatable {
     var statusLine: String?
     var missingPermissions: [Permission]
     var needsRelaunch: Bool
+    /// Secure Event Input is on, so leaders can't be seen (S-038).
+    var keyboardIsSecured: Bool
     /// The first config error, and how many more there are.
     var firstError: String?
     var moreErrors: Int
@@ -19,9 +21,10 @@ struct MenuBarStatus: Equatable {
     init(launcher: Launcher, store: ConfigStore, now: Date = .now) {
         missingPermissions = launcher.missingPermissions
         needsRelaunch = launcher.needsRelaunch
+        keyboardIsSecured = launcher.secureInputIsOn && launcher.isEnabled
         firstError = store.errors.first?.message
         moreErrors = max(0, store.errors.count - 1)
-        let attention = !missingPermissions.isEmpty || needsRelaunch || firstError != nil
+        let attention = !missingPermissions.isEmpty || needsRelaunch || firstError != nil || keyboardIsSecured
         icon = !launcher.isEnabled ? .off : attention ? .warning : .ready
         if !launcher.isEnabled {
             statusLine = "Not capturing leaders"
@@ -41,7 +44,8 @@ struct MenuBarStatus: Equatable {
         switch icon {
         case .ready: "Unnamed Launcher"
         case .off: "Unnamed Launcher, off"
-        case .warning: missingPermissions.isEmpty ? "Unnamed Launcher, needs attention" : "Unnamed Launcher, needs permission"
+        case .warning: !missingPermissions.isEmpty ? "Unnamed Launcher, needs permission"
+            : keyboardIsSecured ? "Unnamed Launcher, keyboard is secured" : "Unnamed Launcher, needs attention"
         }
     }
 }
@@ -66,6 +70,11 @@ struct MenuBarMenu: View {
                     Button("\(permission.rawValue) — Open Settings…") { permission.openSettings() }
                 }
                 Text("Unnamed Launcher needs both to capture your leader keys.")
+            }
+        }
+        if status.keyboardIsSecured {
+            Section("Keyboard Is Secured by Another App") {
+                Text("A password field or another app has turned on Secure Input, so leader keys can't be seen until it's turned off.")
             }
         }
         if status.needsRelaunch {

@@ -1,4 +1,5 @@
 import AppKit
+import Carbon.HIToolbox
 import UnnamedLauncherKit
 
 /// Ties the parts together: permissions, the event tap, the sequence
@@ -9,6 +10,10 @@ final class Launcher {
     private(set) var missingPermissions: [Permission] = Permission.missing
     /// Both permissions are granted but macOS still refused the tap.
     private(set) var needsRelaunch = false
+    /// True while another app has Secure Event Input on, as password
+    /// fields do, so no keys reach the tap (S-038).
+    private(set) var secureInputIsOn = false
+
     /// The last failed action, for the log and the Guide (S-015).
     private(set) var lastFailure: String?
 
@@ -88,6 +93,8 @@ final class Launcher {
     func refreshPermissions() {
         let missing = Permission.missing
         if missing != missingPermissions { missingPermissions = missing }
+        let secure = IsSecureEventInputEnabled()
+        if secure != secureInputIsOn { secureInputIsOn = secure }
         updateCapture()
     }
 
@@ -112,6 +119,11 @@ final class Launcher {
         NSWorkspace.shared.openApplication(at: url, configuration: configuration) { _, _ in
             Task { @MainActor in NSApp.terminate(nil) }
         }
+    }
+
+    /// For the self-test, which can't turn Secure Event Input on.
+    func setSecureInputForTesting(_ on: Bool) {
+        secureInputIsOn = on
     }
 
     /// Removes the tap before quitting (S-009).
