@@ -1,86 +1,77 @@
 import AppKit
-import SwiftData
 import SwiftUI
 
 // UnnamedLauncher
-//   UnnamedLauncher                      the app
-//   APP_STORE=<file> UnnamedLauncher     use another database (tests, experiments)
-//   APP_SNAPSHOT=<dir> UnnamedLauncher   save a PNG of every sidebar page and Settings tab in light and dark mode, then quit
-//   APP_SEED=1 UnnamedLauncher           fill an empty /tmp store with sample items (tools/snap.sh)
-//   UnnamedLauncher --selftest           run the self-test on a /tmp store and quit with 0 or 1 (tools/selftest.sh)
-//   APP_ACCENT=<id> UnnamedLauncher      run with another accent from Theme.all (UI/Theme.swift)
-//   APP_GRID=1 UnnamedLauncher           draw the 8 pt grid and the layout probes over the window
+//   UnnamedLauncher                      the app (menu bar only, no Dock icon)
+//   APP_STORE=<file> UnnamedLauncher     use another config file (tests, experiments)
+//   APP_SNAPSHOT=<dir> UnnamedLauncher   save a PNG of every settings page in light and dark mode, then quit
+//   UnnamedLauncher --selftest           run the self-test against a /tmp config and quit with 0 or 1 (tools/selftest.sh)
+//   APP_GRID=1 UnnamedLauncher           draw the grid and the layout probes over the window
 
 @main
 struct UnnamedLauncherApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
-    @State private var model = AppModel(container: Store.makeContainer())
+    @State private var model = AppModel()
+
+    /// Snapshots and the self-test need the window open at launch. Normal
+    /// launches stay in the menu bar until you choose Settings…
+    private static var opensWindowAtLaunch: Bool {
+        SelfTest.requested || !(ProcessInfo.processInfo.environment["APP_SNAPSHOT"] ?? "").isEmpty
+    }
 
     var body: some Scene {
-        Window("UnnamedLauncher", id: "main") {
+        MenuBarExtra("Unnamed Launcher", systemImage: "command") {
+            MenuBarMenu()
+        }
+
+        Window("Unnamed Launcher Settings", id: WindowID.settings) {
             ContentView()
                 .environment(model)
                 .themed()
                 .overlay { if GridOverlay.enabled { GridOverlay() } }
-                .frame(minWidth: 760, minHeight: 480)
+                .frame(minWidth: 680, minHeight: 440)
         }
-        .modelContainer(model.container)
-        .defaultSize(width: 1100, height: 720)
+        .defaultSize(width: 900, height: 600)
+        .defaultLaunchBehavior(Self.opensWindowAtLaunch ? .presented : .suppressed)
         .windowToolbarStyle(.unified)
         .commands {
             SidebarCommands()
-            ToolbarCommands()
-            CommandGroup(replacing: .newItem) {
-                Button("New Item") { model.addItem() }
-                    .keyboardShortcut("n")
-            }
+            CommandGroup(replacing: .newItem) {}
         }
+    }
+}
 
-        Settings {
-            SettingsView()
-                .environment(model)
-                .themed()
+enum WindowID {
+    static let settings = "settings"
+}
+
+/// The menu bar menu. Stories S-002, S-008 and S-009 fill it in.
+struct MenuBarMenu: View {
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        Button("Settings…") {
+            openWindow(id: WindowID.settings)
+            NSApp.activate()
         }
-        .windowResizability(.contentSize)
+        .keyboardShortcut(",")
+        Divider()
+        Button("Quit Unnamed Launcher") { NSApp.terminate(nil) }
+            .keyboardShortcut("q")
     }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Started from a terminal, the process is not a foreground app yet.
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate()
+        // A menu bar app: no Dock icon, no main menu until a window is open.
+        NSApp.setActivationPolicy(.accessory)
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+    /// Closing the settings window leaves the app running in the menu bar.
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 
     /// The self-test's result becomes the exit code, after a normal quit.
     func applicationWillTerminate(_ notification: Notification) {
         if SelfTest.requested { exit(SelfTest.exitCode) }
-    }
-}
-
-/// Where the data lives: ~/Library/Application Support/UnnamedLauncher/UnnamedLauncher.store
-enum Store {
-    /// True when APP_STORE points somewhere else (tests, snapshots, seed data).
-    static var isOverridden: Bool {
-        !(ProcessInfo.processInfo.environment["APP_STORE"] ?? "").isEmpty
-    }
-
-    static var url: URL {
-        if let path = ProcessInfo.processInfo.environment["APP_STORE"], !path.isEmpty {
-            return URL(fileURLWithPath: path)
-        }
-        let dir = URL.applicationSupportDirectory.appending(path: "UnnamedLauncher", directoryHint: .isDirectory)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appending(path: "UnnamedLauncher.store")
-    }
-
-    static func makeContainer() -> ModelContainer {
-        do {
-            return try ModelContainer(for: Item.self, configurations: ModelConfiguration(url: url))
-        } catch {
-            fatalError("Could not open the database at \(url.path): \(error)")
-        }
     }
 }

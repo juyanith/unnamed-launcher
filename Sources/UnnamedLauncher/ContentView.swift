@@ -1,23 +1,19 @@
-import SwiftData
 import SwiftUI
 
+/// The settings window: a sidebar of pages and the selected page.
 struct ContentView: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         NavigationSplitView {
             sidebar
-        } content: {
-            ItemList(page: model.sidebar ?? .all)
-                .navigationSplitViewColumnWidth(min: 260, ideal: 320)
         } detail: {
-            ItemDetail()
+            SettingsPage(page: model.sidebar ?? .bindings)
         }
+        .noInitialFocus()
         .task {
-            SeedData.insertIfRequested(into: model)
             SelfTest.runIfRequested(model: model)
-            Snapshot.runIfRequested(model: model, openSettings: openSettings)
+            Snapshot.runIfRequested(model: model)
         }
     }
 
@@ -27,65 +23,22 @@ struct ContentView: View {
             Label(page.title, systemImage: page.symbol)
                 .tag(page)
         }
-        .navigationSplitViewColumnWidth(min: 180, ideal: 212)
+        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
     }
 }
 
-struct ItemList: View {
-    @Environment(AppModel.self) private var model
-    @Environment(\.modelContext) private var context
-    @Query(sort: \Item.createdAt, order: .reverse) private var items: [Item]
+/// One settings page. Each page is an empty state until its story is built
+/// (Bindings S-023, Actions S-030, Contexts S-031, General S-032).
+struct SettingsPage: View {
     let page: SidebarItem
 
-    private var visible: [Item] {
-        page == .starred ? items.filter(\.isStarred) : items
-    }
-
     var body: some View {
-        @Bindable var model = model
-        List(visible, selection: $model.selection) { item in
-            Label(item.title, systemImage: item.isStarred ? "star.fill" : "circle")
-                .tag(item.id)
-                .contextMenu {
-                    Button("Delete", role: .destructive) { context.delete(item) }
-                }
-        }
-        .overlay {
-            if visible.isEmpty {
-                ContentUnavailableView(
-                    "No Items",
-                    systemImage: page.symbol,
-                    description: Text("Press Command-N to add one.")
-                )
-            }
-        }
+        ContentUnavailableView(
+            page.emptyTitle,
+            systemImage: page.symbol,
+            description: Text(page.emptyMessage)
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle(page.title)
-        .toolbar {
-            ToolbarItem {
-                Button("New Item", systemImage: "plus") { model.addItem() }
-                    .help("Add an item (Command-N)")
-            }
-        }
-    }
-}
-
-struct ItemDetail: View {
-    @Environment(AppModel.self) private var model
-    @Query private var items: [Item]
-
-    var body: some View {
-        if let item = items.first(where: { $0.id == model.selection }) {
-            @Bindable var item = item
-            Form {
-                TextField("Title", text: $item.title)
-                Toggle("Starred", isOn: $item.isStarred)
-                TextField("Notes", text: $item.notes, axis: .vertical)
-                    .lineLimit(4...)
-            }
-            .formStyle(.grouped)
-            } else {
-            ContentUnavailableView("No Selection", systemImage: "sidebar.right")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
     }
 }

@@ -1,61 +1,59 @@
 import Foundation
-import SwiftData
 import UnnamedLauncherKit
 
-@Model
-final class Item {
-    var title: String
-    var notes: String = ""
-    var isStarred: Bool = false
-    var createdAt: Date = Date.now
-    /// A stable id for links, sync, and the agent CLI.
-    var uuid: UUID = UUID()
-
-    init(title: String) {
-        self.title = title
-    }
-}
-
-/// The sidebar pages. Snapshot mode walks through every case.
+/// The settings window's sidebar pages. Snapshot mode walks through every case.
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case all, starred
+    case bindings, actions, contexts, general
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .all: "All Items"
-        case .starred: "Starred"
+        case .bindings: "Bindings"
+        case .actions: "Actions"
+        case .contexts: "Contexts"
+        case .general: "General"
         }
     }
 
     var symbol: String {
         switch self {
-        case .all: "tray"
-        case .starred: "star"
+        case .bindings: "keyboard"
+        case .actions: "bolt"
+        case .contexts: "macwindow.on.rectangle"
+        case .general: "gearshape"
+        }
+    }
+
+    /// The empty page's title until its story is built.
+    var emptyTitle: String {
+        self == .general ? "No Settings Yet" : "No \(title) Yet"
+    }
+
+    /// What the empty page says until its story is built.
+    var emptyMessage: String {
+        switch self {
+        case .bindings: "Leaders, menus and bindings from the config file appear here."
+        case .actions: "Actions that bindings run appear here."
+        case .contexts: "Sets of apps that Choose by App checks appear here."
+        case .general: "Guide timing, position and feedback settings appear here."
         }
     }
 }
 
-/// App-wide state that menus, toolbars, and views share.
+/// App-wide state that menus and views share.
 @Observable
 final class AppModel {
-    let container: ModelContainer
-    var sidebar: SidebarItem? = .all
-    var selection: PersistentIdentifier?
-    /// Settings reopens on the last tab. Test and snapshot runs leave it alone.
-    var settingsTab: SettingsTab = SettingsTab(rawValue: UserDefaults.standard.string(forKey: "settings.tab") ?? "") ?? .general {
-        didSet { if !Store.isOverridden { UserDefaults.standard.set(settingsTab.rawValue, forKey: "settings.tab") } }
-    }
+    var sidebar: SidebarItem? = .bindings
 
-    init(container: ModelContainer) {
-        self.container = container
-    }
+    /// The config file. Tests and snapshots point APP_STORE at a file in /tmp.
+    let configURL = ConfigLocation.url(environment: ProcessInfo.processInfo.environment,
+                                       home: URL.homeDirectory)
+}
 
-    func addItem(title: String = "") {
-        let item = Item(title: ItemTitle.clean(title))
-        if sidebar == .starred { item.isStarred = true }
-        container.mainContext.insert(item)
-        selection = item.id
+enum Store {
+    /// True when APP_STORE points somewhere else (tests, snapshots, self-test).
+    static var isOverridden: Bool {
+        ConfigLocation.isOverridden(environment: ProcessInfo.processInfo.environment)
     }
 }

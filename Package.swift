@@ -1,9 +1,9 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.4
 import PackageDescription
 
 let package = Package(
     name: "UnnamedLauncher",
-    platforms: [.macOS(.v26)],
+    platforms: [.macOS(.v27)],
     targets: [
         // Rules and data logic with no SwiftUI, so tests run without the app.
         .target(name: "UnnamedLauncherKit"),

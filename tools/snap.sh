@@ -1,15 +1,14 @@
 #!/bin/zsh
-# Snapshots of every page in light and dark, with seed data, on a fresh test store.
+# Snapshots of every settings page in light and dark, against a test config in /tmp.
 # Usage: tools/snap.sh            all pages
-#        APP_SNAPSHOT_PAGES=all,settings tools/snap.sh
+#        APP_SNAPSHOT_PAGES=bindings,general tools/snap.sh
 #        tools/snap.sh -AppleShowScrollBars Always     see the scroll bars as people with a mouse see them
 set -u
 app=~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher
-store=/tmp/UnnamedLauncher-test.store
+config=/tmp/UnnamedLauncher-test.json
 shots=/tmp/UnnamedLauncher-shots
 # A crashed run leaves saved window state, and the next launch would wait on a "reopen windows?" alert.
 rm -rf ~/Library/Saved\ Application\ State/net.unnamed.launcher.savedState
-# Seed data only fills an empty store, so start from nothing.
-rm -f $store $store-shm $store-wal
+rm -f $config
 rm -rf $shots
-APP_STORE=$store APP_SEED=1 APP_SNAPSHOT=$shots $app "$@"
+APP_STORE=$config APP_SNAPSHOT=$shots $app "$@"

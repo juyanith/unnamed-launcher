@@ -1,10 +1,8 @@
 import AppKit
-import SwiftData
-import UnnamedLauncherKit
 
-/// Self-test for agents: runs the app's real functions on a test store,
+/// Self-test for agents: runs the app's real functions against a test config,
 /// prints PASS or FAIL per check, and quits with exit code 0 or 1.
-///   APP_STORE=/tmp/UnnamedLauncher-self.store ~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher --selftest
+///   APP_STORE=/tmp/UnnamedLauncher-self.json ~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher --selftest
 /// (tools/selftest.sh does this.) Add a check for every story with logic.
 @MainActor
 enum SelfTest {
@@ -25,22 +23,11 @@ enum SelfTest {
         }
         Task {
             try? await Task.sleep(for: .seconds(0.5))
-            let context = model.container.mainContext
-            func items() -> [Item] { (try? context.fetch(FetchDescriptor<Item>())) ?? [] }
-
-            let before = items().count
-            model.addItem()
-            check("New Item adds one item", items().count == before + 1)
-            check("the new item is selected", model.selection != nil)
-
-            if let item = items().first(where: { $0.id == model.selection }) {
-                item.isStarred.toggle()
-                check("starring an item marks it starred", item.isStarred)
-                context.delete(item)
-                try? context.save()
-                check("deleting the item removes it", items().count == before)
-            }
-            check("titles are cleaned", ItemTitle.clean("  Buy   milk ") == "Buy milk")
+            check("the config file is the /tmp override", model.configURL.path.hasPrefix("/tmp/"))
+            check("the app has no Dock icon", NSApp.activationPolicy() == .accessory)
+            check("the settings window opens on Bindings", model.sidebar == .bindings)
+            model.sidebar = .general
+            check("the settings window can switch pages", model.sidebar == .general)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
