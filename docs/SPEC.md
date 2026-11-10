@@ -6,7 +6,8 @@ This is the source of truth for how sequences, actions and the config file behav
 
 ### Bindings form a tree
 - **Each config has one or more leaders.** A leader is a global chord, such as Hyper+Space, and opens a top-level menu.
-- **Every entry is either a menu or a binding.** A menu has children and no action. A binding has an action and no children. A leader is always a menu.
+- **Every entry is either a menu or a binding.** A menu has children and no action. A binding has an action and no children.
+- **A top-level entry with an action is a direct binding.** Its chord, such as Hyper+T, runs the action at once: no sequence starts and the HUD never appears. Leaders and direct bindings can be mixed in one config, and a config can have only direct bindings.
 - **Each key press is decided as soon as it arrives.** Which entry a key selects never depends on a timer, so there are no ambiguous prefixes.
 - **There's no depth limit.** Two or three levels below the leader is typical.
 - **Children are listed in config file order**, so you choose the order. The Bindings window has a "Sort Alphabetically" command for a menu. It rewrites that menu's children in three groups: named keys such as `Space` and `Tab` alphabetically (F-keys by number), then digits, then letters.
@@ -17,11 +18,19 @@ This is the source of truth for how sequences, actions and the config file behav
 | Leader chord | Opens its menu. The leader is consumed, so the app in front never sees it. |
 | A child menu's key | Opens that menu. |
 | A child binding's key | Runs the action and ends the sequence. |
+| A direct binding's chord | Has no special meaning inside a sequence. It's a key that isn't bound. |
 | Back (default Backspace) | Goes to the parent menu, or ends the sequence when already in a leader's menu. |
 | Cancel (default Escape) | Ends the sequence and runs nothing. |
 | Any other key | Error feedback: the HUD flashes and/or the alert sound plays. The sequence stays where it is, and if the HUD was waiting for its delay, it appears now. |
 
-- **Every key is consumed until the sequence ends.** That includes repeats and the key-ups of consumed keys. Outside a sequence, only leader chords are consumed.
+- **Every key is consumed until the sequence ends.** That includes repeats and the key-ups of consumed keys. Outside a sequence, only leader chords and direct binding chords are consumed.
+
+### Direct bindings
+| Key | Result |
+| --- | --- |
+| A direct binding's chord | Runs the action for the app in front, and is consumed, along with its repeats and key-up. Holding the chord runs the action once. |
+| The same chord when its Context Aware action has nothing to run for the app in front | Isn't consumed. The app in front gets the chord as if the launcher weren't running. |
+
 - **Step keys have no modifiers.** Modifiers that belong to the leader and are still held are ignored, so you can press Hyper+W then 1 whether or not you've let go of Hyper. A step pressed with any other modifier doesn't match.
 - **Keys mean physical positions on the US ANSI layout.** Other keyboard layouts don't change which key a name refers to.
 
@@ -93,7 +102,7 @@ A config is rejected if any of these are true:
 - There's an unknown field, a missing `title`, or `keys` that can't be parsed.
 - Two entries have the same path (compared case-insensitively).
 - An entry has no parent entry, or its parent is a binding.
-- A leader is a binding, or a menu has no children.
+- A menu has no children. (A top-level entry with an action is a direct binding, not an error.)
 - A step key has modifiers, or is the cancel or back key.
 - The cancel and back keys are the same.
 - A delay is negative.

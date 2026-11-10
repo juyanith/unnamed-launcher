@@ -6,7 +6,8 @@ If you finish the sequence quickly, nothing appears on screen. If you pause, a s
 
 ## Features
 
-- **Leader chords and menus.** Bindings form a tree with as many levels as you need. Back (Backspace) goes up a level and Cancel (Escape) ends the sequence.
+- **Leader chords and menus.** Bindings form a tree with as many levels as you need. Back (Backspace) goes up a level and Cancel (Escape) ends the sequence. You can have as many leaders as you like.
+- **Direct bindings.** A chord such as Hyper+T can run an action on its own, with no menu and no HUD.
 - **Actions:**
   - **Use Application** focuses an app, starts it, or does whichever fits (the default). Focusing returns to the app's last focused window.
   - **Open** opens a file, folder or URL.
@@ -55,10 +56,12 @@ On first launch the app writes a starter config. A small example:
   "entries": [
     { "keys": "Hyper+Space", "title": "Commands" },
     { "keys": "Hyper+Space E", "title": "Editor", "action": "open-editor" },
-    { "keys": "Hyper+Space F", "title": "Find", "action": "search" }
+    { "keys": "Hyper+Space F", "title": "Find", "action": "search" },
+    { "keys": "Hyper+T", "title": "Terminal", "action": "open-terminal" }
   ],
   "actions": {
     "open-editor": { "type": "application", "bundleId": "dev.zed.Zed" },
+    "open-terminal": { "type": "application", "bundleId": "com.apple.Terminal" },
     "search": {
       "type": "contextual",
       "variants": { "browser": { "type": "send", "keys": "Primary+L" } },
@@ -71,7 +74,7 @@ On first launch the app writes a starter config. A small example:
 }
 ```
 
-An entry with an `action` is a binding, and one without is a menu. The full format, including runtime and HUD settings, is in [docs/SPEC.md](docs/SPEC.md).
+An entry with an `action` is a binding, and one without is a menu. A top-level entry (a single chord) without an action is a leader; with an action it's a direct binding that runs as soon as you press the chord. The full format, including runtime and HUD settings, is in [docs/SPEC.md](docs/SPEC.md).
 
 ## Development
 

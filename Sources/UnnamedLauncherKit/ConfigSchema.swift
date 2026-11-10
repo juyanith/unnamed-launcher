@@ -65,7 +65,7 @@ public enum ConfigSchema {
                         "type": "object", "additionalProperties": false, "required": ["keys", "title"],
                         "properties": [
                             "keys": ["type": "string", "pattern": keysPattern,
-                                     "description": "The leader chord, then step keys: \"Hyper+Space A T\"."],
+                                     "description": "The leader chord, then step keys: \"Hyper+Space A T\". A single chord with an action is a direct binding."],
                             "title": ["type": "string", "minLength": 1],
                             "action": ["type": "string", "description": "An id in actions. Without one, the entry is a menu."],
                         ],

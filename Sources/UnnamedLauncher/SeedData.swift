@@ -21,7 +21,8 @@ enum SeedData {
         { "keys": "Hyper+Space L", "title": "Address Bar", "action": "address-bar" },
         { "keys": "Hyper+Space F", "title": "Find", "action": "find" },
         { "keys": "Ctrl+Alt+W", "title": "Workspace" },
-        { "keys": "Ctrl+Alt+W 1", "title": "Workspace 1", "action": "workspace-1" }
+        { "keys": "Ctrl+Alt+W 1", "title": "Workspace 1", "action": "workspace-1" },
+        { "keys": "Hyper+T", "title": "Terminal", "action": "open-terminal" }
       ],
       "actions": {
         "spotlight": { "type": "send", "keys": "Cmd+Space" },

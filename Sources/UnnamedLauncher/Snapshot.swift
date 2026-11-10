@@ -49,6 +49,13 @@ enum Snapshot {
                     try? await Task.sleep(for: .seconds(0.8))
                     capture(to: "\(dir)/actions-app-\(mode).png")
                 }
+                if only?.contains("bindings") ?? true {
+                    // S-048: a direct binding, with its editor pane.
+                    model.sidebar = .bindings
+                    model.editor.selection = KeySequence(parsing: "Hyper+T")
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/bindings-direct-\(mode).png")
+                }
             }
             if only == nil || only?.contains("empty") == true {
                 // S-042: each page with nothing in it.

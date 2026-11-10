@@ -104,11 +104,12 @@ final class BindingsEditor {
         return draft.entry(selection)?.action == nil && !needsAction.contains(selection) ? selection : selection.parent
     }
 
-    /// New Binding (⌘N): at the end of the target menu, with its key recorder on.
+    /// New Binding (⌘N): at the end of the target menu, with its key recorder
+    /// on, or a direct binding with nothing selected.
     func addBinding(undo: UndoManager?) {
-        guard let menu = targetMenu else { return addMenu(undo: undo) }
+        let parent = selection == nil ? nil : targetMenu
         var added: KeySequence?
-        change("New Binding", undo: undo) { added = $0.addEntry(under: menu, title: "New Binding", action: nil) }
+        change("New Binding", undo: undo) { added = $0.addEntry(under: parent, title: "New Binding", action: nil) }
         if let added {
             needsAction.insert(added)
             commit()

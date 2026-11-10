@@ -25,7 +25,7 @@ struct BindingsPage: View {
         .toolbar {
             ToolbarItemGroup {
                 Button("New Binding", systemImage: "plus") { editor.addBinding(undo: undo) }
-                    .help("Add a binding to the selected menu (⌘N)")
+                    .help("Add a binding to the selected menu, or a direct binding when nothing is selected (⌘N)")
                 Button("New Menu", systemImage: "folder.badge.plus") { editor.addMenu(undo: undo) }
                     .help("Add a menu, or a leader when nothing is selected (⇧⌘N)")
             }
@@ -77,9 +77,10 @@ struct BindingsPage: View {
                     ContentUnavailableView {
                         Label("No Bindings", systemImage: "keyboard")
                     } description: {
-                        Text("Add a leader such as Hyper+Space, then the keys under it.")
+                        Text("Add a leader such as Hyper+Space with keys under it, or a direct binding such as Hyper+T.")
                     } actions: {
                         Button("New Menu") { editor.addMenu(undo: undo) }
+                        Button("New Binding") { editor.addBinding(undo: undo) }
                     }
                 }
             }

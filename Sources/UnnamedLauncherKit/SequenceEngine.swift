@@ -13,7 +13,8 @@ public enum SequenceEffect: Sendable, Equatable {
     /// A sequence started or moved into a menu, including Back. Show it.
     /// `frontApp` is the app that was in front when the leader was pressed.
     case showMenu(BindingNode, path: [String], frontApp: String?)
-    /// A binding was selected: run its action for `frontApp`. The sequence has ended.
+    /// A binding was selected, or a direct binding's chord was pressed: run its
+    /// action for `frontApp`. Any sequence has ended.
     case run(BindingNode, frontApp: String?)
     /// A Context Aware binding with nothing to run for the app in front.
     /// The sequence stays in its menu (S-013).
@@ -100,6 +101,14 @@ public struct SequenceEngine: Sendable {
               let leader = config.leader(for: Chord(modifiers: modifiers, key: key)) else {
             // A repeat of a consumed leader is still consumed.
             return isRepeat && consumedKeys.contains(keyCode) ? .consumed() : .pass
+        }
+        if !leader.isMenu {
+            // A direct binding runs at once, with no sequence. One that has
+            // nothing to run for the app in front lets the chord through.
+            guard config.isAvailable(leader, frontApp: frontApp) else { return .pass }
+            if isRepeat { return .consumed() }
+            consumedKeys.insert(keyCode)
+            return .consumed(.run(leader, frontApp: frontApp))
         }
         if isRepeat { return .consumed() }
         consumedKeys.insert(keyCode)

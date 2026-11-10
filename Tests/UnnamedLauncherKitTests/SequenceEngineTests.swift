@@ -12,7 +12,8 @@ private let entries = """
 { "keys": "Hyper+Space A D E P", "title": "Deepest" },
 { "keys": "Hyper+Space A D E P X", "title": "Six", "action": "edit" },
 { "keys": "Ctrl+W", "title": "Workspace" },
-{ "keys": "Ctrl+W 1", "title": "One", "action": "edit" }
+{ "keys": "Ctrl+W 1", "title": "One", "action": "edit" },
+{ "keys": "Hyper+T", "title": "Terminal", "action": "edit" }
 """
 
 private func engine(runtime: String = "{}") throws -> SequenceEngine {
@@ -37,6 +38,22 @@ struct SequenceEngineTests {
         guard case let .showMenu(menu, path, _) = out.effect else { Issue.record("no menu"); return }
         #expect(menu.title == "Commands" && path == ["Commands"])
         #expect(e.isActive)
+    }
+
+    @Test("A direct binding runs at once, with no sequence")
+    func direct() throws {
+        var e = try engine()
+        e.setFrontApp("com.apple.Notes")
+        let out = e.handle(down(.t, .hyper))
+        guard case let .run(binding, frontApp) = out.effect else { Issue.record("no run"); return }
+        #expect(out.consume && binding.title == "Terminal" && frontApp == "com.apple.Notes")
+        #expect(!e.isActive)
+        // Holding the chord doesn't run it again, and its key-up is consumed.
+        #expect(e.handle(down(.t, .hyper, repeat: true)) == .consumed())
+        #expect(e.handle(.up(keyCode: code(.t))).consume)
+        // Inside a sequence the chord is just a key that isn't bound.
+        _ = e.handle(down(.space, .hyper))
+        guard case .unbound = e.handle(down(.t, .hyper)).effect else { Issue.record("ran inside a sequence"); return }
     }
 
     @Test("During a sequence every key-down, repeat and matching key-up is consumed")

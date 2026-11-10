@@ -555,3 +555,21 @@ Acceptance:
 - [manual] With two Ghostty windows, use the second, switch to another app, press Hyper+Space T: the second window is in front.
 Status: done
 Verified: window choice (unit tests), unresponsive process (self-test). Not yet tried by hand: the manual line; windows on another Space or under a window manager.
+
+### S-048 Run an action straight from a chord
+As the user, I give a top-level chord such as Hyper+T an action, and pressing it runs the action at once, with no menu and no Guide.
+Screens: bindings-direct-light.png, bindings-direct-dark.png, empty-bindings-light.png
+Depends: S-003, S-024
+Acceptance:
+- [unit] A top-level entry with an action loads as a direct binding; nothing can go under it.
+- [unit] Its chord runs the action for the app in front and starts no sequence; holding it runs once; inside a sequence it's a key that isn't bound.
+- [unit] A Context Aware direct binding with nothing to run for the app in front lets the chord through to that app.
+- [self] New Binding with nothing selected adds a direct binding, which is saved once it has an action and runs from its chord.
+- [snap] A selected direct binding says what it is under its key.
+- [manual] Bind Hyper+T to Terminal, press it in another app: Terminal comes forward and no Guide appears.
+UX:
+- Flow: New Binding (⌘N) with nothing selected, or the empty state's New Binding → key recorder → choose an action → saved
+- Surface: a top-level row in the Bindings outline (same as a leader)
+- Words: "Direct binding"; footer "A direct binding is a chord that runs its action from anywhere, with no menu."
+Status: done
+Verified: unit tests, self-test, snapshots. Not yet tried by hand: the manual line.

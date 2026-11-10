@@ -160,10 +160,20 @@ struct ValidationTests {
         #expect(errors(json(entries: underBinding, actions: minimalActions)).contains { $0.contains("which is a binding") })
     }
 
-    @Test("A leader that's a binding, and an empty menu")
+    @Test("A top-level entry with an action is a direct binding")
+    func directBinding() throws {
+        let direct = minimalEntries + #", { "keys": "Hyper+T", "title": "Terminal", "action": "edit" }"#
+        let loaded = try load(json(entries: direct, actions: minimalActions)).get()
+        #expect(loaded.leaders.map(\.title) == ["Commands", "Terminal"])
+        #expect(loaded.leaders[1].action == "edit" && loaded.leaders[1].children.isEmpty)
+        // A config of direct bindings alone is fine.
+        #expect(errors(json(entries: #"{ "keys": "Hyper+T", "title": "T", "action": "edit" }"#, actions: minimalActions)).isEmpty)
+        let under = direct + #", { "keys": "Hyper+T X", "title": "X", "action": "edit" }"#
+        #expect(errors(json(entries: under, actions: minimalActions)).contains { $0.contains("which is a binding") })
+    }
+
+    @Test("An empty menu")
     func shapes() {
-        #expect(errors(json(entries: #"{ "keys": "Hyper+Space", "title": "C", "action": "edit" }"#, actions: minimalActions))
-            .contains { $0.contains("Leader “Hyper+Space” has an action") })
         let empty = minimalEntries + #", { "keys": "Hyper+Space A", "title": "Apps" }"#
         #expect(errors(json(entries: empty, actions: minimalActions)).contains("Menu “Hyper+Space A” has no keys under it. Add a binding or remove the menu."))
     }

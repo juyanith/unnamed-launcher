@@ -23,8 +23,7 @@ struct EntryEditor: View {
                             if old == .title { editor.setTitle(path, title, undo: undo) }
                         }
                 } footer: {
-                    Text(path.isLeader ? "A leader is a chord that opens its menu from anywhere."
-                                       : "A single key, pressed after the keys above it.")
+                    Text(footer(path, isBinding: entry.action != nil || editor.needsAction.contains(path)))
                 }
                 if entry.action != nil || editor.needsAction.contains(path) {
                     Section {
@@ -49,6 +48,12 @@ struct EntryEditor: View {
             ContentUnavailableView("No Selection", systemImage: "keyboard",
                                    description: Text("Select a binding or menu to edit it."))
         }
+    }
+
+    private func footer(_ path: KeySequence, isBinding: Bool) -> String {
+        guard path.isLeader else { return "A single key, pressed after the keys above it." }
+        return isBinding ? "A direct binding is a chord that runs its action from anywhere, with no menu."
+                         : "A leader is a chord that opens its menu from anywhere."
     }
 
     private func actionPicker(_ path: KeySequence, _ entry: Config.Entry) -> some View {

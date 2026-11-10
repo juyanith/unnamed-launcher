@@ -14,7 +14,7 @@ Sol, which is used only to launch apps. Spotlight still handles search, and pane
 
 ## Data
 The source of truth is one JSON file, `~/.config/unnamed-launcher/config.json`. The app watches it and reloads it when it changes. A dotfiles tool such as chezmoi may write it too. Format and file name were decided by the agent.
-- **Entry:** `keys` (the leader chord and step keys), `title`, optional `action`. An entry with an action is a binding; one without is a menu.
+- **Entry:** `keys` (the leader chord and step keys), `title`, optional `action`. An entry with an action is a binding; one without is a menu. A top-level binding is a direct binding: its chord runs the action at once.
 - **Action:** `id`, `type` (`application`, `open`, `exec`, `send`, `contextual`, `noop`), and the fields for that type.
 - **Context:** `id`, `apps` (bundle ids).
 - **Settings:** `runtime` (cancel and back keys, HUD on or off, HUD delay, timeout) and `ui` (theme, position, error flash, error bell).

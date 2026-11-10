@@ -35,8 +35,11 @@ public struct BindingNode: Sendable, Equatable {
 }
 
 /// A valid config, ready to use: the tree of leaders and the resolved keys.
+/// A top-level entry with an action is a direct binding: its chord runs the
+/// action at once, with no sequence.
 public struct LoadedConfig: Sendable, Equatable {
     public var config: Config
+    /// Top-level entries in file order: leaders (menus) and direct bindings.
     public var leaders: [BindingNode]
     public var cancelKey: KeyName
     /// nil when Back is turned off.
@@ -83,7 +86,7 @@ public enum ConfigValidator {
         // Entries: parse, find duplicates.
         var parsed: [(entry: Config.Entry, path: KeySequence)] = []
         var seen: [KeySequence: String] = [:]
-        if config.entries.isEmpty { error("The config has no entries. Add a leader and at least one binding.") }
+        if config.entries.isEmpty { error("The config has no entries. Add a leader and at least one binding, or a direct binding.") }
         for entry in config.entries {
             guard let path = KeySequence(parsing: entry.keys) else {
                 error("Entry “\(entry.keys)” has a key that isn't a known name. Check the spelling of each key and modifier.", entry.keys)
@@ -121,8 +124,6 @@ public enum ConfigValidator {
                         error("\(name) “\(path)” uses \(step.key.name), which is the \(step.key == cancelKey ? "cancel" : "back") key.", path.description)
                     }
                 }
-            } else if entry.action != nil {
-                error("Leader “\(path)” has an action. A leader must be a menu with keys under it.", path.description)
             }
             if let action = entry.action, config.actions[action] == nil {
                 error("Binding “\(path)” uses action “\(action)”, which isn't defined.", path.description)

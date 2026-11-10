@@ -130,5 +130,33 @@ extension SelfTest {
             check("S-034 clicking an error selects its row and focuses the field",
                   editor.selection?.description == issue.subject && editor.focus == .action, issue.message)
         }
+
+        // S-048: with nothing selected, New Binding adds a direct binding, which runs from its chord.
+        undo.undo()
+        editor.selection = nil
+        step { editor.addBinding(undo: undo) }
+        let direct = editor.selection
+        check("S-048 New Binding with nothing selected adds a direct binding",
+              direct?.isLeader == true && editor.recording == direct, "\(String(describing: direct))")
+        editor.stopRecording()
+        let plain = editor.draft.sortedActionIDs.first { id in
+            if case .contextual = editor.draft.config.actions[id] { false } else { true }
+        }
+        if let direct, let plain {
+            step { editor.setAction(direct, plain, undo: undo) }
+            let node = store.loaded?.leaders.first { $0.path == direct }
+            check("S-048 a direct binding with an action is saved", node?.action == plain && fileLines().contains { $0.contains(direct.description) })
+            var ran = false
+            if let loaded = store.loaded, let code = direct.leader.key.keyCode {
+                var engine = SequenceEngine(config: loaded)
+                let output = engine.handle(.down(keyCode: code, modifiers: direct.leader.modifiers, isRepeat: false))
+                if case let .run(binding, _) = output.effect { ran = output.consume && binding.path == direct && !engine.isActive }
+            }
+            check("S-048 its chord runs the action at once, with no sequence", ran)
+            step { editor.delete(direct, undo: undo) }
+            check("S-048 deleting it leaves the file without it", !fileLines().contains { $0.contains(direct.description) })
+        } else {
+            check("S-048 a direct binding can be added", false)
+        }
     }
 }

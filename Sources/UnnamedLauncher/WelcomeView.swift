@@ -32,7 +32,7 @@ struct WelcomeView: View {
 
     var body: some View {
         let status = WelcomeStatus(launcher: model.launcher)
-        let leader = model.store.loaded?.leaders.first
+        let leader = model.store.loaded?.leaders.first(where: \.isMenu)
         VStack(alignment: .leading, spacing: Space.xl) {
             HStack(spacing: Space.md) {
                 Image(nsImage: NSApp.applicationIconImage)

@@ -170,6 +170,30 @@ struct ContextSequenceTests {
     }
 }
 
+@Suite("Context Aware direct bindings")
+struct ContextDirectTests {
+    let text = json(entries: #"{ "keys": "Hyper+L", "title": "Address Bar", "action": "address" }"#,
+                    actions: #"{ "address": { "type": "contextual", "variants": { "browser": { "type": "send", "keys": "Cmd+L" } } } }"#,
+                    contexts: #"[{ "id": "browser", "apps": ["com.apple.Safari"] }]"#)
+
+    func press(in app: String) throws -> SequenceOutput {
+        var engine = SequenceEngine(config: try load(text).get())
+        engine.setFrontApp(app)
+        return engine.handle(.down(keyCode: KeyName.l.keyCode!, modifiers: .hyper, isRepeat: false))
+    }
+
+    @Test("In a matching app it runs for that app")
+    func available() throws {
+        guard case let .run(_, frontApp) = try press(in: "com.apple.Safari").effect else { Issue.record("no run"); return }
+        #expect(frontApp == "com.apple.Safari")
+    }
+
+    @Test("With nothing to run, the chord goes through to the app in front")
+    func unavailable() throws {
+        #expect(try press(in: "com.apple.Notes") == .pass)
+    }
+}
+
 @Suite("Do Nothing in a sequence (S-014)")
 struct NoopSequenceTests {
     @Test("A noop binding ends the sequence and does nothing else")
