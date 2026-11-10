@@ -1,12 +1,13 @@
 #!/bin/zsh
-# Builds UnnamedLauncher and installs it to ~/Applications/UnnamedLauncher.app.
-# Build products live in ~/Library/Developer/UnnamedLauncher, outside the repo
-# (and outside Dropbox or iCloud, which would try to sync them).
+# Builds UnnamedLauncher into ./build/UnnamedLauncher.app, inside the repo and
+# ignored by git. It isn't installed, so it never replaces the copy in
+# /Applications from Homebrew. SwiftPM's intermediate products live in
+# ~/Library/Developer/UnnamedLauncher, outside the repo.
 #
-# Usage: ./build.sh              release build, install
-#        ./build.sh --debug      debug build, install
-#        ./build.sh --open       install, then quit the running copy and open the new one
-#        ./build.sh --out DIR    put the app in DIR instead of ~/Applications (CI, releases)
+# Usage: ./build.sh              release build
+#        ./build.sh --debug      debug build
+#        ./build.sh --open       build, then quit the running copy and open the new one
+#        ./build.sh --out DIR    put the app in DIR instead of ./build (releases)
 #
 # Environment:
 #   APP_VERSION     CFBundleShortVersionString (default 0.1); releases set it from the tag
@@ -17,7 +18,7 @@ here=${0:A:h}
 name="UnnamedLauncher"
 scratch="$HOME/Library/Developer/$name/build"
 config=release
-out="$HOME/Applications"
+out="$here/build"
 open_after=0
 while (( $# )); do
   case "$1" in
@@ -56,12 +57,19 @@ rm -f "$build_log"
 [[ "$build_ok" == 1 ]] || { echo "build failed"; exit 1; }
 bin="$scratch/$config/$name"
 [[ -x "$bin" ]] || { echo "build failed"; exit 1; }
-# swift build can report success while an edited file failed to compile. Catch that.
+# swift build can report success while an edited file failed to compile, and
+# it skips relinking after an edit that changes no code (a comment). Either
+# way the binary is older than a source. Delete it and build again: a real
+# failure then leaves no binary.
 stale=$(find "$here/Sources" -name '*.swift' -newer "$bin" | head -1)
 if [[ -n "$stale" ]]; then
-  echo "build failed: binary is older than $stale"
-  swift build -c $config --package-path "$here" --scratch-path "$scratch" 2>&1 | grep -E "error" | head -20
-  exit 1
+  rm -f "$bin"
+  swift build -c "$config" --package-path "$here" --scratch-path "$scratch" > /dev/null 2>&1 || true
+  if [[ ! -x "$bin" ]]; then
+    echo "build failed: $stale didn't compile"
+    swift build -c "$config" --package-path "$here" --scratch-path "$scratch" 2>&1 | grep -E "error" | head -20
+    exit 1
+  fi
 fi
 
 mkdir -p "$out"
@@ -83,7 +91,7 @@ sign_opts=()
 [[ "$identity" == "Developer ID Application"* ]] && sign_opts=(--options runtime --timestamp)
 codesign --force "${sign_opts[@]}" --sign "$identity" "$app" 2>&1 | grep -v "replacing existing signature" || true
 codesign --verify --strict "$app" || { echo "signature check failed"; exit 1; }
-echo "installed $app (version $version, signed: ${identity})"
+echo "built $app (version $version, signed: ${identity})"
 
 if (( open_after )); then
   osascript -e "quit app \"$name\"" 2>/dev/null || true

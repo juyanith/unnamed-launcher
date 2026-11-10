@@ -4,4 +4,4 @@ set -u
 rm -rf ~/Library/Saved\ Application\ State/net.unnamed.launcher.savedState
 config=/tmp/UnnamedLauncher-self.json
 rm -f $config
-APP_STORE=$config ~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher --selftest
+APP_STORE=$config ${0:A:h}/../build/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher --selftest

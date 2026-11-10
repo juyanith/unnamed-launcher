@@ -4,7 +4,7 @@ import SwiftUI
 import UnnamedLauncherKit
 
 /// Screenshot mode for agents.
-///   APP_STORE=/tmp/test.json APP_SNAPSHOT=/tmp/shots ~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher
+///   APP_STORE=/tmp/test.json APP_SNAPSHOT=/tmp/shots build/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher
 /// writes <page>-light.png and <page>-dark.png for every Bindings page, and
 /// settings-light.png and settings-dark.png for Settings, then quits.
 /// Each PNG gets a <page>-<mode>-layout.json with the grid probes (tools/check-layout.swift).
