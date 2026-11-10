@@ -32,6 +32,13 @@ struct KeyTests {
         ("primary+f", "Cmd+F"),
         ("Shift+Ctrl+pageup", "Ctrl+Shift+PageUp"),
         ("Ctrl+Alt+Shift+Cmd+1", "Hyper+1"),
+        ("meh+t", "Meh+T"),
+        ("Ctrl+Alt+Shift+T", "Meh+T"),
+        ("cag+space", "CAG+Space"),
+        ("Cmd+Ctrl+Alt+Space", "CAG+Space"),
+        ("Meh+Cmd+A", "Hyper+A"),
+        ("CAG+Shift+A", "Hyper+A"),
+        ("Ctrl+Shift+Cmd+A", "Ctrl+Shift+Cmd+A"),
         ("f12", "F12"),
     ])
     func chords(_ text: String, expected: String) {

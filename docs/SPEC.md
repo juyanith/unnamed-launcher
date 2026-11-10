@@ -91,7 +91,7 @@ When an action fails, for example because the app isn't installed or the command
 ```
 
 - **Entries are a flat, ordered list keyed by their full path.** Each entry can be read and diffed on its own, duplicates and orphans are easy to report, and every depth uses the same shape.
-- **Key syntax:** tokens are separated by spaces. The first token is a chord, `Mod+…+Key`. Modifiers are `Ctrl`, `Alt` (⌥), `Shift`, `Cmd`, `Primary` (⌘) and `Hyper` (⌃⌥⇧⌘). Names are case-insensitive.
+- **Key syntax:** tokens are separated by spaces. The first token is a chord, `Mod+…+Key`. Modifiers are `Ctrl`, `Alt` (⌥), `Shift`, `Cmd` and `Primary` (⌘), plus three names for groups: `Hyper` (⌃⌥⇧⌘), `Meh` (⌃⌥⇧) and `CAG` (⌃⌥⌘). Names are case-insensitive, and a group can be combined with other modifiers (`Meh+Cmd` is `Hyper`). The app writes and shows a chord with exactly one group's modifiers by that group's name, so `Ctrl+Alt+Shift+T` becomes `Meh+T`.
 - **Key names:** `A`–`Z`, `0`–`9`, `F1`–`F24`, `Space`, `Tab`, `Enter`, `Backspace`, `Delete`, `Escape`, the arrows, `Home`, `End`, `PageUp`, `PageDown`, `Grave`, `Minus`, `Equal`, `LeftBracket`, `RightBracket`, `Backslash`, `Semicolon`, `Quote`, `Comma`, `Period`, `Slash`.
 - **Defaults:** only `version` and at least one entry are required. Everything else has a default.
 - **Why JSON:** `Codable` reads and writes it with no dependency, arrays keep their order, and a JSON Schema gives editors validation. The app writes `config.schema.json` next to the config at launch, and the starter config's `"$schema": "./config.schema.json"` line points at it. The cost is that JSON has no comments.

@@ -57,8 +57,9 @@ public enum KeyName: String, CaseIterable, Sendable, Hashable {
     private static let byCode: [UInt16: KeyName] = Dictionary(uniqueKeysWithValues: codes.map { ($1, $0) })
 }
 
-/// The four modifiers a chord can use. `Primary` is ⌘ on the Mac, and
-/// `Hyper` is all four held together (SPEC.md, Key syntax).
+/// The four modifiers a chord can use. `Primary` is ⌘ on the Mac. Three
+/// names stand for groups: `Hyper` is all four, `Meh` is ⌃⌥⇧ and `CAG` is
+/// ⌃⌥⌘ (SPEC.md, Key syntax).
 public struct Modifiers: OptionSet, Sendable, Hashable {
     public let rawValue: UInt8
     public init(rawValue: UInt8) { self.rawValue = rawValue }
@@ -68,6 +69,8 @@ public struct Modifiers: OptionSet, Sendable, Hashable {
     public static let shift = Modifiers(rawValue: 1 << 2)
     public static let command = Modifiers(rawValue: 1 << 3)
     public static let hyper: Modifiers = [.control, .option, .shift, .command]
+    public static let meh: Modifiers = [.control, .option, .shift]
+    public static let cag: Modifiers = [.control, .option, .command]
 
     /// Parses one modifier name, case-insensitive.
     public init?(parsing text: String) {
@@ -77,13 +80,18 @@ public struct Modifiers: OptionSet, Sendable, Hashable {
         case "shift": self = .shift
         case "cmd", "primary": self = .command
         case "hyper": self = .hyper
+        case "meh": self = .meh
+        case "cag": self = .cag
         default: return nil
         }
     }
 
-    /// Canonical names: "Hyper" for all four, else Ctrl, Alt, Shift, Cmd in that order.
+    /// Canonical names: "Hyper", "Meh" or "CAG" when the set is exactly that
+    /// group, else Ctrl, Alt, Shift, Cmd in that order.
     public var names: [String] {
         if self == .hyper { return ["Hyper"] }
+        if self == .meh { return ["Meh"] }
+        if self == .cag { return ["CAG"] }
         var out: [String] = []
         if contains(.control) { out.append("Ctrl") }
         if contains(.option) { out.append("Alt") }
