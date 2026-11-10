@@ -22,6 +22,7 @@ struct EntryEditor: View {
                         .onChange(of: focus) { old, _ in
                             if old == .title { editor.setTitle(path, title, undo: undo) }
                         }
+                        .textEntry("Title")
                 } footer: {
                     Text(footer(path, isBinding: entry.action != nil || editor.needsAction.contains(path)))
                 }

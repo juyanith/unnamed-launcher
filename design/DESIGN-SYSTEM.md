@@ -40,7 +40,7 @@ Which token to use, and when. The tokens are in `Sources/UnnamedLauncher/UI/`. A
 - **In the Bindings window,** rows added, moved or removed use `Motion.listChange`, and custom hover fills use `Motion.hover`. Hover never moves the selection.
 
 ## Still to add
-- **`Components.swift`:** the `Keycap` view and the key recorder style, with S-005 and S-025. Style controls with `ButtonStyle` and `ToggleStyle`; never rebuild a control from shapes.
+- **`Components.swift`:** the `Keycap` view and the key recorder style, with S-005 and S-025. `.textEntry("Label")` on every Form text field people type words into: it left-aligns the text so a typed space shows at once. Number fields stay right-aligned. Style controls with `ButtonStyle` and `ToggleStyle`; never rebuild a control from shapes.
 
 ## Check
 This should find nothing outside `UI/`:

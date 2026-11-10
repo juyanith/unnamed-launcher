@@ -103,6 +103,7 @@ private struct ActionForm: View {
             Section {
                 TextField("ID", text: $newID)
                     .onSubmit(rename)
+                    .textEntry("ID")
                 if let idProblem {
                     Text(idProblem).font(.callout).foregroundStyle(.red)
                 }
@@ -154,6 +155,7 @@ struct ActionFields: View {
         case let .application(bundleId, mode):
             Section {
                 TextField("Bundle ID", text: text(bundleId) { .application(bundleId: $0, mode: mode) })
+                    .textEntry("Bundle ID")
                 Button("Choose App…") { chooseApp(mode: mode) }
                 Picker("Mode", selection: Binding(get: { mode }, set: { action = .application(bundleId: bundleId, mode: $0) })) {
                     ForEach(Config.AppMode.menuOrder, id: \.self) { Text($0.displayName).tag($0) }
@@ -164,6 +166,7 @@ struct ActionFields: View {
         case let .open(target):
             Section {
                 TextField("File, Folder or URL", text: text(target) { .open(target: $0) })
+                    .textEntry("File, Folder or URL")
                 Button("Choose…") { chooseFile() }
             } footer: {
                 Text("A path starting with / or ~, or a URL such as https://example.com.")
@@ -175,16 +178,19 @@ struct ActionFields: View {
                     set: { action = .exec(command: $0.split(separator: "\n").map(String.init), cwd: cwd, env: env) }),
                           axis: .vertical)
                     .lineLimit(2...6)
+                    .textEntry("Command")
                 TextField("Folder", text: Binding(
                     get: { cwd ?? "" },
                     set: { action = .exec(command: command, cwd: $0.isEmpty ? nil : $0, env: env) }),
                           prompt: Text("~"))
+                    .textEntry("Folder")
             } footer: {
                 Text("One argument per line, the program first. It runs with no shell, so nothing is expanded except a leading ~.")
             }
         case let .send(keys):
             Section {
                 TextField("Keys", text: text(keys) { .send(keys: $0) }, prompt: Text("Cmd+F"))
+                    .textEntry("Keys")
             } footer: {
                 Text("One or more chords separated by spaces, such as Cmd+K S.")
             }

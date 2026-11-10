@@ -88,7 +88,7 @@ private struct ContextForm: View {
     var body: some View {
         Form {
             Section {
-                TextField("ID", text: $newID).onSubmit(rename)
+                TextField("ID", text: $newID).onSubmit(rename).textEntry("ID")
                 if let idProblem { Text(idProblem).font(.callout).foregroundStyle(.red) }
             } footer: {
                 Text("Context Aware variants refer to the context by this id.")

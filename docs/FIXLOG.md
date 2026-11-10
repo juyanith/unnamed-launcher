@@ -11,3 +11,9 @@ Symptom: a script that rewrote `config.json` in place (open, truncate, write) ch
 Cause: `ConfigStore` watched only the config's folder. Replacing or renaming a file changes the folder; writing into an existing file doesn't, so no event arrived.
 Fix: the store also watches the file itself (write, extend, delete, rename), and watches the file at the path again after every change and every save, since an atomic replace leaves the old watch on a file that's gone.
 Rule: Watch a file and its folder. A folder watch misses in-place writes, and a file watch misses replacements unless it's reopened after each one.
+
+## 2026-11-09 A typed space in a title didn't show
+Symptom: typing a space at the end of a binding's title showed nothing until the next letter, so it looked like the key did nothing. Command, Keys and File or URL on the Actions page did the same.
+Cause: a grouped Form right-aligns its text fields, and a right-aligned AppKit text field doesn't draw trailing spaces. The Form also ignores `multilineTextAlignment` on a field it lays out itself.
+Fix: `.textEntry("Label")` in `UI/Components.swift` puts the field in a `LabeledContent` with its own label hidden and left-aligns it. Every field people type words into uses it.
+Rule: Never leave a free-text field right-aligned. Put Form text fields through `.textEntry`; only number fields stay right-aligned.
