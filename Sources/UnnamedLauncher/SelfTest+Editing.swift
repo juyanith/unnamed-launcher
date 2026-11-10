@@ -153,8 +153,17 @@ extension SelfTest {
                 if case let .run(binding, _) = output.effect { ran = output.consume && binding.path == direct && !engine.isActive }
             }
             check("S-048 its chord runs the action at once, with no sequence", ran)
-            step { editor.delete(direct, undo: undo) }
-            check("S-048 deleting it leaves the file without it", !fileLines().contains { $0.contains(direct.description) })
+            // A chord recorded with ⌃⌥⇧ or ⌃⌥⌘ is saved as Meh or CAG.
+            var named = direct
+            for (modifiers, name) in [(Modifiers.meh, "Meh+"), (Modifiers.cag, "CAG+")] {
+                var problem: String?
+                step { problem = editor.setKey(named, Chord(modifiers: modifiers, key: .f19), undo: undo) }
+                named = editor.selection ?? named
+                check("S-025 a chord with \(name.dropLast()) modifiers is saved as \(name)F19",
+                      problem == nil && fileLines().contains { $0.contains("\"\(name)F19\"") }, problem ?? named.description)
+            }
+            step { editor.delete(named, undo: undo) }
+            check("S-048 deleting it leaves the file without it", !fileLines().contains { $0.contains(named.description) })
         } else {
             check("S-048 a direct binding can be added", false)
         }

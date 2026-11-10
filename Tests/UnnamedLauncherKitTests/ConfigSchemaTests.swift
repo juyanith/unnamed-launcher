@@ -20,6 +20,7 @@ struct ConfigSchemaTests {
     @Test("The keys pattern accepts every key path the app accepts", arguments: [
         "Hyper+Space", "Hyper+Space A T", "hyper+space e", "Ctrl+Alt+L", "Primary+F", "F13 F24",
         "Ctrl+Alt+Shift+Cmd+PageUp", "Hyper+Space Space", "Hyper+Space LeftBracket",
+        "Meh+T", "meh+w 1", "CAG+Space", "cag+space A",
     ])
     func accepts(_ text: String) {
         #expect(matches(text))

@@ -8,7 +8,7 @@ public enum ConfigSchema {
     public static let fileName = "config.schema.json"
 
     /// Modifier names a chord may use.
-    public static let modifierNames = ["Ctrl", "Alt", "Shift", "Cmd", "Primary", "Hyper"]
+    public static let modifierNames = ["Ctrl", "Alt", "Shift", "Cmd", "Primary", "Hyper", "Meh", "CAG"]
 
     /// One chord, any capitalization: modifiers joined by +, then a key.
     public static var chordPattern: String {
@@ -65,7 +65,7 @@ public enum ConfigSchema {
                         "type": "object", "additionalProperties": false, "required": ["keys", "title"],
                         "properties": [
                             "keys": ["type": "string", "pattern": keysPattern,
-                                     "description": "The leader chord, then step keys: \"Hyper+Space A T\". A single chord with an action is a direct binding."],
+                                     "description": "The leader chord, then step keys: \"Hyper+Space A T\". Modifiers: Ctrl, Alt, Shift, Cmd, Primary, Hyper (all four), Meh (Ctrl+Alt+Shift), CAG (Ctrl+Alt+Cmd). A single chord with an action is a direct binding."],
                             "title": ["type": "string", "minLength": 1],
                             "action": ["type": "string", "description": "An id in actions. Without one, the entry is a menu."],
                         ],

@@ -74,7 +74,7 @@ On first launch the app writes a starter config. A small example:
 }
 ```
 
-An entry with an `action` is a binding, and one without is a menu. A top-level entry (a single chord) without an action is a leader; with an action it's a direct binding that runs as soon as you press the chord. The full format, including runtime and HUD settings, is in [docs/SPEC.md](docs/SPEC.md).
+Chords use `Ctrl`, `Alt`, `Shift` and `Cmd`, or the groups `Hyper` (⌃⌥⇧⌘), `Meh` (⌃⌥⇧) and `CAG` (⌃⌥⌘). An entry with an `action` is a binding, and one without is a menu. A top-level entry (a single chord) without an action is a leader; with an action it's a direct binding that runs as soon as you press the chord. The full format, including runtime and HUD settings, is in [docs/SPEC.md](docs/SPEC.md).
 
 ## Development
 
