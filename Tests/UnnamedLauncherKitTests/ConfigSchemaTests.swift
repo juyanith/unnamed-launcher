@@ -21,6 +21,7 @@ struct ConfigSchemaTests {
         "Hyper+Space", "Hyper+Space A T", "hyper+space e", "Ctrl+Alt+L", "Primary+F", "F13 F24",
         "Ctrl+Alt+Shift+Cmd+PageUp", "Hyper+Space Space", "Hyper+Space LeftBracket",
         "Meh+T", "meh+w 1", "CAG+Space", "cag+space A",
+        "Ctrl+Opt+L", "Control+Option+Command+K", "⌘F", "⌃⌥⇧T A", "⌘+⇧+F", "Opt+⌘K",
     ])
     func accepts(_ text: String) {
         #expect(matches(text))
@@ -28,7 +29,7 @@ struct ConfigSchemaTests {
     }
 
     @Test("The keys pattern rejects what the app rejects", arguments: [
-        "Hyper+Spcae", "Meta+A", "Ctrl+", "", "Hyper+Space  ++A", "Space Bar",
+        "Hyper+Spcae", "Meta+A", "Ctrl+", "", "Hyper+Space  ++A", "Space Bar", "⌘", "T⌘",
     ])
     func rejects(_ text: String) {
         #expect(!matches(text))

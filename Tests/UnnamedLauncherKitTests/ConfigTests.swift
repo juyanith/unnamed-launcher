@@ -39,13 +39,21 @@ struct KeyTests {
         ("Meh+Cmd+A", "Hyper+A"),
         ("CAG+Shift+A", "Hyper+A"),
         ("Ctrl+Shift+Cmd+A", "Ctrl+Shift+Cmd+A"),
+        ("Ctrl+Opt+L", "Ctrl+Alt+L"),
+        ("control+option+command+K", "CAG+K"),
+        ("⌘F", "Cmd+F"),
+        ("⌃⌥⇧T", "Meh+T"),
+        ("⌃⌥⇧⌘Space", "Hyper+Space"),
+        ("⌘+⇧+F", "Shift+Cmd+F"),
+        ("⌃⌥+Shift+PageUp", "Meh+PageUp"),
+        ("Opt+⌘K", "Alt+Cmd+K"),
         ("f12", "F12"),
     ])
     func chords(_ text: String, expected: String) {
         #expect(Chord(parsing: text)?.description == expected)
     }
 
-    @Test("Unknown names don't parse", arguments: ["Hyper+Spcae", "Meta+A", "Ctrl+", "", "Ctrl+Alt"])
+    @Test("Unknown names don't parse", arguments: ["Hyper+Spcae", "Meta+A", "Ctrl+", "", "Ctrl+Alt", "⌘", "⌘+", "T⌘", "⌥⌥x+A"])
     func badChords(_ text: String) {
         #expect(Chord(parsing: text) == nil)
     }
