@@ -5,7 +5,7 @@ import UnnamedLauncherKit
 
 /// Self-test for agents: runs the app's real functions against a test config,
 /// prints PASS or FAIL per check, and quits with exit code 0 or 1.
-///   APP_STORE=/tmp/UnnamedLauncher-self.json ~/Applications/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher --selftest
+///   APP_STORE=/tmp/UnnamedLauncher-self.json build/UnnamedLauncher.app/Contents/MacOS/UnnamedLauncher --selftest
 /// (tools/selftest.sh does this.) Add a check for every story with logic.
 @MainActor
 enum SelfTest {

@@ -42,7 +42,7 @@ brew install --cask unnamed-launcher
 ./build.sh --open
 ```
 
-This builds a release version, signs it, installs it to `~/Applications/UnnamedLauncher.app` and opens it. Build products go to `~/Library/Developer/UnnamedLauncher`, outside the repo.
+This builds a release version into `build/UnnamedLauncher.app`, signs it and opens it. Nothing is installed, so a Homebrew copy in /Applications stays as it is. SwiftPM's intermediate products go to `~/Library/Developer/UnnamedLauncher`, outside the repo. To keep a local build, copy it to /Applications yourself.
 
 It signs with the "Unnamed Launcher Code Signing" certificate when it's in your keychain, so a local build has the same signature as the releases. Otherwise it uses your Apple Development certificate, or signs ad hoc. With an ad hoc signature, macOS asks for the permissions again after each rebuild.
 

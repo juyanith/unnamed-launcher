@@ -11,7 +11,7 @@ does and how: `docs/BRIEF.md`, `docs/SPEC.md`, `docs/STORIES.md`,
 - `Sources/UnnamedLauncher/` the app. `App.swift` has the menu bar item, the Bindings window, Settings, and the app delegate. `docs/DESIGN.md` is the design plan.
 - `Sources/UnnamedLauncherKit/` rules and data logic with no SwiftUI. Tests in `Tests/UnnamedLauncherKitTests/`.
 - `Package.swift` a Swift package. There is no Xcode project.
-- `build.sh` builds, signs, and installs `~/Applications/UnnamedLauncher.app`.
+- `build.sh` builds and signs `build/UnnamedLauncher.app` in the repo (ignored by git). It doesn't install anything; the copy in /Applications comes from Homebrew.
 - `Icon/AppIcon.icon` the app icon, an Icon Composer file (JSON plus SVG layers). `build.sh` compiles it with `tools/make_icon.sh`; `tools/icon_review.sh` renders every look into one PNG.
 - `.github/workflows/` CI (build, unit tests, self-test on every push) and releases (push a `v*` tag). `build.sh --out DIR` and `APP_VERSION` exist for them.
 - `docs/` the brief, the spec, the stories, the glossary, and research.
@@ -19,7 +19,7 @@ does and how: `docs/BRIEF.md`, `docs/SPEC.md`, `docs/STORIES.md`,
 
 ## Build and check
 
-- Build and install: `./build.sh`. Add `--open` to restart the app with the new build. The build shows warnings; fix them.
+- Build: `./build.sh`. Add `--open` to restart the app with the new build. The build shows warnings; fix them.
 - Unit tests: `swift test --scratch-path ~/Library/Developer/UnnamedLauncher/test-build`.
 - Self-test (the app's real functions against a /tmp config): `tools/selftest.sh`. Exit 0 when every check passes. Add a check for every story with logic in `SelfTest.swift`.
 - After every UI change, take snapshots with sample data and look at them: `tools/snap.sh`.
