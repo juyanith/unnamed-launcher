@@ -72,18 +72,35 @@ public struct Modifiers: OptionSet, Sendable, Hashable {
     public static let meh: Modifiers = [.control, .option, .shift]
     public static let cag: Modifiers = [.control, .option, .command]
 
-    /// Parses one modifier name, case-insensitive.
+    /// The Mac's own modifier symbols.
+    public static let symbols: [Character: Modifiers] = ["⌃": .control, "⌥": .option, "⇧": .shift, "⌘": .command]
+
+    /// Parses one modifier name, case-insensitive ("Ctrl", "Opt", "Command"),
+    /// or a run of symbols such as "⌃⌥".
     public init?(parsing text: String) {
         switch text.lowercased() {
-        case "ctrl": self = .control
-        case "alt": self = .option
+        case "ctrl", "control": self = .control
+        case "alt", "opt", "option": self = .option
         case "shift": self = .shift
-        case "cmd", "primary": self = .command
+        case "cmd", "command", "primary": self = .command
         case "hyper": self = .hyper
         case "meh": self = .meh
         case "cag": self = .cag
-        default: return nil
+        default:
+            guard let modifiers = Self(symbols: text) else { return nil }
+            self = modifiers
         }
+    }
+
+    /// Parses one or more symbols: "⌘", "⌃⌥⇧". Nil for anything else.
+    public init?(symbols text: some StringProtocol) {
+        guard !text.isEmpty else { return nil }
+        var modifiers: Modifiers = []
+        for char in text {
+            guard let modifier = Self.symbols[char] else { return nil }
+            modifiers.formUnion(modifier)
+        }
+        self = modifiers
     }
 
     /// Canonical names: "Hyper", "Meh" or "CAG" when the set is exactly that
@@ -111,11 +128,15 @@ public struct Chord: Sendable, Hashable, CustomStringConvertible {
         self.key = key
     }
 
-    /// Parses a chord token. Returns nil when a part isn't a known name.
+    /// Parses a chord token: "Hyper+Space", "Ctrl+Opt+L", "⌃⌥⇧T" or
+    /// "⌘+F". Returns nil when a part isn't a known name.
     public init?(parsing token: String) {
         let parts = token.split(separator: "+", omittingEmptySubsequences: false).map(String.init)
-        guard let last = parts.last, let key = KeyName(parsing: last) else { return nil }
-        var modifiers: Modifiers = []
+        guard let last = parts.last else { return nil }
+        // Symbols can sit right before the key, as macOS writes shortcuts.
+        let symbols = last.prefix { Modifiers.symbols[$0] != nil }
+        guard let key = KeyName(parsing: String(last.dropFirst(symbols.count))) else { return nil }
+        var modifiers = Modifiers(symbols: symbols) ?? []
         for part in parts.dropLast() {
             guard let modifier = Modifiers(parsing: part) else { return nil }
             modifiers.formUnion(modifier)

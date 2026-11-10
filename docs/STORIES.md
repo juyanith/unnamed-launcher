@@ -574,13 +574,14 @@ UX:
 Status: done
 Verified: unit tests, self-test, snapshots. Not yet tried by hand: the manual line.
 
-### S-049 Write Meh and CAG chords
+### S-049 Write Meh, CAG, Opt and ⌃⌥⇧⌘ chords
 As the user, I write `Meh+W` (⌃⌥⇧) or `CAG+T` (⌃⌥⌘) in the config file, or record those modifiers in the Bindings window, and the app reads and shows them by those names, as it does Hyper.
 Screens: bindings-light.png, bindings-direct-light.png
 Depends: S-025
 Acceptance:
 - [unit] `Meh` and `CAG` parse in any case; exactly those modifiers print as `Meh+…` and `CAG+…`; a group plus the missing modifier prints as `Hyper`.
 - [unit] The JSON Schema accepts Meh and CAG chords.
+- [unit] `Opt`, `Option`, `Control` and `Command` parse, and so do the symbols ⌃⌥⇧⌘, joined with + or right before the key (`⌃⌥⇧T`, `⌘+F`); the app writes names.
 - [self] A key recorded with ⌃⌥⇧ or ⌃⌥⌘ is saved to the file as `Meh+…` or `CAG+…`.
 - [snap] The outline and the key recorder show `Meh+W` and `CAG+T`.
 Status: done

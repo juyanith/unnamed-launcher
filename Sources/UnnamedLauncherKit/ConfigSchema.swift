@@ -8,13 +8,16 @@ public enum ConfigSchema {
     public static let fileName = "config.schema.json"
 
     /// Modifier names a chord may use.
-    public static let modifierNames = ["Ctrl", "Alt", "Shift", "Cmd", "Primary", "Hyper", "Meh", "CAG"]
+    public static let modifierNames = ["Control", "Ctrl", "Option", "Opt", "Alt", "Shift", "Command", "Cmd",
+                                       "Primary", "Hyper", "Meh", "CAG"]
 
-    /// One chord, any capitalization: modifiers joined by +, then a key.
+    /// One chord, any capitalization: modifier names or symbols joined by +,
+    /// then a key, which symbols may come right before ("⌃⌥⇧T").
     public static var chordPattern: String {
         let modifiers = modifierNames.map(anyCase).joined(separator: "|")
+        let symbols = "[" + String(Modifiers.symbols.keys.sorted()) + "]"
         let keys = KeyName.allCases.map(\.name).sorted { $0.count > $1.count }.map(anyCase).joined(separator: "|")
-        return "(?:(?:\(modifiers))\\+)*(?:\(keys))"
+        return "(?:(?:\(modifiers)|\(symbols)+)\\+)*\(symbols)*(?:\(keys))"
     }
 
     /// A key path: a chord, then step keys, separated by spaces.
@@ -65,7 +68,7 @@ public enum ConfigSchema {
                         "type": "object", "additionalProperties": false, "required": ["keys", "title"],
                         "properties": [
                             "keys": ["type": "string", "pattern": keysPattern,
-                                     "description": "The leader chord, then step keys: \"Hyper+Space A T\". Modifiers: Ctrl, Alt, Shift, Cmd, Primary, Hyper (all four), Meh (Ctrl+Alt+Shift), CAG (Ctrl+Alt+Cmd). A single chord with an action is a direct binding."],
+                                     "description": "The leader chord, then step keys: \"Hyper+Space A T\". Modifiers: Ctrl, Alt or Opt, Shift, Cmd, Primary, Hyper (all four), Meh (Ctrl+Alt+Shift), CAG (Ctrl+Alt+Cmd), or the symbols ⌃⌥⇧⌘ (\"⌃⌥⇧T\"). A single chord with an action is a direct binding."],
                             "title": ["type": "string", "minLength": 1],
                             "action": ["type": "string", "description": "An id in actions. Without one, the entry is a menu."],
                         ],
