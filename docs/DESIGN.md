@@ -58,7 +58,7 @@ The status item menu acts as the menu bar while no window is open (menus.md, rul
 | Open Config File / Show in Finder (⌥) | Menu bar menu, and the File menu | — |
 | Edit Bindings… | Menu bar menu | ⌘B |
 | Settings… | Menu bar menu and the app menu | ⌘, |
-| Help (menu bar menu) / Unnamed Launcher Help (Help menu): open the Help page | Menu bar menu, and the Help menu of the Bindings window | ⌘? |
+| Help (menu bar menu) / Unnamed Launcher Help (Help menu): open the Help page | Menu bar menu, and the Help menu of the Bindings window | None: macOS keeps ⌘? for the Help menu's search. The page is ⌘4, and a Show Help binding opens it from anywhere |
 | Version line ("Version 0.1.3", or "Version 0.1 (main, aa45720)" for a local build) | Menu bar menu, disabled item above Quit | — |
 | Config line ("Config loaded at 14:02", or "Created config file") | Menu bar menu, disabled item under the version line | — |
 | Quit Unnamed Launcher | Menu bar menu and the app menu | ⌘Q |

@@ -155,7 +155,7 @@ UX:
 - Flow: menu bar icon → "Enabled" (a check mark that toggles) → the icon dims and leaders type normally again → choose it again to turn it back on. "Quit Unnamed Launcher" (⌘Q) quits with no confirmation, since nothing is lost.
 - Surface: menu bar menu, a toggle item (inline: changes one value).
 - States: on → check mark, normal icon. Off → no check mark, dimmed icon, and the status line reads "Not capturing leaders". Enabled is remembered across launches.
-- Words: menu order is the status line (only when off), "Enabled", a separator, "Reload Config", "Open Config File", a separator, "Edit Bindings…" (⌘B), "Settings…" (⌘,), "Help" (⌘?), a separator, the version line, the config line, "Quit Unnamed Launcher" (⌘Q).
+- Words: menu order is the status line (only when off), "Enabled", a separator, "Reload Config", "Open Config File", a separator, "Edit Bindings…" (⌘B), "Settings…" (⌘,), "Help", a separator, the version line, the config line, "Quit Unnamed Launcher" (⌘Q).
 - Access: the status item's accessibility label includes the state: "Unnamed Launcher, off".
 Status: done
 Verified: Enabled off removes capture, dims the icon, VoiceOver label (self-test). Not yet tried by hand: the dimmed icon in the menu bar.
@@ -642,9 +642,9 @@ Acceptance:
 - [self] With no bindings it shows No Bindings with New Binding, and the rest of the page.
 - [self] Help is a page of the Bindings window, in the sidebar and as ⌘4.
 - [snap] Each row shows its key, title, and "Leader" or "Direct binding"; In a Sequence, Words, and More (Open Config File, the documentation, Report a Problem, and the version line) follow.
-- [manual] Clicking a row shows it selected on the Bindings page (tried by hand on 2026-11-11). Help (⌘?) in the menu bar menu and Unnamed Launcher Help in the Help menu open the page.
+- [manual] Clicking a row shows it selected on the Bindings page (tried by hand on 2026-11-11). Help in the menu bar menu and Unnamed Launcher Help in the Help menu open the page. Neither has ⌘?, which macOS keeps for the Help menu's search.
 UX:
-- Flow: Help (⌘?) in the menu bar menu → the Bindings window on Help → click a row → the Bindings page with that row selected.
+- Flow: Help in the menu bar menu, or a Show Help chord (S-053), → the Bindings window on Help → click a row → the Bindings page with that row selected.
 - Surface: a sidebar page of the Bindings window; a grouped Form, centered, at most 640 pt wide.
 - States: with bindings; no bindings (No Bindings, New Binding); an invalid draft shows the last valid config.
 - Words: "Your Keys: Hyper", "In a Sequence", "Words", "More", "Read the Documentation on GitHub", "Report a Problem".

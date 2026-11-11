@@ -81,7 +81,7 @@ final class AppModel {
     /// that's always there.
     var openBindingsWindow: (() -> Void)?
 
-    /// Help (⌘?) and the Show Help action: the Help page, in front (S-052, S-053).
+    /// Help in the menu bar menu and the Show Help action: the Help page, in front (S-052, S-053).
     func showHelp() {
         sidebar = .help
         openBindingsWindow?()

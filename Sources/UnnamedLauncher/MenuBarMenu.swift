@@ -121,7 +121,6 @@ struct MenuBarMenu: View {
         }
         .keyboardShortcut(",")
         Button("Help") { model.showHelp() }
-        .keyboardShortcut("?", modifiers: .command)
         Divider()
         Text(AppVersion.line)
         if let line = status.configLine {

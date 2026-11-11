@@ -27,9 +27,10 @@ struct EditorCommands: Commands {
             }
             Divider()
         }
+        // No ⌘? here or in the menu bar menu: macOS takes ⌘? to open the
+        // Help menu's search. The page has ⌘4, and Show Help a chord.
         CommandGroup(replacing: .help) {
             Button("Unnamed Launcher Help") { model.sidebar = .help }
-                .keyboardShortcut("?", modifiers: .command)
         }
     }
 
