@@ -61,6 +61,10 @@ enum Snapshot {
                     model.editor.selection = KeySequence(parsing: "CAG+T")
                     try? await Task.sleep(for: .seconds(0.8))
                     capture(to: "\(dir)/bindings-direct-\(mode).png")
+                    // S-056: an entry with an icon of its own.
+                    model.editor.selection = KeySequence(parsing: "Hyper+Space S")
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/bindings-icon-\(mode).png")
                 }
             }
             if only == nil || only?.contains("empty") == true {

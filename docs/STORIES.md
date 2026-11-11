@@ -567,7 +567,8 @@ UX:
 - Surface: the entry form on the Bindings page, under Title.
 - Words: "Icon", hint "An SF Symbol name, such as terminal, or the path of a file whose icon to use."
 - Access: icons stay hidden from VoiceOver in the Guide; the editor's preview is labeled with the symbol name.
-Status: todo
+Status: done
+Verified: reading, writing, empty icons, symbols and paths, the entry's icon winning, the schema (unit tests); setting, clearing and undoing in the editor, the unknown-symbol message, no icon for an unknown symbol (self-test); hud and bindings-icon in light and dark (snapshots), grid checks. Not yet tried by hand: VoiceOver on the Icon field's preview.
 
 ## Later
 - Import and export a single menu as a JSON snippet.

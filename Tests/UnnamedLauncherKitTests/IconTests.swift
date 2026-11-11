@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import UnnamedLauncherKit
 
-@Suite("Icons in the Guide (S-054, S-055)")
+@Suite("Icons in the Guide (S-054 to S-056)")
 struct IconTests {
     let config = try! ConfigLoader.load(Data("""
     { "version": 1,
@@ -16,7 +16,10 @@ struct IconTests {
         { "keys": "Hyper+Space W", "title": "Site", "action": "site" },
         { "keys": "Hyper+Space P", "title": "Apps Folder", "action": "apps" },
         { "keys": "Hyper+Space X", "title": "Bad", "action": "bad" },
-        { "keys": "Hyper+T", "title": "Terminal", "action": "terminal" }
+        { "keys": "Hyper+T", "title": "Terminal", "action": "terminal" },
+        { "keys": "Hyper+M", "title": "Mine", "action": "terminal", "icon": "star" },
+        { "keys": "Meh+W", "title": "Workspace", "icon": "~/Pictures/w.png" },
+        { "keys": "Meh+W 1", "title": "One", "action": "notes" }
       ],
       "actions": {
         "editor": { "type": "application", "bundleId": "dev.zed.Zed" },
@@ -61,8 +64,30 @@ struct IconTests {
     }
 
     @Test func everyIconOnce() {
-        #expect(config.iconSources(home: home) == [.app("dev.zed.Zed"), .app("com.apple.Terminal"),
+        #expect(config.iconSources(home: home) == [.app("dev.zed.Zed"), .app("com.apple.Terminal"), .symbol("star"),
+                                                    .file("/Users/someone/Pictures/w.png"),
                                                     .file("/Users/someone/Notes"), .file("/Applications"),
                                                     .url(URL(string: "https://example.com")!)])
+    }
+
+    @Test func anEntrysOwnIconWins() {
+        #expect(icon("Hyper+M") == .symbol("star"))
+        #expect(icon("Meh+W") == .file("/Users/someone/Pictures/w.png"))
+        #expect(IconSource("/Applications/Safari.app") == .file("/Applications/Safari.app"))
+        #expect(IconSource("questionmark.circle") == .symbol("questionmark.circle"))
+    }
+
+    @Test func iconIsWrittenBackAndLeftOutWhenEmpty() throws {
+        let json = #"{ "version": 1, "entries": [{ "keys": "Hyper+T", "title": "T", "action": "n", "icon": "terminal" }, { "keys": "Hyper+U", "title": "U", "action": "n", "icon": "" }], "actions": { "n": { "type": "noop" } } }"#
+        var document = try ConfigDocument(data: Data(json.utf8))
+        #expect(document.config.entries.map(\.icon) == ["terminal", nil])
+        let written = String(decoding: document.data(), as: UTF8.self)
+        #expect(written.contains(#""icon": "terminal""#))
+        #expect(written.components(separatedBy: "\"icon\"").count == 2)
+        let path = KeySequence(parsing: "Hyper+T")!
+        document.setIcon(path, "  ")
+        #expect(document.entry(path)?.icon == nil)
+        document.setIcon(path, " gear ")
+        #expect(document.entry(path)?.icon == "gear")
     }
 }

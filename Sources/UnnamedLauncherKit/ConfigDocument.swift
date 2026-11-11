@@ -144,6 +144,13 @@ public struct ConfigDocument: Sendable, Equatable {
         config.entries[i].title = title
     }
 
+    /// An empty or blank icon is left out of the file (S-056).
+    public mutating func setIcon(_ path: KeySequence, _ icon: String?) {
+        guard let i = index(of: path) else { return }
+        let trimmed = icon?.trimmingCharacters(in: .whitespaces) ?? ""
+        config.entries[i].icon = trimmed.isEmpty ? nil : trimmed
+    }
+
     public mutating func setAction(_ path: KeySequence, _ action: String?) {
         guard let i = index(of: path) else { return }
         config.entries[i].action = action

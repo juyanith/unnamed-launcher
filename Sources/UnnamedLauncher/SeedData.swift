@@ -17,7 +17,7 @@ enum SeedData {
         { "keys": "Hyper+Space A T", "title": "Terminal", "action": "open-terminal" },
         { "keys": "Hyper+Space A M", "title": "Messages", "action": "open-messages" },
         { "keys": "Hyper+Space N", "title": "Notes for the weekly planning meeting", "action": "notes" },
-        { "keys": "Hyper+Space S", "title": "Screenshot", "action": "screenshot" },
+        { "keys": "Hyper+Space S", "title": "Screenshot", "action": "screenshot", "icon": "camera" },
         { "keys": "Hyper+Space L", "title": "Address Bar", "action": "address-bar" },
         { "keys": "Hyper+Space F", "title": "Find", "action": "find" },
         { "keys": "Meh+W", "title": "Workspace" },

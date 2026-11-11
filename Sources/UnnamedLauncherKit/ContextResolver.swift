@@ -34,13 +34,16 @@ public enum IconSource: Hashable, Sendable {
     case file(String)
     /// The icon of the app that opens a URL.
     case url(URL)
+    /// An SF Symbol, by name (S-056).
+    case symbol(String)
 }
 
 extension LoadedConfig {
-    /// The icon for a binding: its app for Use Application, its file, folder
-    /// or URL for Open. nil for menus and every other action, Context Aware
-    /// included.
+    /// The icon for an entry: its own icon if it has one (S-056); otherwise
+    /// its app for Use Application, its file, folder or URL for Open. nil for
+    /// menus and every other action, Context Aware included.
     public func iconSource(_ binding: BindingNode, home: URL = FileManager.default.homeDirectoryForCurrentUser) -> IconSource? {
+        if let icon = binding.icon { return IconSource(icon, home: home) }
         guard let id = binding.action else { return nil }
         switch config.actions[id] {
         case let .application(bundleId, _):
@@ -60,5 +63,13 @@ extension LoadedConfig {
             nodes.flatMap { node in (iconSource(node, home: home).map { [$0] } ?? []) + sources(node.children) }
         }
         return Set(sources(leaders))
+    }
+}
+
+extension IconSource {
+    /// An entry's `icon`: a path starting with / or ~ is a file, anything
+    /// else an SF Symbol name.
+    public init(_ icon: String, home: URL = FileManager.default.homeDirectoryForCurrentUser) {
+        self = icon.hasPrefix("/") || icon.hasPrefix("~") ? .file(ActionPlanner.expandTilde(icon, home: home)) : .symbol(icon)
     }
 }

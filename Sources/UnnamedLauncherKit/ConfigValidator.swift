@@ -24,6 +24,8 @@ public struct BindingNode: Sendable, Equatable {
     public var title: String
     /// The action id; nil for a menu.
     public var action: String?
+    /// The entry's own icon (S-056).
+    public var icon: String? = nil
     public var children: [BindingNode]
 
     public var isMenu: Bool { action == nil }
@@ -182,7 +184,8 @@ public enum ConfigValidator {
     private static func tree(_ parsed: [(entry: Config.Entry, path: KeySequence)]) -> [BindingNode] {
         func node(_ item: (entry: Config.Entry, path: KeySequence)) -> BindingNode {
             let children = parsed.filter { $0.path.parent == item.path }.map(node)
-            return BindingNode(path: item.path, title: item.entry.title, action: item.entry.action, children: children)
+            return BindingNode(path: item.path, title: item.entry.title, action: item.entry.action,
+                               icon: item.entry.icon, children: children)
         }
         return parsed.filter { $0.path.isLeader }.map(node)
     }

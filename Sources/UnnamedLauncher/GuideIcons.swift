@@ -1,7 +1,8 @@
 import AppKit
 import UnnamedLauncherKit
 
-/// Icons for the Guide's rows: apps (S-054), files, folders and URLs (S-055).
+/// Icons for the Guide's rows: apps (S-054), files, folders and URLs (S-055),
+/// and SF Symbols (S-056).
 /// Filled when the config loads, so showing the Guide only reads what is
 /// already here.
 @MainActor
@@ -36,6 +37,8 @@ final class GuideIcons {
             return FileManager.default.fileExists(atPath: path) ? workspace.icon(forFile: path) : nil
         case let .url(url):
             return workspace.urlForApplication(toOpen: url).map { workspace.icon(forFile: $0.path) }
+        case let .symbol(name):
+            return NSImage(systemSymbolName: name, accessibilityDescription: nil)
         }
     }
 }

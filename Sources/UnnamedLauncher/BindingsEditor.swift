@@ -6,7 +6,7 @@ import UnnamedLauncherKit
 /// with errors stays on screen with its errors and the file isn't touched.
 @Observable
 final class BindingsEditor {
-    enum Field: Hashable { case key, title, action }
+    enum Field: Hashable { case key, title, icon, action }
 
     let store: ConfigStore
     /// What's on screen.
@@ -135,6 +135,31 @@ final class BindingsEditor {
         guard draft.entry(path)?.title != title else { return }
         change("Rename", undo: undo) { $0.setTitle(path, title) }
     }
+
+    /// Sets or clears an entry's own icon (S-056).
+    func setIcon(_ path: KeySequence, _ icon: String, undo: UndoManager?) {
+        let trimmed = icon.trimmingCharacters(in: .whitespaces)
+        guard (draft.entry(path)?.icon ?? "") != trimmed else { return }
+        change("Change Icon", undo: undo) { $0.setIcon(path, trimmed) }
+    }
+
+    /// Why an icon won't show, or nil when it will (or there's none).
+    static func iconProblem(_ icon: String) -> String? {
+        let trimmed = icon.trimmingCharacters(in: .whitespaces)
+        switch trimmed.isEmpty ? nil : IconSource(trimmed) {
+        case let .symbol(name) where NSImage(systemSymbolName: name, accessibilityDescription: nil) == nil:
+            return "No SF Symbol named “\(name)”."
+        case let .file(path) where !FileManager.default.fileExists(atPath: path):
+            return "No file at \(trimmed)."
+        default:
+            return nil
+        }
+    }
+
+    /// The Icon field's menu: symbols that fit common bindings.
+    static let commonSymbols = ["terminal", "folder", "doc.text", "globe", "envelope", "calendar", "music.note",
+                                "camera", "photo", "gearshape", "star", "bolt", "keyboard", "magnifyingglass",
+                                "hammer", "house"]
 
     func setAction(_ path: KeySequence, _ action: String, undo: UndoManager?) {
         change("Change Action", undo: undo) { $0.setAction(path, action) }

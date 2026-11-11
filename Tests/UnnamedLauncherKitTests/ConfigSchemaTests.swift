@@ -53,6 +53,15 @@ struct ConfigSchemaTests {
         #expect((runtime["hudDelayMs"] as! [String: Any])["minimum"] as? Int == 0)
     }
 
+    @Test("Entries may have an icon, an optional string (S-056)")
+    func icon() {
+        let props = schema["properties"] as! [String: Any]
+        let entry = ((props["entries"] as! [String: Any])["items"] as! [String: Any])
+        let icon = (entry["properties"] as! [String: Any])["icon"] as! [String: Any]
+        #expect(icon["type"] as? String == "string")
+        #expect(entry["required"] as? [String] == ["keys", "title"])
+    }
+
     @Test("The starter config points at the schema, and loading ignores $schema")
     func starter() throws {
         #expect(ConfigLoader.starterJSON.contains(#""$schema": "./config.schema.json""#))

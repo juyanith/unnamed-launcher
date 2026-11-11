@@ -236,7 +236,12 @@ struct GuideView: View {
     /// The row's icon, or its empty space. Decorative: the row's label names it.
     private func appIcon(_ row: GuideContent.Row) -> some View {
         Group {
-            if let image = row.icon.flatMap(GuideIcons.shared.icon) {
+            if case let .symbol(name) = row.icon, GuideIcons.shared.icon(for: .symbol(name)) != nil {
+                // Symbols in secondary, so colored app and file icons stand out.
+                Image(systemName: name)
+                    .imageScale(.large)
+                    .foregroundStyle(.secondary)
+            } else if let image = row.icon.flatMap(GuideIcons.shared.icon) {
                 Image(nsImage: image).resizable()
             } else {
                 Color.clear

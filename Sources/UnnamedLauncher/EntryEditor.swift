@@ -8,6 +8,7 @@ struct EntryEditor: View {
     @Environment(\.undoManager) private var undo
     @FocusState private var focus: BindingsEditor.Field?
     @State private var title = ""
+    @State private var icon = ""
 
     private var editor: BindingsEditor { model.editor }
 
@@ -26,6 +27,7 @@ struct EntryEditor: View {
                 } footer: {
                     Text(footer(path, isBinding: entry.action != nil || editor.needsAction.contains(path)))
                 }
+                iconSection(path)
                 if entry.action != nil || editor.needsAction.contains(path) {
                     Section {
                         actionPicker(path, entry)
@@ -40,8 +42,11 @@ struct EntryEditor: View {
                 }
             }
             .formStyle(.grouped)
-            .onAppear { title = entry.title }
-            .onChange(of: path) { _, _ in title = editor.draft.entry(path)?.title ?? "" }
+            .onAppear { title = entry.title; icon = entry.icon ?? "" }
+            .onChange(of: path) { _, _ in
+                title = editor.draft.entry(path)?.title ?? ""
+                icon = editor.draft.entry(path)?.icon ?? ""
+            }
             .onChange(of: editor.focus, initial: true) { _, field in
                 if field == .title || field == .action { focus = field }
             }
@@ -49,6 +54,47 @@ struct EntryEditor: View {
             ContentUnavailableView("No Selection", systemImage: "keyboard",
                                    description: Text("Select a binding or menu to edit it."))
         }
+    }
+
+    /// Icon (S-056): a symbol name or a file path, a preview, and common symbols.
+    private func iconSection(_ path: KeySequence) -> some View {
+        Section {
+            LabeledContent("Icon") {
+                HStack(spacing: Space.sm) {
+                    // Left-aligned like textEntry, which would add a second label here.
+                    TextField("Icon", text: $icon, prompt: Text("Automatic"))
+                        .labelsHidden()
+                        .multilineTextAlignment(.leading)
+                        .focused($focus, equals: .icon)
+                        .onSubmit { editor.setIcon(path, icon, undo: undo) }
+                        .onChange(of: focus) { old, _ in
+                            if old == .icon { editor.setIcon(path, icon, undo: undo) }
+                        }
+                    IconPreview(icon: icon)
+                    Menu {
+                        ForEach(BindingsEditor.commonSymbols, id: \.self) { name in
+                            Button { choose(name, path) } label: { Label(name, systemImage: name) }
+                        }
+                        Divider()
+                        Button("Automatic") { choose("", path) }
+                    } label: {
+                        Label("Common Symbols", systemImage: "square.grid.2x2")
+                    }
+                    .labelStyle(.iconOnly)
+                    .menuStyle(.borderlessButton)
+                    .fixedSize()
+                    .help("Choose a common SF Symbol")
+                }
+            }
+        } footer: {
+            Text(BindingsEditor.iconProblem(icon)
+                 ?? "An SF Symbol name, such as terminal, or the path of a file whose icon to use. Apps and Open targets show their own icon when this is empty.")
+        }
+    }
+
+    private func choose(_ name: String, _ path: KeySequence) {
+        icon = name
+        editor.setIcon(path, name, undo: undo)
     }
 
     private func footer(_ path: KeySequence, isBinding: Bool) -> String {
@@ -88,5 +134,30 @@ extension BindingsEditor {
     /// The action popup's choices: every action in alphabetical order (S-045), then New Action… (S-026).
     var actionChoices: [String] {
         draft.sortedActionIDs + [Self.newActionTag]
+    }
+}
+
+/// The Icon field's preview: the symbol or file icon as the Guide shows it.
+private struct IconPreview: View {
+    let icon: String
+
+    var body: some View {
+        let trimmed = icon.trimmingCharacters(in: .whitespaces)
+        Group {
+            switch trimmed.isEmpty || BindingsEditor.iconProblem(trimmed) != nil ? nil : IconSource(trimmed) {
+            case let .symbol(name):
+                Image(systemName: name)
+                    .imageScale(.large)
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(name)
+            case let .file(path):
+                Image(nsImage: NSWorkspace.shared.icon(forFile: path))
+                    .resizable()
+                    .accessibilityLabel((path as NSString).lastPathComponent)
+            default:
+                Color.clear.accessibilityHidden(true)
+            }
+        }
+        .frame(width: Layout.guideIconSize, height: Layout.guideIconSize)
     }
 }

@@ -39,6 +39,7 @@ public enum ConfigWriter {
     private static func entry(_ entry: Config.Entry) -> String {
         var fields = [("keys", quote(entry.keys)), ("title", quote(entry.title))]
         if let action = entry.action { fields.append(("action", quote(action))) }
+        if let icon = entry.icon { fields.append(("icon", quote(icon))) }
         return object(fields)
     }
 

@@ -62,6 +62,26 @@ extension SelfTest {
             check("S-026 changing the title rewrites only that entry",
                   retitled.count == withBinding.count && zip(retitled, withBinding).filter { $0 != $1 }.count == 1)
 
+            // S-056: an icon of your own is written, wins over the action's, and undoes.
+            step { editor.setIcon(renamed, "star", undo: undo) }
+            let starred = store.loaded.flatMap { config in
+                config.leaders[0].child(for: renamed.lastStep!.key).map { config.iconSource($0) } }
+            check("S-056 setting an icon writes it and it wins over the action's icon",
+                  fileLines().contains { $0.contains(#""icon": "star""#) } && starred == .symbol("star"), "\(String(describing: starred))")
+            undo.undo()
+            check("S-056 Undo restores the entry without an icon",
+                  editor.draft.entry(renamed)?.icon == nil && !fileLines().contains { $0.contains(#""icon""#) })
+            step { editor.setIcon(renamed, "star", undo: undo) }
+            step { editor.setIcon(renamed, "", undo: undo) }
+            check("S-056 clearing the icon leaves it out of the file", !fileLines().contains { $0.contains(#""icon""#) })
+            check("S-056 an unknown SF Symbol is named in the editor",
+                  BindingsEditor.iconProblem("no-such-symbol") == "No SF Symbol named “no-such-symbol”."
+                  && BindingsEditor.iconProblem("terminal") == nil && BindingsEditor.iconProblem("") == nil)
+            let icons = GuideIcons()
+            icons.load([.symbol("no-such-symbol"), .symbol("terminal")])
+            check("S-056 an unknown SF Symbol shows no icon in the Guide",
+                  icons.icon(for: .symbol("no-such-symbol")) == nil && icons.icon(for: .symbol("terminal")) != nil)
+
             // S-028: reordering is saved, stays in its menu, and the Guide follows.
             step { editor.move(in: commands, from: [2], to: 0, undo: undo) }
             let order = editor.draft.children(of: commands).map { $0.lastStep!.key.name }

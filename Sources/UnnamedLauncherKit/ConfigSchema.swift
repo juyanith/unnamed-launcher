@@ -71,6 +71,8 @@ public enum ConfigSchema {
                                      "description": "The leader chord, then step keys: \"Hyper+Space A T\". Modifiers: Ctrl, Alt or Opt, Shift, Cmd, Primary, Hyper (all four), Meh (Ctrl+Alt+Shift), CAG (Ctrl+Alt+Cmd), or the symbols ⌃⌥⇧⌘ (\"⌃⌥⇧T\"). A single chord with an action is a direct binding."],
                             "title": ["type": "string", "minLength": 1],
                             "action": ["type": "string", "description": "An id in actions. Without one, the entry is a menu."],
+                            "icon": ["type": "string", "minLength": 1,
+                                     "description": "Its icon in the Guide: an SF Symbol name such as \"terminal\", or a path starting with / or ~ for that file's icon. Without one, apps and Open targets show their own icon."],
                         ],
                     ],
                 ],

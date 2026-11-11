@@ -147,7 +147,8 @@ extension SelfTest {
             check("S-019 the Guide is on the screen of the front app's window",
                   screen.frame.contains(guide.window.frame), "\(guide.window.frame) not in \(screen.frame)")
         } else {
-            check("S-019 the front app's window is found", false, "no front window")
+            check("S-019 the front app's window is found", false,
+                  "no front window for \(NSWorkspace.shared.frontmostApplication?.localizedName ?? "no app")")
         }
         guide.flash()
         check("S-018 an unbound key flashes the Guide", guide.isFlashing)
