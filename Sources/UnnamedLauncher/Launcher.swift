@@ -51,6 +51,7 @@ final class Launcher {
         self.store = store
         store.onLoad = { [unowned self] config in
             engine.replace(config)
+            AppIcons.shared.load(config.appBundleIds)
             schedule = GuideSchedule(runtime: config.config.runtime, ui: config.config.ui)
             guide.position = GuidePlacement.Position(rawValue: config.config.ui.position.lowercased()) ?? .center
             guide.theme = config.config.ui.theme

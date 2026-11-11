@@ -12,6 +12,8 @@ struct GuideContent: Equatable {
         var isAvailable = true
         /// "not available in Notes", shown on an unavailable row.
         var note: String?
+        /// The app of a Use Application binding, for its icon (S-054).
+        var appBundleId: String?
         var id: String { key }
     }
 
@@ -61,7 +63,8 @@ struct GuideContent: Equatable {
     private static func row(_ node: BindingNode, key: KeyName, config: LoadedConfig, frontApp: String?, appName: String) -> Row {
         let available = node.isMenu || config.isAvailable(node, frontApp: frontApp)
         return Row(key: key.name, title: node.title, isMenu: node.isMenu,
-                   isAvailable: available, note: available ? nil : "not available in \(appName)")
+                   isAvailable: available, note: available ? nil : "not available in \(appName)",
+                   appBundleId: config.appBundleId(node))
     }
 
     /// Every row, in order.
@@ -107,6 +110,12 @@ struct GuideContent: Equatable {
             }
         }
         return columns
+    }
+
+    /// True when a column has an app icon, so every row in it keeps the
+    /// icon's space and the titles line up (S-054).
+    static func showsIcons(_ column: [Section]) -> Bool {
+        column.contains { $0.rows.contains { $0.appBundleId != nil } }
     }
 
     /// Home side by side: a vertical divider after the first group's column.
@@ -176,7 +185,7 @@ struct GuideView: View {
                             sectionHeader(title)
                                 .padding(.top, position > 0 && !divided ? Space.xs : 0)
                         }
-                        ForEach(section.rows) { row in rowView(row) }
+                        ForEach(section.rows) { row in rowView(row, icons: GuideContent.showsIcons(column)) }
                     }
                 }
                 .frame(width: Layout.guideColumnWidth, alignment: .leading)
@@ -198,10 +207,11 @@ struct GuideView: View {
             .accessibilityAddTraits(.isHeader)
     }
 
-    private func rowView(_ row: GuideContent.Row) -> some View {
+    private func rowView(_ row: GuideContent.Row, icons: Bool) -> some View {
         GridRow {
             Keycap(label: row.key)
                 .gridColumnAlignment(.leading)
+            if icons { appIcon(row) }
             VStack(alignment: .leading, spacing: 0) {
                 Text(row.title)
                     .lineLimit(1)
@@ -221,6 +231,19 @@ struct GuideView: View {
         .opacity(row.isAvailable ? 1 : Surfaces.unavailableOpacity)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(row.key), \(row.title)\(row.isMenu ? ", menu" : "")\(row.note.map { ", \($0)" } ?? "")")
+    }
+
+    /// The app's icon, or its empty space. Decorative: the row's label names it.
+    private func appIcon(_ row: GuideContent.Row) -> some View {
+        Group {
+            if let image = row.appBundleId.flatMap(AppIcons.shared.icon) {
+                Image(nsImage: image).resizable()
+            } else {
+                Color.clear
+            }
+        }
+        .frame(width: Layout.guideIconSize, height: Layout.guideIconSize)
+        .accessibilityHidden(true)
     }
 
     private var footer: some View {

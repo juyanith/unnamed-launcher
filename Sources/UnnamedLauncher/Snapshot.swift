@@ -31,6 +31,8 @@ enum Snapshot {
                                         IOPMAssertionLevel(kIOPMAssertionLevelOn), "Snapshots" as CFString, &awake)
             try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
             try? await Task.sleep(for: .seconds(1.5))
+            // The Guide's seed content may use apps the /tmp config doesn't (S-054).
+            AppIcons.shared.load(SeedData.fixture.appBundleIds)
             for mode in ["light", "dark"] {
                 NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
                 // A row selected on each page, so the editor pane shows a form.

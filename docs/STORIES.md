@@ -523,7 +523,7 @@ Acceptance:
 - [unit] A row whose action is Use Application carries its bundle ID; rows with other actions, menus, and Context Aware rows carry none.
 - [self] A row for an installed app gets that app's icon, looked up once per bundle ID and cached for the rest of the run.
 - [self] A row for an app that isn't installed gets no icon and still shows its title, with no error.
-- [self] When any row in a section has an icon, every row in that section keeps the same icon space, so titles line up.
+- [self] When any row in a Guide column has an icon, every row in that column keeps the same icon space, so titles line up; a column with no app rows has none.
 - [self] Opening the Guide never waits on an icon lookup: icons come from the cache, filled when the config loads.
 - [snap] The Guide and Home show 16 pt icons between the keycap and the title, in light and dark, with the grid checks passing.
 - [manual] VoiceOver reads a row the same as before: the icon is decorative.
@@ -532,7 +532,8 @@ UX:
 - States: icon; no icon (not installed, or not Use Application); a dimmed row dims its icon too.
 - Words: none new.
 - Access: icons are hidden from VoiceOver.
-Status: todo
+Status: done
+Verified: bundle IDs on rows and the set of apps (unit tests, AppIconTests); the cache, a missing app, the icon column and no lookups when the Guide shows (self-test); hud and hud-home in light and dark (snapshots), grid checks. Not yet tried by hand: VoiceOver on a row with an icon.
 
 ## Later
 - Import and export a single menu as a JSON snippet.
