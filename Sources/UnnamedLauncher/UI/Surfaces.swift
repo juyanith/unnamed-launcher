@@ -18,10 +18,10 @@ enum Surfaces {
 /// The menu bar icon in each state (DESIGN.md, Archetype). Template symbols,
 /// so they follow the menu bar's look.
 enum StatusIcon {
-    /// Ready and capturing leaders.
-    static let ready = "command"
-    /// Enabled is off: the same symbol, drawn dimmed.
-    static let off = "command"
+    /// The app icon's two keycaps and ›, in one color (Icon/AppIcon.icon),
+    /// drawn this many points square. Ready and capturing leaders.
+    static let glyphSize: CGFloat = 17
+    /// Enabled is off: the same glyph, drawn dimmed.
     static let offOpacity = 0.4
     /// A permission is missing, the config has an error, or Secure Event
     /// Input blocks keys. Shown as a badge on the ready symbol; this symbol

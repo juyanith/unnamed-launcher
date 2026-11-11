@@ -148,18 +148,14 @@ struct MenuBarIcon: View {
 
     /// A template image: dimmed when off, with a badge when something needs attention.
     static func image(for icon: MenuBarStatus.Icon) -> NSImage {
-        let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
-        guard let base = NSImage(systemSymbolName: StatusIcon.ready, accessibilityDescription: nil)?
-            .withSymbolConfiguration(config) else { return NSImage() }
-        let size = NSSize(width: base.size.width + 4, height: base.size.height)
-        let image = NSImage(size: size, flipped: false) { rect in
-            let alpha = icon == .off ? StatusIcon.offOpacity : 1
-            base.draw(in: NSRect(x: 0, y: 0, width: base.size.width, height: base.size.height),
-                      from: .zero, operation: .sourceOver, fraction: alpha)
+        let side = StatusIcon.glyphSize
+        // Room on the right for the warning badge, so it covers less of the glyph.
+        let image = NSImage(size: NSSize(width: side + StatusIcon.badgeDiameter / 2, height: side), flipped: true) { rect in
+            drawGlyph(in: NSRect(x: 0, y: 0, width: side, height: side), alpha: icon == .off ? StatusIcon.offOpacity : 1)
             if icon == .warning {
                 // A filled dot in the top trailing corner, punched out of the symbol.
                 let d = StatusIcon.badgeDiameter
-                let dot = NSRect(x: rect.maxX - d, y: rect.maxY - d, width: d, height: d)
+                let dot = NSRect(x: rect.maxX - d, y: rect.minY, width: d, height: d)
                 NSColor.clear.set()
                 NSBezierPath(ovalIn: dot.insetBy(dx: -2, dy: -2)).fill(using: .copy)
                 NSColor.black.set()
@@ -169,6 +165,38 @@ struct MenuBarIcon: View {
         }
         image.isTemplate = true
         return image
+    }
+
+    /// The app icon's glyph (front.svg and back.svg, whose shapes span 193 to
+    /// 765 of 1024): the back keycap, a gap, then the front keycap with its
+    /// › cut out. In a flipped rect, so the SVG's coordinates work as is.
+    private static func drawGlyph(in rect: NSRect, alpha: CGFloat) {
+        let scale = rect.width / 572
+        func point(_ x: CGFloat, _ y: CGFloat) -> NSPoint { NSPoint(x: (x - 193) * scale, y: (y - 193) * scale) }
+        func keycap(_ x: CGFloat, _ y: CGFloat, _ side: CGFloat) -> NSBezierPath {
+            let origin = point(x, y)
+            return NSBezierPath(roundedRect: NSRect(x: origin.x, y: origin.y, width: side * scale, height: side * scale),
+                                xRadius: 106 * scale, yRadius: 106 * scale)
+        }
+        let gap = max(1, 24 * scale)
+        NSColor.black.withAlphaComponent(alpha).set()
+        keycap(193, 193, 462).fill()
+        // The gap between the keycaps, so the front one reads as in front.
+        let front = keycap(303, 303, 462)
+        let halo = NSBezierPath(roundedRect: front.bounds.insetBy(dx: -gap, dy: -gap),
+                                xRadius: 106 * scale + gap, yRadius: 106 * scale + gap)
+        NSColor.clear.set()
+        halo.fill(using: .copy)
+        NSColor.black.withAlphaComponent(alpha).set()
+        let chevron = NSBezierPath()
+        chevron.move(to: point(462, 380))
+        for (x, y) in [(565, 380), (680, 534), (565, 688), (462, 688), (577, 534)] as [(CGFloat, CGFloat)] {
+            chevron.line(to: point(x, y))
+        }
+        chevron.close()
+        front.append(chevron)
+        front.windingRule = .evenOdd
+        front.fill()
     }
 }
 

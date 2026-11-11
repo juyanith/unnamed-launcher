@@ -13,7 +13,7 @@ A **menu bar extra, the Guide panel, a Bindings window, and a Settings window** 
 | Surface | What it is | Opened by |
 | --- | --- | --- |
 | Guide | A non-activating, borderless Liquid Glass `NSPanel`. It never becomes key or main, and it shows the path and the next keys. | Pausing during a sequence (S-005, S-016) |
-| Menu bar menu | A `MenuBarExtra` with a template SF Symbol (`command`) and a badge for warnings | Clicking the menu bar icon |
+| Menu bar menu | A `MenuBarExtra` with the app icon's glyph (two keycaps and ›) drawn as a template image, and a badge for warnings | Clicking the menu bar icon |
 | Bindings window | A `Window` scene with a `NavigationSplitView` sidebar: Bindings, Actions, Contexts, Help. This is where you edit your own data, so it's the main window, not Settings (rules 37 and 54). | Edit Bindings… |
 | Settings | A `Settings` scene with one grouped Form, 520 pt wide. It's a single pane, so it has no tabs and is titled "Unnamed Launcher Settings" (settings.md). | Settings… (⌘,) |
 | Welcome | A small window shown only on first run (S-040). It isn't a tour: it lists the steps you need to finish setup. | First launch |

@@ -30,7 +30,7 @@ Which token to use, and when. The tokens are in `Sources/UnnamedLauncher/UI/`. A
 - **Keycaps** use `Surfaces.keycap` as the fill and `Surfaces.keycapStroke` as the outline. Both are a little translucent, so they take on the glass behind them.
 - **`Surfaces.warning`** is the one warning color, for a missing permission, a config error or a failed action. Always pair it with a symbol or words.
 - **Unavailable rows** (Choose by App with no match) use `Surfaces.unavailableOpacity` plus the words "not available in <App>".
-- **Menu bar icon:** use `StatusIcon.ready`. When Enabled is off, use `StatusIcon.off` at `StatusIcon.offOpacity`. When something needs attention, add the `StatusIcon.warning` badge. All are template symbols. Each state also goes in the status item's accessibility label.
+- **Menu bar icon:** the app icon's glyph, two keycaps and ›, drawn as a template image `StatusIcon.glyphSize` square (`MenuBarIcon.image(for:)`). When Enabled is off, draw it at `StatusIcon.offOpacity`. When something needs attention, add the badge, `StatusIcon.badgeDiameter` wide, at the top trailing corner. If the app icon's shapes change, change the glyph with them. Each state also goes in the status item's accessibility label.
 
 ## Motion.swift: animation
 - **Every animation goes through `Motion`.** Pass `@Environment(\.accessibilityReduceMotion)`, and every token returns nil when Reduce Motion is on.
