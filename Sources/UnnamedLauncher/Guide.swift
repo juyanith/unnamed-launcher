@@ -74,7 +74,7 @@ struct GuideContent: Equatable {
 
     /// "esc" and "delete", as printed on a Mac keyboard, for the default
     /// keys; the key name otherwise.
-    private static func footerLabel(_ key: KeyName) -> String {
+    static func footerLabel(_ key: KeyName) -> String {
         switch key {
         case .escape: "esc"
         case .backspace: "delete"

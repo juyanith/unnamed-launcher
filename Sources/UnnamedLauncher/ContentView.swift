@@ -14,6 +14,7 @@ struct ContentView: View {
             case .bindings: BindingsPage()
             case .actions: ActionsPage()
             case .contexts: ContextsPage()
+            case .help: HelpPage()
             }
         }
         .noInitialFocus()

@@ -61,5 +61,20 @@ extension SelfTest {
             check("S-044 Return puts the cursor in the title field", editor.focus == .title && editor.recording == nil)
             editor.focus = nil
         }
+
+        // S-052: the Help page lists your keys from the config, grouped as Home groups them.
+        let help = HelpContent(config: SeedData.fixture)
+        check("S-052 Help lists every leader and direct binding by group",
+              help.groups.map(\.title) == ["Hyper", "Meh", "CAG"]
+              && help.groups.flatMap(\.rows).map(\.title) == SeedData.fixture.leaders.map(\.title),
+              help.groups.map(\.title).joined(separator: ", "))
+        check("S-052 Help names the Cancel and Back keys and mentions Home",
+              help.cancelKey == "esc" && help.backKey == "delete" && help.hasHome)
+        check("S-052 Help has an empty state with no bindings", HelpContent(config: nil).isEmpty)
+        check("S-052 a config with one leader has no Home on the Help page",
+              model.store.loaded.map { HelpContent(config: $0).hasHome } == false)
+        model.sidebar = .help
+        check("S-052 the Bindings window opens the Help page", model.sidebar == .help)
+        model.sidebar = .bindings
     }
 }

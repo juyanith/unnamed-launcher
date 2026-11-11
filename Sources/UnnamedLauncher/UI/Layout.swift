@@ -24,6 +24,8 @@ enum Layout {
     static let actionColumnWidth: CGFloat = 148
     /// The Actions and Contexts pages' list beside the form.
     static let listPaneWidth: CGFloat = 280
+    /// The Help page's form, so its lines stay readable in a wide window.
+    static let helpMaxWidth: CGFloat = 640
 
     /// The Guide: rows per column before it adds a column (12, then 24).
     static let guideRowsPerColumn = 12

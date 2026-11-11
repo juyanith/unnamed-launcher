@@ -15,6 +15,7 @@ Built from [BRIEF.md](BRIEF.md), [SPEC.md](SPEC.md) and [research/launchers.md](
 | `bindings` | The Bindings page of the Bindings window |
 | `actions` | The Actions page |
 | `contexts` | The Contexts page |
+| `help`, `empty-help` | The Help page, with and without bindings |
 | `settings` | The Settings window |
 
 **How each acceptance line is checked:** `[snap]` snapshot, `[unit]` unit test, `[self]` self-test, `[manual]` a person must try it.
@@ -629,3 +630,23 @@ UX:
 - Words: "Version 0.1.3"; "Version 0.1 (main, aa45720)".
 Status: done
 Verified: the line's text (self-test), the branch and commit in a local build's Info.plist. Not yet tried by hand: the manual line.
+
+### S-052 Find my keys and how sequences work on the Help page
+As the user, when I'm stuck I open Help and see my leaders and direct bindings, the keys that work in every sequence, what the words mean, and where to read more.
+Screens: help, empty-help
+Depends: S-050, S-051
+Acceptance:
+- [self] The page lists every leader and direct binding, grouped by modifiers as Home groups them, with the group of the first entry first.
+- [self] It names your Cancel and Back keys, and says Back opens Home only when there are two or more top-level entries.
+- [self] With no bindings it shows No Bindings with New Binding, and the rest of the page.
+- [self] Help is a page of the Bindings window, in the sidebar and as ⌘4.
+- [snap] Each row shows its key, title, and "Leader" or "Direct binding"; In a Sequence, Words, and More (Open Config File, the documentation, Report a Problem, and the version line) follow.
+- [manual] Clicking a row shows it selected on the Bindings page. Help (⌘?) in the menu bar menu and Unnamed Launcher Help in the Help menu open the page.
+UX:
+- Flow: Help (⌘?) in the menu bar menu → the Bindings window on Help → click a row → the Bindings page with that row selected.
+- Surface: a sidebar page of the Bindings window; a grouped Form, centered, at most 640 pt wide.
+- States: with bindings; no bindings (No Bindings, New Binding); an invalid draft shows the last valid config.
+- Words: "Your Keys: Hyper", "In a Sequence", "Words", "More", "Read the Documentation on GitHub", "Report a Problem".
+- Access: each key row reads as "key, title, leader" or "direct binding" and is a button.
+Status: done
+Verified: content and page switching (self-test), help and empty-help in light and dark (snapshots), grid checks. Not yet tried by hand: the manual line.

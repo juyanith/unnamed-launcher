@@ -14,7 +14,7 @@ A **menu bar extra, the Guide panel, a Bindings window, and a Settings window** 
 | --- | --- | --- |
 | Guide | A non-activating, borderless Liquid Glass `NSPanel`. It never becomes key or main, and it shows the path and the next keys. | Pausing during a sequence (S-005, S-016) |
 | Menu bar menu | A `MenuBarExtra` with a template SF Symbol (`command`) and a badge for warnings | Clicking the menu bar icon |
-| Bindings window | A `Window` scene with a `NavigationSplitView` sidebar: Bindings, Actions, Contexts. This is where you edit your own data, so it's the main window, not Settings (rules 37 and 54). | Edit Bindings… |
+| Bindings window | A `Window` scene with a `NavigationSplitView` sidebar: Bindings, Actions, Contexts, Help. This is where you edit your own data, so it's the main window, not Settings (rules 37 and 54). | Edit Bindings… |
 | Settings | A `Settings` scene with one grouped Form, 520 pt wide. It's a single pane, so it has no tabs and is titled "Unnamed Launcher Settings" (settings.md). | Settings… (⌘,) |
 | Welcome | A small window shown only on first run (S-040). It isn't a tour: it lists the steps you need to finish setup. | First launch |
 
@@ -31,8 +31,9 @@ A **menu bar extra, the Guide panel, a Bindings window, and a Settings window** 
 | Bindings | `keyboard` | An outline of leaders › menus › bindings with Key, Title and Action columns, in file order (S-023 to S-029) |
 | Actions | `bolt` | A list of actions plus a form for the selected one, which changes with its type (S-030) |
 | Contexts | `macwindow.on.rectangle` | An ordered list of contexts with their apps (S-031) |
+| Help | `questionmark.circle` | A grouped Form, centered and at most 640 pt wide: your leaders and direct bindings grouped as in Home, the keys that work in every sequence, the words, and links (S-052) |
 
-The window title names the page ("Bindings", "Actions", "Contexts"), not the app (rule 19). Each page puts its list on the left and a form for the selection on the right, 280 pt wide on Bindings. There's no inspector.
+The window title names the page ("Bindings", "Actions", "Contexts", "Help"), not the app (rule 19). Each page puts its list on the left and a form for the selection on the right, 280 pt wide on Bindings. There's no inspector.
 
 **Settings, one pane** (S-032, S-036), as grouped sections:
 - **Guide:** Show Guide (toggle), delay before showing, timeout, position (Center, Top, Bottom), theme (System, Light, Dark).
@@ -57,6 +58,7 @@ The status item menu acts as the menu bar while no window is open (menus.md, rul
 | Open Config File / Show in Finder (⌥) | Menu bar menu, and the File menu | — |
 | Edit Bindings… | Menu bar menu | ⌘B |
 | Settings… | Menu bar menu and the app menu | ⌘, |
+| Help (menu bar menu) / Unnamed Launcher Help (Help menu): open the Help page | Menu bar menu, and the Help menu of the Bindings window | ⌘? |
 | Version line ("Version 0.1.3", or "Version 0.1 (main, aa45720)" for a local build) | Menu bar menu, disabled item above Quit | — |
 | Quit Unnamed Launcher | Menu bar menu and the app menu | ⌘Q |
 | New Binding / New Menu | File menu, the toolbar over the outline, and the context menu | ⌘N / ⇧⌘N |
@@ -67,7 +69,7 @@ The status item menu acts as the menu bar while no window is open (menus.md, rul
 | Delete | Edit menu and the context menu | ⌫ |
 | Undo / Redo | Edit menu | ⌘Z / ⇧⌘Z |
 | Show/Hide Sidebar | View menu (`SidebarCommands`) | ⌃⌘S |
-| Bindings / Actions / Contexts | View menu, to switch pages | ⌘1 / ⌘2 / ⌘3 |
+| Bindings / Actions / Contexts / Help | View menu, to switch pages | ⌘1 / ⌘2 / ⌘3 / ⌘4 |
 
 **Inside a sequence** (the Guide, not menus): Cancel (Escape), Back (Backspace), and the step keys. The Guide's footer teaches Cancel and Back.
 
@@ -81,6 +83,7 @@ Each uses `ContentUnavailableView` with the first action as a button (rule 27).
 | --- | --- | --- | --- |
 | Bindings, no config yet (only seen if the starter couldn't be written) | No Bindings | Add a leader such as Hyper+Space, then the keys under it. | New Binding |
 | Actions | No Actions | Actions are what bindings do: open an app, run a command, send a shortcut. | New Action |
+| Help, no bindings | No Bindings | Add a leader such as Hyper+Space with keys under it, or a direct binding such as Hyper+T. Your keys are listed here. The rest of the page still shows. | New Binding |
 | Contexts | No Contexts | A context is a set of apps, such as your browsers, that Context Aware actions check. | New Context |
 | Bindings, config invalid | The banner above the outline lists the errors, and the outline shows the last valid config (S-023, S-034). | — | — |
 
@@ -107,7 +110,7 @@ Its look and behavior, as the base for design-system tokens and story S-005:
 Snapshot pages to add as each surface lands:
 - `hud`, `hud-error` (S-005, S-015, S-018)
 - `menubar`, `menubar-warning` (S-002, S-008, S-009)
-- `bindings`, `actions`, `contexts` (the sidebar pages; they exist now)
+- `bindings`, `actions`, `contexts`, `help` (the sidebar pages; they exist now)
 - `settings` (exists now)
 - `welcome` (S-040)
 

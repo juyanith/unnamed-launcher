@@ -27,6 +27,10 @@ struct EditorCommands: Commands {
             }
             Divider()
         }
+        CommandGroup(replacing: .help) {
+            Button("Unnamed Launcher Help") { model.sidebar = .help }
+                .keyboardShortcut("?", modifiers: .command)
+        }
     }
 
     /// One outline command as a menu bar item, with its shortcut.

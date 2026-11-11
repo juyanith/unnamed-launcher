@@ -3,7 +3,7 @@ import UnnamedLauncherKit
 
 /// The Bindings window's sidebar pages. Snapshot mode walks through every case.
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case bindings, actions, contexts
+    case bindings, actions, contexts, help
 
     var id: String { rawValue }
 
@@ -12,6 +12,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .bindings: "Bindings"
         case .actions: "Actions"
         case .contexts: "Contexts"
+        case .help: "Help"
         }
     }
 
@@ -20,6 +21,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .bindings: "keyboard"
         case .actions: "bolt"
         case .contexts: "macwindow.on.rectangle"
+        case .help: "questionmark.circle"
         }
     }
 
@@ -29,6 +31,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .bindings: "Leaders, menus and bindings from the config file appear here."
         case .actions: "Actions that bindings run appear here."
         case .contexts: "Sets of apps that Context Aware checks appear here."
+        case .help: "Your leaders and direct bindings, and how sequences work."
         }
     }
 }

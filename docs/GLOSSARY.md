@@ -34,4 +34,5 @@ One name per idea. Use these words in the UI, the docs, the log and VoiceOver la
 | Enabled | Whether Unnamed Launcher is capturing leaders. When it's off, no keys are captured. | active, running, paused, armed |
 | Permissions | The Accessibility and Input Monitoring access in System Settings that the app needs to capture keys. Use Apple's names for each one. | rights, access, privileges |
 | Bindings window | The window for editing bindings, actions and contexts, opened by Edit Bindings… (⌘B). | editor, config editor, settings window |
+| Help page | The Help page of the Bindings window: your leaders and direct bindings, the keys that work in every sequence, and links. | manual, documentation, cheat sheet |
 | Settings | The Settings window (Settings… ⌘,): Guide, keys, feedback, Open at Login. | Preferences, options |

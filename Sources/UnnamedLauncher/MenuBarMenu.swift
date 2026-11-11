@@ -121,6 +121,12 @@ struct MenuBarMenu: View {
             NSApp.activate()
         }
         .keyboardShortcut(",")
+        Button("Help") {
+            model.sidebar = .help
+            openWindow(id: WindowID.bindings)
+            NSApp.activate()
+        }
+        .keyboardShortcut("?", modifiers: .command)
         Divider()
         Text(AppVersion.line)
         Button("Quit Unnamed Launcher") {
