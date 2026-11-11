@@ -40,7 +40,7 @@ final class GuideIcons {
         case let .symbol(name):
             return NSImage(systemSymbolName: name, accessibilityDescription: nil)
         case .menu:
-            return MenuBarIcon.glyph(side: Layout.guideGlyphSize)
+            return AppGlyph.image(side: Layout.guideGlyphSize)
         }
     }
 }
