@@ -8,6 +8,7 @@ Built from [BRIEF.md](BRIEF.md), [SPEC.md](SPEC.md) and [research/launchers.md](
 | --- | --- |
 | `hud` | The HUD over a sample app |
 | `hud-error` | The HUD after an unbound key or a failed action |
+| `hud-home`, `hud-home-wide` | Home in one column, and groups side by side |
 | `menubar` | The menu bar menu, all OK |
 | `menubar-warning` | The menu bar menu with a missing permission or a config error |
 | `welcome` | The first-run window |
@@ -586,7 +587,7 @@ Acceptance:
 - [snap] The outline and the key recorder show `Meh+W` and `CAG+T`.
 Status: done
 
-## Proposed (branch `feature-home-menu`)
+## Home
 
 ### S-050 Go Back to Home
 As the user, I press Back in a leader's menu and see Home: every leader and direct binding, with the ones on my current modifiers at the top, so I can switch leaders or run a direct binding without starting over.
@@ -608,5 +609,5 @@ UX:
 - States: normal; wide (side by side); a disabled row reads "not available in <App>" (S-013).
 - Words: path "Home", then "Home › Commands" after picking a leader. Group headers use the chord names the app writes: "Hyper", "Meh", "CAG", "Cmd", and "No modifiers". Keycaps show the key alone.
 - Access: VoiceOver announces "Home, N keys" and each group header as a heading.
-Status: done (on branch `feature-home-menu`)
+Status: done
 Verified: engine and grouping (unit tests, HomeTests), groups, columns and dimmed rows (self-test), hud-home and hud-home-wide in light and dark (snapshots). Not yet tried by hand: Back to Home and picking another leader with the real keyboard, and VoiceOver reading the group headers.

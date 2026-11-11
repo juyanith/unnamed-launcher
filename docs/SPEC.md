@@ -34,7 +34,7 @@ This is the source of truth for how sequences, actions and the config file behav
 - **Step keys have no modifiers.** Modifiers that belong to the leader and are still held are ignored, so you can press Hyper+W then 1 whether or not you've let go of Hyper. A step pressed with any other modifier doesn't match.
 - **Keys mean physical positions on the US ANSI layout.** Other keyboard layouts don't change which key a name refers to.
 
-### Home (proposed, branch `feature-home-menu`)
+### Home
 Home is the menu above the leaders. It lists every leader and direct binding, so Back can go one level further up than a leader's menu. The global Cancel and Back keys stay as they are.
 
 - **Opening it:** Back in a leader's menu opens Home. No chord opens it directly.
