@@ -227,6 +227,8 @@ struct GuideView: View {
             footerKey(content.cancelKey, "Cancel")
             if let back = content.backKey { footerKey(back, "Back") }
         }
+        // Centered under the rows, however many columns they take.
+        .frame(maxWidth: .infinity)
         .font(.caption)
         .foregroundStyle(.secondary)
     }
