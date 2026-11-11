@@ -111,6 +111,8 @@ private struct ContextForm: View {
                 Button("Add App…") { addApp() }
             } header: {
                 Text("Apps")
+            } footer: {
+                Text("When an app is in more than one context, Context Aware uses the first one in the list. Drag contexts to change the order.")
             }
         }
         .formStyle(.grouped)
