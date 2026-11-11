@@ -2,8 +2,8 @@
 #   brew tap juyanith/unnamed-launcher https://github.com/juyanith/unnamed-launcher
 #   brew install --cask unnamed-launcher
 cask "unnamed-launcher" do
-  version "0.1.4"
-  sha256 "e358b0ceeddb5707cd7ca87826e19cb64d34d596db24aed5cc0bf875c0add05e"
+  version "0.1.5"
+  sha256 "7de55cdc82e7350fc3a42938308bcf13607c8d695a86dbec3b9bd16e6fcc7354"
 
   url "https://github.com/juyanith/unnamed-launcher/releases/download/v#{version}/UnnamedLauncher-#{version}.zip"
   name "Unnamed Launcher"
