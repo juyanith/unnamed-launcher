@@ -39,16 +39,6 @@ enum WindowRaiser {
         return AXUIElementPerformAction(window, kAXRaiseAction as CFString) == .success
     }
 
-    /// Makes the app with this pid the active app. Unlike NSWorkspace,
-    /// which picks by bundle, it can't reach another copy of the same app.
-    @discardableResult
-    static func makeFrontmost(pid: pid_t) -> Bool {
-        guard AXIsProcessTrusted() else { return false }
-        let app = AXUIElementCreateApplication(pid)
-        AXUIElementSetMessagingTimeout(app, timeout)
-        return AXUIElementSetAttributeValue(app, kAXFrontmostAttribute as CFString, kCFBooleanTrue) == .success
-    }
-
     private static func value<T>(_ element: AXUIElement, _ attribute: String) -> T? {
         var result: CFTypeRef?
         guard AXUIElementCopyAttributeValue(element, attribute as CFString, &result) == .success else { return nil }

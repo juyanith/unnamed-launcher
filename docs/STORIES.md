@@ -670,4 +670,4 @@ UX:
 - Surface: the Help page (S-052). The action is set up on the Actions page like any other.
 - Words: "Show Help"; form text "Opens the Help page of the Bindings window, which lists your leaders and direct bindings."
 Status: done
-Verified: loading, writing, the plan, the direct binding and the chords macOS keeps (unit tests); the starter, the picker, opening the page with the window closed (self-test); actions-help in light and dark (snapshots); the window coming to the front over Finder (a test copy, run by hand). Tried by hand on 2026-11-11: Hyper+H opens the page; Hyper+Slash never reached the launcher, which led to the sysdiagnose rule. Not yet tried by hand: focus from a real key press, and ⌘W giving focus back.
+Verified: loading, writing, the plan, the direct binding and the chords macOS keeps (unit tests); the starter, the picker, opening the page with the window closed (self-test); actions-help in light and dark (snapshots); Tried by hand on 2026-11-11: Hyper+H from Zed brings the Help page to the front with focus, and ⌘W gives focus back to Zed; Hyper+Slash never reached the launcher, which led to the sysdiagnose rule.

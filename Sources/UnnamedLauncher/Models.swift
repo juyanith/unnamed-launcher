@@ -87,12 +87,15 @@ final class AppModel {
         openBindingsWindow?()
         // A chord doesn't make this app active, and macOS ignores activate()
         // from an app in the background, so the window would open behind.
-        // Accessibility can make this process frontmost.
-        Task {
-            await Task.yield()
-            if !WindowRaiser.makeFrontmost(pid: ProcessInfo.processInfo.processIdentifier) { NSApp.activate() }
-            NSApp.windows.first { $0.identifier?.rawValue.hasPrefix(WindowID.bindings) == true }?
-                .makeKeyAndOrderFront(nil)
+        // NSWorkspace can bring it forward, as it does apps for Use Application.
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = true
+        // (Accessibility's frontmost attribute reports success and does nothing.)
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, _ in
+            Task { @MainActor in
+                NSApp.windows.first { $0.identifier?.rawValue.hasPrefix(WindowID.bindings) == true }?
+                    .makeKeyAndOrderFront(nil)
+            }
         }
     }
 
