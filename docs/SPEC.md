@@ -35,16 +35,17 @@ This is the source of truth for how sequences, actions and the config file behav
 - **Keys mean physical positions on the US ANSI layout.** Other keyboard layouts don't change which key a name refers to.
 
 ### Home (proposed, branch `feature-home-menu`)
-Home is the menu above the leaders. It lists every leader and direct binding, so Back can go one level further up than a leader's menu.
+Home is the menu above the leaders. It lists every leader and direct binding, so Back can go one level further up than a leader's menu. The global Cancel and Back keys stay as they are.
 
-- **Opening it:** Back in a leader's menu opens Home. **Open (Q1):** whether a chord can also open Home directly.
-- **When it's shown:** **Open (Q4):** only when the config has two or more top-level entries, or always.
-- **Groups:** Home lists top-level entries in groups by their exact modifiers (Hyper, Meh, CAG, ⌘, no modifiers…). Within a group every key is unique, because two entries can't share a chord, so grouping removes clashes like `Hyper+Space` and `Meh+Space`.
-- **Current group first:** the group of the leader you came from is at the top, then a separator, then the other groups. **Open (Q2):** the other groups as one flat list with full chords, or each under its own header.
-- **Picking:** in the current group, press the key alone, with that group's modifiers held or not. Any other entry needs its exact chord, counting modifiers still held from the leader. A press matches at most one entry, since chords are unique.
+- **Opening it:** Back in a leader's menu opens Home. No chord opens it directly.
+- **When it's shown:** only when the config has two or more top-level entries. With one, Back in the leader's menu ends the sequence, as before.
+- **Leaving it:** Back or Cancel in Home ends the sequence.
+- **Groups:** Home lists top-level entries in groups by their exact modifiers (Hyper, Meh, CAG, Cmd, no modifiers…), each under a header with its name. Rows show the key alone. Within a group every key is unique, because two entries can't share a chord, so grouping removes clashes like `Hyper+Space` and `Meh+Space`.
+- **Current group first:** the group of the leader you came from comes first, then a separator, then the other groups in order of their first entry in the file. Within a group, rows are in file order.
+- **Picking:** in the current group, press the key alone, with that group's modifiers held or not. Any other entry needs its exact chord, counting modifiers still held from the leader. A press matches at most one entry, since chords are unique. Anything else is a key that isn't bound.
 - **Leaders and direct bindings:** picking a leader opens its menu, and picking a direct binding runs it and ends the sequence. The app in front stays the one from when the sequence started.
-- **Unavailable direct bindings:** **Open (Q5):** a Context Aware direct binding with nothing to run for the app in front is shown disabled and flashes like any unavailable binding, or is hidden.
-- **Size:** **Open (Q6):** Home can be the longest menu. How the Guide handles many rows and groups.
+- **Unavailable direct bindings:** a Context Aware direct binding with nothing to run for the app in front is shown disabled. Picking it flashes and stays in Home, as for any unavailable binding.
+- **Layout:** when Home fits in one column (12 rows or fewer), the separator is a horizontal line. Otherwise the groups sit side by side: the current group in the first column, the others in more columns, never splitting a group, with a vertical divider after the current group.
 
 ### HUD
 - **Delay:** `hudDelayMs` (default 0) is how long the sequence must sit idle before the HUD appears. Every key press restarts the delay. Once the HUD is shown, it stays until the sequence ends. If you know the sequence, nothing appears on screen.

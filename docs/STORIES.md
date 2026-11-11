@@ -590,25 +590,21 @@ Status: done
 
 ### S-050 Go Back to Home
 As the user, I press Back in a leader's menu and see Home: every leader and direct binding, with the ones on my current modifiers at the top, so I can switch leaders or run a direct binding without starting over.
-Screens: hud-home
+Screens: hud-home, hud-home-wide
 Depends: S-007, S-048, S-049
 Acceptance:
-- [unit] Back in a leader's menu opens Home; Back in Home ends the sequence.
-- [unit] Home groups top-level entries by exact modifiers, with the group of the leader you came from first.
-- [unit] In the current group the key alone picks, with its modifiers held or not; other entries need their exact chord.
+- [unit] With two or more top-level entries, Back in a leader's menu opens Home; with one, it ends the sequence.
+- [unit] Back or Cancel in Home ends the sequence.
+- [unit] Home groups top-level entries by exact modifiers, with the group of the leader you came from first, then the others in order of their first entry; rows keep file order.
+- [unit] In the current group the key alone picks, with its modifiers held or not; other entries need their exact chord, counting held modifiers; anything else is unbound.
 - [unit] Picking a leader opens its menu; picking a direct binding runs it for the app that was in front when the sequence started.
-- [snap] The Guide shows Home with the current group, a separator, and the other groups.
+- [unit] An unavailable Context Aware direct binding flashes and stays in Home.
+- [snap] Home with 12 rows or fewer: the current group, a horizontal separator, then each other group under its header.
+- [snap] Home with more rows: groups side by side, no group split, a vertical divider after the current group.
 UX:
 - Flow: leader → its menu → Back → Home → a key or chord → that leader's menu, or the direct binding runs.
 - Surface: the Guide (S-005).
-- Words: path "Home"; then "Home › Commands" after picking a leader.
-Open questions:
-- Q1: Can a chord open Home directly, and if so which group is current?
-- Q2: Other groups: one flat list with full chords, or a header per group?
-- Q3: Back in Home: end the sequence (as written), or nothing?
-- Q4: Show Home always, or only with two or more top-level entries?
-- Q5: Unavailable Context Aware direct bindings: disabled, or hidden?
-- Q6: Many rows: columns as today (S-005), a height limit, or groups side by side?
-- Q7: Does this replace the global Cancel and Back keys, or come first and stand alone?
+- States: normal; wide (side by side); a disabled row reads "not available in <App>" (S-013).
+- Words: path "Home", then "Home › Commands" after picking a leader. Group headers use the chord names the app writes: "Hyper", "Meh", "CAG", "Cmd", and "No modifiers". Keycaps show the key alone.
+- Access: VoiceOver announces "Home, N keys" and each group header as a heading.
 Status: proposed
-
