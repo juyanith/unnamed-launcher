@@ -211,7 +211,7 @@ struct GuideView: View {
         GridRow {
             Keycap(label: row.key)
                 .gridColumnAlignment(.leading)
-            if icons { appIcon(row) }
+            if icons { EntryIcon(source: row.icon) }
             VStack(alignment: .leading, spacing: 0) {
                 Text(row.title)
                     .lineLimit(1)
@@ -231,29 +231,6 @@ struct GuideView: View {
         .opacity(row.isAvailable ? 1 : Surfaces.unavailableOpacity)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(row.key), \(row.title)\(row.isMenu ? ", menu" : "")\(row.note.map { ", \($0)" } ?? "")")
-    }
-
-    /// The row's icon, or its empty space. Decorative: the row's label names it.
-    private func appIcon(_ row: GuideContent.Row) -> some View {
-        Group {
-            if case let .symbol(name) = row.icon, GuideIcons.shared.icon(for: .symbol(name)) != nil {
-                // Symbols in secondary, so colored app and file icons stand out.
-                Image(systemName: name)
-                    .imageScale(.large)
-                    .foregroundStyle(.secondary)
-            } else if row.icon == .menu, let image = GuideIcons.shared.icon(for: .menu) {
-                // The menu bar icon's glyph, in secondary like a symbol.
-                Image(nsImage: image)
-                    .renderingMode(.template)
-                    .foregroundStyle(.secondary)
-            } else if let image = row.icon.flatMap(GuideIcons.shared.icon) {
-                Image(nsImage: image).resizable()
-            } else {
-                Color.clear
-            }
-        }
-        .frame(width: Layout.guideIconSize, height: Layout.guideIconSize)
-        .accessibilityHidden(true)
     }
 
     private var footer: some View {

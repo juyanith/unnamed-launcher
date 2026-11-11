@@ -19,6 +19,13 @@ final class GuideIcons {
         icons[source]
     }
 
+    /// The icon, looked up now if it wasn't found yet: for the Bindings
+    /// editor's preview, never the Guide.
+    func lookUpIcon(for source: IconSource) -> NSImage? {
+        load([source])
+        return icons[source]
+    }
+
     /// Looks up the icons not found yet. A missing app or file is tried
     /// again on the next load, in case it exists by then.
     func load(_ sources: Set<IconSource>) {

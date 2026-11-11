@@ -70,7 +70,10 @@ struct EntryEditor: View {
                         .onChange(of: focus) { old, _ in
                             if old == .icon { editor.setIcon(path, icon, undo: undo) }
                         }
-                    IconPreview(icon: icon)
+                    let trimmed = icon.trimmingCharacters(in: .whitespaces)
+                    // VoiceOver reads a symbol's name, or a file's name without its folder.
+                    EntryIcon(source: trimmed.isEmpty ? nil : IconSource(trimmed), looksUp: true,
+                              accessibilityName: (trimmed as NSString).lastPathComponent)
                     Menu {
                         ForEach(BindingsEditor.commonSymbols, id: \.self) { name in
                             Button { choose(name, path) } label: { Label(name, systemImage: name) }
@@ -137,27 +140,3 @@ extension BindingsEditor {
     }
 }
 
-/// The Icon field's preview: the symbol or file icon as the Guide shows it.
-private struct IconPreview: View {
-    let icon: String
-
-    var body: some View {
-        let trimmed = icon.trimmingCharacters(in: .whitespaces)
-        Group {
-            switch trimmed.isEmpty || BindingsEditor.iconProblem(trimmed) != nil ? nil : IconSource(trimmed) {
-            case let .symbol(name):
-                Image(systemName: name)
-                    .imageScale(.large)
-                    .foregroundStyle(.secondary)
-                    .accessibilityLabel(name)
-            case let .file(path):
-                Image(nsImage: NSWorkspace.shared.icon(forFile: path))
-                    .resizable()
-                    .accessibilityLabel((path as NSString).lastPathComponent)
-            default:
-                Color.clear.accessibilityHidden(true)
-            }
-        }
-        .frame(width: Layout.guideIconSize, height: Layout.guideIconSize)
-    }
-}
