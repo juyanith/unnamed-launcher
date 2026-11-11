@@ -19,7 +19,7 @@ This is the source of truth for how sequences, actions and the config file behav
 | A child menu's key | Opens that menu. |
 | A child binding's key | Runs the action and ends the sequence. |
 | A direct binding's chord | Has no special meaning inside a sequence. It's a key that isn't bound. |
-| Back (default Backspace) | Goes to the parent menu, or ends the sequence when already in a leader's menu. |
+| Back (default Backspace) | Goes to the parent menu. In a leader's menu it opens Home, or ends the sequence when Home isn't shown (see Home). In Home it ends the sequence. |
 | Cancel (default Escape) | Ends the sequence and runs nothing. |
 | Any other key | Error feedback: the HUD flashes and/or the alert sound plays. The sequence stays where it is, and if the HUD was waiting for its delay, it appears now. |
 
@@ -33,6 +33,18 @@ This is the source of truth for how sequences, actions and the config file behav
 
 - **Step keys have no modifiers.** Modifiers that belong to the leader and are still held are ignored, so you can press Hyper+W then 1 whether or not you've let go of Hyper. A step pressed with any other modifier doesn't match.
 - **Keys mean physical positions on the US ANSI layout.** Other keyboard layouts don't change which key a name refers to.
+
+### Home (proposed, branch `feature-home-menu`)
+Home is the menu above the leaders. It lists every leader and direct binding, so Back can go one level further up than a leader's menu.
+
+- **Opening it:** Back in a leader's menu opens Home. **Open (Q1):** whether a chord can also open Home directly.
+- **When it's shown:** **Open (Q4):** only when the config has two or more top-level entries, or always.
+- **Groups:** Home lists top-level entries in groups by their exact modifiers (Hyper, Meh, CAG, ⌘, no modifiers…). Within a group every key is unique, because two entries can't share a chord, so grouping removes clashes like `Hyper+Space` and `Meh+Space`.
+- **Current group first:** the group of the leader you came from is at the top, then a separator, then the other groups. **Open (Q2):** the other groups as one flat list with full chords, or each under its own header.
+- **Picking:** in the current group, press the key alone, with that group's modifiers held or not. Any other entry needs its exact chord, counting modifiers still held from the leader. A press matches at most one entry, since chords are unique.
+- **Leaders and direct bindings:** picking a leader opens its menu, and picking a direct binding runs it and ends the sequence. The app in front stays the one from when the sequence started.
+- **Unavailable direct bindings:** **Open (Q5):** a Context Aware direct binding with nothing to run for the app in front is shown disabled and flashes like any unavailable binding, or is hidden.
+- **Size:** **Open (Q6):** Home can be the longest menu. How the Guide handles many rows and groups.
 
 ### HUD
 - **Delay:** `hudDelayMs` (default 0) is how long the sequence must sit idle before the HUD appears. Every key press restarts the delay. Once the HUD is shown, it stays until the sequence ends. If you know the sequence, nothing appears on screen.

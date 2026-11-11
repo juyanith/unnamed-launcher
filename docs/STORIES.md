@@ -586,3 +586,29 @@ Acceptance:
 - [snap] The outline and the key recorder show `Meh+W` and `CAG+T`.
 Status: done
 
+## Proposed (branch `feature-home-menu`)
+
+### S-050 Go Back to Home
+As the user, I press Back in a leader's menu and see Home: every leader and direct binding, with the ones on my current modifiers at the top, so I can switch leaders or run a direct binding without starting over.
+Screens: hud-home
+Depends: S-007, S-048, S-049
+Acceptance:
+- [unit] Back in a leader's menu opens Home; Back in Home ends the sequence.
+- [unit] Home groups top-level entries by exact modifiers, with the group of the leader you came from first.
+- [unit] In the current group the key alone picks, with its modifiers held or not; other entries need their exact chord.
+- [unit] Picking a leader opens its menu; picking a direct binding runs it for the app that was in front when the sequence started.
+- [snap] The Guide shows Home with the current group, a separator, and the other groups.
+UX:
+- Flow: leader → its menu → Back → Home → a key or chord → that leader's menu, or the direct binding runs.
+- Surface: the Guide (S-005).
+- Words: path "Home"; then "Home › Commands" after picking a leader.
+Open questions:
+- Q1: Can a chord open Home directly, and if so which group is current?
+- Q2: Other groups: one flat list with full chords, or a header per group?
+- Q3: Back in Home: end the sequence (as written), or nothing?
+- Q4: Show Home always, or only with two or more top-level entries?
+- Q5: Unavailable Context Aware direct bindings: disabled, or hidden?
+- Q6: Many rows: columns as today (S-005), a height limit, or groups side by side?
+- Q7: Does this replace the global Cancel and Back keys, or come first and stand alone?
+Status: proposed
+

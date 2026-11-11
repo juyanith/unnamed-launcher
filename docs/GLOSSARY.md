@@ -10,6 +10,8 @@ One name per idea. Use these words in the UI, the docs, the log and VoiceOver la
 | Menu | A named group of keys inside a sequence, such as Applications. It opens more choices and runs nothing itself. | folder, group, submenu, category |
 | Binding | A key that runs an action, such as E → Editor. | shortcut, command, item, mapping, hotkey |
 | Direct binding | A binding on a global chord, such as Hyper+T → Terminal. It runs at once, with no sequence and no guide. | hotkey, global shortcut, quick key |
+| Home | The menu above the leaders, listing every leader and direct binding by group. Back from a leader's menu opens it. (Proposed.) | root, top level, start menu, launcher menu |
+| Group | In Home, the top-level entries that share the same modifiers, such as Hyper. (Proposed.) | layer, modifier set, section |
 | Entry | Config-file word for a menu or binding. Never shown in the UI; say "binding" or "menu". | (UI) |
 | Action | What a binding does: open an app, open a file or URL, run a command, send a shortcut, choose by app, or nothing. | command, task, handler |
 | Use Application | The `application` action: focus an app, start it, or both, by its mode. | Open App, launch, activate, switch to |
