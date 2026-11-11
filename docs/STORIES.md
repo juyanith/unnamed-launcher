@@ -554,6 +554,7 @@ Main jobs in the brief map to M1 (job 1), M4 (job 2) and S-002, S-008 and S-009 
 - **System commands:** covered by `exec` and `send` (S-011, S-012).
 - **Run scripts and Shortcuts:** covered by `exec`, for example `shortcuts run "Name"` (S-011).
 - **Accounts, sync, analytics, upgrade prompts:** dropped. This is a personal app.
+- **A menu that also runs an action** (from LeaderTray, 2026-11-11): pressing Hyper+B would focus the browser and then open a menu of browser keys. Rejected: it saves one key press but changes the rule that an entry is a menu or a binding, which touches the config, the validator, the engine, the Bindings editor and the Guide.
 
 ### S-046 Use Application with Focus, Start, or Focus or Start
 As the user, I choose whether an app binding only focuses the app, starts a new copy, or focuses it and starts it if needed. Open App is now Use Application, Choose by App is now Context Aware, and the Type picker is alphabetical.
