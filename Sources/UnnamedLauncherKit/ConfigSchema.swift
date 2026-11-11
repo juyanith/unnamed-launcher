@@ -96,10 +96,13 @@ public enum ConfigSchema {
     }
 
     private static func actionVariants(allowingContextual: Bool) -> [[String: Any]] {
+        // The type is a one-item enum, not a const: editors that read the
+        // schema as an older draft ignore const, and then Do Nothing and
+        // Show Help, which have no other fields, both match and oneOf fails.
         func variant(_ type: String, _ fields: [String: Any], required: [String] = []) -> [String: Any] {
             [
                 "type": "object", "additionalProperties": false, "required": ["type"] + required,
-                "properties": fields.merging(["type": ["const": type]]) { a, _ in a },
+                "properties": fields.merging(["type": ["enum": [type]]]) { a, _ in a },
             ]
         }
         var variants = [

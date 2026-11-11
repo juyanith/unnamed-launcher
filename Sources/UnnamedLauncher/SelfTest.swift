@@ -14,9 +14,13 @@ enum SelfTest {
     static var exitCode: Int32 = 0
     private static var failures = 0
     private static var count = 0
+    /// The Bindings window's task starts the run, and S-053 closes and
+    /// reopens that window, so the run must start only once.
+    private static var started = false
 
     static func runIfRequested(model: AppModel) {
-        guard requested else { return }
+        guard requested, !started else { return }
+        started = true
         // Print each line at once, so a crash keeps the lines before it.
         setvbuf(stdout, nil, _IOLBF, 0)
         guard Store.isOverridden else {
@@ -39,7 +43,7 @@ enum SelfTest {
             await failureChecks(model)
             await editorChecks(model)
             systemChecks(model)
-            polishChecks(model)
+            await polishChecks(model)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)

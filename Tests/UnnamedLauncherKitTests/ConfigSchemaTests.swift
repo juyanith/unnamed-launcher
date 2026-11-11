@@ -46,8 +46,8 @@ struct ConfigSchemaTests {
     func types() throws {
         let defs = schema["$defs"] as! [String: Any]
         let variants = (defs["action"] as! [String: Any])["oneOf"] as! [[String: Any]]
-        let types = variants.map { (($0["properties"] as! [String: Any])["type"] as! [String: Any])["const"] as! String }
-        #expect(types == ConfigSchema.actionTypes)
+        let types = variants.map { (($0["properties"] as! [String: Any])["type"] as! [String: Any])["enum"] as! [String] }
+        #expect(types == ConfigSchema.actionTypes.map { [$0] })
         let props = schema["properties"] as! [String: Any]
         let runtime = (props["runtime"] as! [String: Any])["properties"] as! [String: Any]
         #expect((runtime["hudDelayMs"] as! [String: Any])["minimum"] as? Int == 0)

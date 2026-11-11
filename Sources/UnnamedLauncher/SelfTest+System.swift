@@ -36,7 +36,7 @@ extension SelfTest {
     }
 
     /// M6: the welcome window, icons, context menus, keyboard.
-    static func polishChecks(_ model: AppModel) {
+    static func polishChecks(_ model: AppModel) async {
         // S-040: the welcome window shows until both permissions and one sequence are done.
         check("S-040 the welcome window shows until setup is done",
               !WelcomeStatus(accessibility: true, inputMonitoring: true, ranSequence: false).isComplete
@@ -85,7 +85,12 @@ extension SelfTest {
               starter?.leaders.last.map { $0.path.description == "Hyper+Slash" && starter?.config.actions[$0.action ?? ""] == .help } == true)
         check("S-053 Show Help is a type in the Actions page's picker",
               Config.Action.types(allowsContextAware: true).contains("help"))
-        model.showHelp()
+        // As from a chord: the window closed, through the real performer.
+        NSApp.windows.first { $0.identifier?.rawValue.hasPrefix(WindowID.bindings) == true }?.close()
+        try? await Task.sleep(for: .seconds(0.5))
+        model.sidebar = .bindings
+        try? await SystemPerformer().perform(.showHelp)
+        try? await Task.sleep(for: .seconds(1))
         let bindingsWindow = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix(WindowID.bindings) == true }
         check("S-053 Show Help opens the Bindings window on the Help page",
               model.sidebar == .help && bindingsWindow?.isVisible == true,
