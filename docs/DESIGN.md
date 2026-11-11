@@ -93,7 +93,7 @@ Its look and behavior, as the base for design-system tokens and story S-005:
 - **Layout:**
   - The path row comes first, in Headline style with the › separators in secondary text.
   - Rows show the keycap (a monospaced key name in a small rounded rectangle), then the title in Body style, then a trailing › on menus.
-  - The footer has the Cancel and Back keycaps in Caption style, centered under the rows.
+  - The footer has the Cancel and Back keycaps in Caption style, centered under the rows, below a separator.
   - The content is 20 pt from the panel edge, rows are 8 pt apart, and everything is on the 4 pt grid.
 - **Size:** it fits its content. Up to 12 rows make one column, up to 24 make two, and more make three. It is never resizable.
 - **Motion:** a 120 ms fade in and out, with no scaling or sliding. With Reduce Motion it appears instantly. A menu change is instant with no transition, because typing speed matters most.

@@ -132,6 +132,7 @@ struct GuideView: View {
                 failureRow(failure)
             } else {
                 menuRows
+                Divider()
                 footer
             }
         }
