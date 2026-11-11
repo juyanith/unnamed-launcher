@@ -17,3 +17,9 @@ Symptom: typing a space at the end of a binding's title showed nothing until the
 Cause: a grouped Form right-aligns its text fields, and a right-aligned AppKit text field doesn't draw trailing spaces. The Form also ignores `multilineTextAlignment` on a field it lays out itself.
 Fix: `.textEntry("Label")` in `UI/Components.swift` puts the field in a `LabeledContent` with its own label hidden and left-aligns it. Every field people type words into uses it.
 Rule: Never leave a free-text field right-aligned. Put Form text fields through `.textEntry`; only number fields stay right-aligned.
+
+## 2026-11-11 An Open folder's icon wasn't found by its path
+Symptom: the Guide's icon for an Open binding to `~/Documents` was keyed as `/Users/…/Documents/`, so the self-test's check for the path failed.
+Cause: `URL(fileURLWithPath:)` adds a trailing slash when the path is an existing folder, and the icon source took its path from that URL.
+Fix: the icon source uses the target as written, with `~` expanded (`LoadedConfig.iconSource`).
+Rule: never compare or key paths taken from a file URL; use the path as written, or standardize both sides.
