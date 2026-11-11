@@ -535,6 +535,39 @@ UX:
 Status: done
 Verified: bundle IDs on rows and the set of apps (unit tests, AppIconTests); the cache, a missing app, the icon column and no lookups when the Guide shows (self-test); hud and hud-home in light and dark (snapshots), grid checks. Not yet tried by hand: VoiceOver on a row with an icon.
 
+### S-055 See file, folder and URL icons in the Guide
+As the user, I see the Finder icon of the file or folder an Open binding opens, and for a URL the icon of the app that opens it, so the rows I open things from are as easy to spot as my apps.
+Screens: hud
+Depends: S-054
+Acceptance:
+- [unit] An Open row carries its target: a path with a leading ~ expanded, or a URL; menus and other actions carry none.
+- [self] A file or folder that exists gets its Finder icon; one that doesn't gets no icon and no error.
+- [self] A URL gets the icon of the app that opens it, such as the default browser for https.
+- [self] Icons are looked up when the config loads, never when the Guide shows, as for apps (S-054).
+- [snap] An Open row shows its icon in the same 24 pt space as an app's.
+UX:
+- Surface: the Guide and Home.
+- States: icon; no icon (missing file, no app for the URL).
+- Words: none new.
+Status: todo
+
+### S-056 Choose an icon for any entry
+As the user, I give a menu or a binding an icon of my own, an SF Symbol or a file's icon, so rows the launcher can't guess an icon for are easy to spot too.
+Screens: hud, bindings
+Depends: S-054, S-055
+Acceptance:
+- [unit] An entry's optional `icon` is an SF Symbol name, or a path starting with / or ~ for that file's Finder icon; it is written back unchanged, and left out when empty.
+- [unit] The schema lists `icon` as an optional string on entries.
+- [self] An entry's own icon wins over its action's icon.
+- [self] An SF Symbol name macOS doesn't have shows no icon in the Guide, and the Bindings editor says "No SF Symbol named “X”."
+- [self] Setting and clearing the icon in the Bindings editor writes the file, and Undo restores it.
+- [snap] Symbols are drawn in secondary color, centered in the 24 pt icon space; the editor shows an Icon field with a preview and a menu of common symbols.
+UX:
+- Surface: the entry form on the Bindings page, under Title.
+- Words: "Icon", hint "An SF Symbol name, such as terminal, or the path of a file whose icon to use."
+- Access: icons stay hidden from VoiceOver in the Guide; the editor's preview is labeled with the symbol name.
+Status: todo
+
 ## Later
 - Import and export a single menu as a JSON snippet.
 - A Windows version that reads the same config.
