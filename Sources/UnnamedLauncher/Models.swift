@@ -76,6 +76,18 @@ final class AppModel {
         Self.current = self
     }
 
+    /// Opens the Bindings window. MenuBarIcon sets it, since only a view
+    /// can open a SwiftUI window and the menu bar icon is the one view
+    /// that's always there.
+    var openBindingsWindow: (() -> Void)?
+
+    /// Help (⌘?) and the Show Help action: the Help page, in front (S-052, S-053).
+    func showHelp() {
+        sidebar = .help
+        openBindingsWindow?()
+        NSApp.activate()
+    }
+
     /// Shows an action on the Actions page.
     func showAction(_ id: String) {
         actionSelection = id

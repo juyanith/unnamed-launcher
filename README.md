@@ -15,7 +15,8 @@ If you finish the sequence quickly, nothing appears on screen. If you pause, a s
   - **Send Shortcut** sends key chords to the app in front.
   - **Context Aware** picks a different action depending on which app is in front.
   - **Do Nothing.**
-- **A Bindings window** to edit menus, bindings, actions and contexts, record chords, and reorder items.
+  - **Show Help** opens the Help page. The starter config puts it on Hyper+Slash.
+- **A Bindings window** to edit menus, bindings, actions and contexts, record chords, and reorder items. Its Help page lists your leaders and direct bindings and how sequences work (⌘? from the menu bar menu).
 - **One JSON config file** at `~/.config/unnamed-launcher/config.json`. The app watches it and reloads it when it changes, so you can keep it in your dotfiles. A config with errors is reported, and the last valid one stays in use.
 - **A menu bar menu** to turn the launcher on or off, reload the config, check permissions, and see the last error.
 

@@ -67,7 +67,7 @@ public enum ConfigWriter {
             let ids = ordered(Array(variants.keys), by: contexts.map(\.id))
             fields.append(("variants", object(ids.map { ($0, self.action(variants[$0]!, contexts: contexts)) })))
             if let fallback { fields.append(("fallback", self.action(fallback, contexts: contexts))) }
-        case .noop:
+        case .noop, .help:
             break
         }
         return object(fields)

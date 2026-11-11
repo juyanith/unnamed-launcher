@@ -230,6 +230,11 @@ struct ActionFields: View {
                 Text("This action does nothing. Use it to reserve a key.")
                     .foregroundStyle(.secondary)
             }
+        case .help:
+            Section {
+                Text("Opens the Help page of the Bindings window, which lists your leaders and direct bindings.")
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
@@ -260,7 +265,7 @@ struct ActionFields: View {
 extension Config.Action {
     /// The types for the Type picker, alphabetical by the name shown (S-046).
     static func types(allowsContextAware: Bool) -> [String] {
-        let types = ["application", "open", "exec", "send", "noop"] + (allowsContextAware ? ["contextual"] : [])
+        let types = ["application", "open", "exec", "send", "noop", "help"] + (allowsContextAware ? ["contextual"] : [])
         return types.sorted { empty(of: $0).displayName.localizedStandardCompare(empty(of: $1).displayName) == .orderedAscending }
     }
 
@@ -272,6 +277,7 @@ extension Config.Action {
         case "exec": .exec(command: [], cwd: nil, env: [:])
         case "send": .send(keys: "")
         case "contextual": .contextual(variants: [:], fallback: nil)
+        case "help": .help
         default: .noop
         }
     }

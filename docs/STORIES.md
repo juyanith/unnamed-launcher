@@ -16,6 +16,7 @@ Built from [BRIEF.md](BRIEF.md), [SPEC.md](SPEC.md) and [research/launchers.md](
 | `actions` | The Actions page |
 | `contexts` | The Contexts page |
 | `help`, `empty-help` | The Help page, with and without bindings |
+| `actions-help` | The Actions page with a Show Help action |
 | `settings` | The Settings window |
 
 **How each acceptance line is checked:** `[snap]` snapshot, `[unit]` unit test, `[self]` self-test, `[manual]` a person must try it.
@@ -35,7 +36,7 @@ Acceptance:
 - [unit] Every rule in SPEC.md Validation rejects a config with a message naming the entry or action and the rule. Unused actions and contexts give warnings.
 - [unit] A config that has only `version` and one leader with one binding loads, with every setting at its default.
 - [unit] Entry order is kept exactly as in the file.
-- [self] If no file exists, the app writes a starter config with one leader (Hyper+Space) and two example bindings, then loads it.
+- [self] If no file exists, the app writes a starter config with one leader (Hyper+Space), two example bindings, and a Show Help direct binding (Hyper+Slash, S-053), then loads it.
 UX:
 - Flow: launch the app, which reads the config file → if the file is missing, writes the starter config → the menu bar icon shows Ready. There's nothing to undo, and the starter file is never written over an existing file.
 - Surface: none of its own. The status appears in the menu bar menu (S-008).
@@ -650,3 +651,22 @@ UX:
 - Access: each key row reads as "key, title, leader" or "direct binding" and is a button.
 Status: done
 Verified: content and page switching (self-test), help and empty-help in light and dark (snapshots), grid checks. Not yet tried by hand: the manual line.
+
+### S-053 Show Help from a key
+As the user, I press a chord such as Hyper+Slash, or a key in a menu, and the Help page opens in front, so I can find my keys when I'm stuck.
+Screens: actions-help, hud-home
+Depends: S-048, S-052
+Acceptance:
+- [unit] `{ "type": "help" }` loads as Show Help, takes no other fields, is written back unchanged, and plans opening the Help page.
+- [unit] A Show Help direct binding runs from its chord and starts no sequence.
+- [self] The starter config has Show Help on Hyper+Slash.
+- [self] Show Help is in the Actions page's Type picker, in alphabetical order.
+- [self] Running it opens the Bindings window on the Help page.
+- [snap] A Show Help action's form says what it does and has no fields.
+- [manual] Press Hyper+Slash in another app: the Help page comes forward; ⌘W closes it and the app you were in comes back.
+UX:
+- Flow: chord or key → the sequence ends → the Bindings window opens on Help, in front.
+- Surface: the Help page (S-052). The action is set up on the Actions page like any other.
+- Words: "Show Help"; form text "Opens the Help page of the Bindings window, which lists your leaders and direct bindings."
+Status: done
+Verified: loading, writing, the plan and the direct binding (unit tests); the starter, the picker, opening the page (self-test); actions-help in light and dark (snapshots). Not yet tried by hand: the manual line.

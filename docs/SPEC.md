@@ -63,6 +63,7 @@ Home is the menu above the leaders. It lists every leader and direct binding, so
 | `send` | `keys` | Sends one or more chords to the app that was in front. Held leader modifiers must not leak into the chord. `Primary` means ⌘. |
 | `contextual` | `variants` (context id → action), optional `fallback` | Uses the first context, in config order, that matches the app in front and has a variant. If none matches, uses `fallback`. With no fallback, the action is unavailable. |
 | `noop` | none | Does nothing. |
+| `help` | none | Opens the Bindings window on its Help page and brings it in front. The sequence ends, as for any action. |
 
 When an action fails, for example because the app isn't installed or the command can't start, the sequence ends and the failure is shown in the HUD and the log.
 

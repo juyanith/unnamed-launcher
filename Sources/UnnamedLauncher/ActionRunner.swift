@@ -33,6 +33,8 @@ struct SystemPerformer: ActionPerformer {
             try await open(url)
         case .nothing:
             return
+        case .showHelp:
+            AppModel.current?.showHelp()
         case let .spawn(program, arguments, cwd, env):
             try spawn(program, arguments: arguments, cwd: cwd, env: env)
         case let .send(chords):

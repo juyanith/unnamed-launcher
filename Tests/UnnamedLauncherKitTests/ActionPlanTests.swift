@@ -41,6 +41,39 @@ struct NoopPlanTests {
     }
 }
 
+@Suite("Show Help (S-053)")
+struct HelpPlanTests {
+    @Test("Show Help plans opening the Help page")
+    func help() throws {
+        #expect(try ActionPlanner.plan(.help, home: testHome) == .showHelp)
+    }
+
+    @Test("Show Help reads from the file, takes no fields, and is written back")
+    func roundTrip() throws {
+        let text = json(entries: #"{ "keys": "Hyper+Slash", "title": "Help", "action": "show-help" }"#,
+                        actions: #"{ "show-help": { "type": "help" } }"#)
+        let config = try load(text).get()
+        #expect(config.config.actions["show-help"] == .help)
+        #expect(config.config.actions["show-help"]?.displayName == "Show Help")
+        let written = String(decoding: ConfigDocument(config: config.config).data(), as: UTF8.self)
+        #expect(try load(written).get().config.actions["show-help"] == .help)
+        #expect(!errors(json(entries: #"{ "keys": "Hyper+Slash", "title": "Help", "action": "h" }"#,
+                             actions: #"{ "h": { "type": "help", "page": "keys" } }"#)).isEmpty)
+    }
+
+    @Test("A Show Help direct binding runs from its chord")
+    func direct() throws {
+        let text = json(entries: #"{ "keys": "Hyper+Slash", "title": "Help", "action": "show-help" }"#,
+                        actions: #"{ "show-help": { "type": "help" } }"#)
+        var engine = SequenceEngine(config: try load(text).get())
+        guard case let .run(binding, _) = engine.handle(.down(keyCode: KeyName.slash.keyCode!, modifiers: .hyper, isRepeat: false)).effect else {
+            Issue.record("no run"); return
+        }
+        #expect(binding.title == "Help")
+        #expect(!engine.isActive)
+    }
+}
+
 @Suite("Run Command (S-011)")
 struct ExecPlanTests {
     @Test("Arguments pass literally; only a leading ~ in command and cwd expands")

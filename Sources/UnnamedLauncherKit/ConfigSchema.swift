@@ -116,6 +116,7 @@ public enum ConfigSchema {
             ], required: ["command"]),
             variant("send", ["keys": ["type": "string", "pattern": keysPattern]], required: ["keys"]),
             variant("noop", [:]),
+            variant("help", [:]),
         ]
         if allowingContextual {
             variants.append(variant("contextual", [
@@ -128,6 +129,6 @@ public enum ConfigSchema {
 
     /// The action types the schema allows, in order.
     public static var actionTypes: [String] {
-        ["application", "open", "exec", "send", "noop", "contextual"]
+        ["application", "open", "exec", "send", "noop", "help", "contextual"]
     }
 }

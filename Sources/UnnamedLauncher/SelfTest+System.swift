@@ -66,15 +66,30 @@ extension SelfTest {
         let help = HelpContent(config: SeedData.fixture)
         check("S-052 Help lists every leader and direct binding by group",
               help.groups.map(\.title) == ["Hyper", "Meh", "CAG"]
-              && help.groups.flatMap(\.rows).map(\.title) == SeedData.fixture.leaders.map(\.title),
+              && help.groups.flatMap(\.rows).map(\.title) == ["Commands", "Help", "Workspace", "Terminal"],
               help.groups.map(\.title).joined(separator: ", "))
         check("S-052 Help names the Cancel and Back keys and mentions Home",
               help.cancelKey == "esc" && help.backKey == "delete" && help.hasHome)
         check("S-052 Help has an empty state with no bindings", HelpContent(config: nil).isEmpty)
+        let oneLeader = try? ConfigLoader.load(Data("""
+            { "version": 1, "entries": [{ "keys": "Hyper+Space", "title": "Commands" },
+              { "keys": "Hyper+Space F", "title": "Finder", "action": "f" }],
+              "actions": { "f": { "type": "application", "bundleId": "com.apple.finder" } } }
+            """.utf8)).get()
         check("S-052 a config with one leader has no Home on the Help page",
-              model.store.loaded.map { HelpContent(config: $0).hasHome } == false)
-        model.sidebar = .help
-        check("S-052 the Bindings window opens the Help page", model.sidebar == .help)
+              oneLeader.map { HelpContent(config: $0).hasHome } == false)
+
+        // S-053: Show Help, on Hyper+Slash in the starter, opens the Help page.
+        let starter = model.store.loaded
+        check("S-053 the starter config has Show Help on Hyper+Slash",
+              starter?.leaders.last.map { $0.path.description == "Hyper+Slash" && starter?.config.actions[$0.action ?? ""] == .help } == true)
+        check("S-053 Show Help is a type in the Actions page's picker",
+              Config.Action.types(allowsContextAware: true).contains("help"))
+        model.showHelp()
+        let bindingsWindow = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix(WindowID.bindings) == true }
+        check("S-053 Show Help opens the Bindings window on the Help page",
+              model.sidebar == .help && bindingsWindow?.isVisible == true,
+              NSApp.windows.map { $0.identifier?.rawValue ?? "?" }.joined(separator: ", "))
         model.sidebar = .bindings
     }
 }

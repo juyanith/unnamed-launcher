@@ -22,7 +22,8 @@ enum SeedData {
         { "keys": "Hyper+Space F", "title": "Find", "action": "find" },
         { "keys": "Meh+W", "title": "Workspace" },
         { "keys": "Meh+W 1", "title": "Workspace 1", "action": "workspace-1" },
-        { "keys": "CAG+T", "title": "Terminal", "action": "open-terminal" }
+        { "keys": "CAG+T", "title": "Terminal", "action": "open-terminal" },
+        { "keys": "Hyper+Slash", "title": "Help", "action": "show-help" }
       ],
       "actions": {
         "spotlight": { "type": "send", "keys": "Cmd+Space" },
@@ -33,6 +34,7 @@ enum SeedData {
         "notes": { "type": "open", "target": "~/Documents/Notes" },
         "screenshot": { "type": "send", "keys": "Cmd+Shift+4" },
         "workspace-1": { "type": "send", "keys": "Ctrl+1" },
+        "show-help": { "type": "help" },
         "address-bar": { "type": "contextual", "variants": { "browser": { "type": "send", "keys": "Cmd+L" } } },
         "find": {
           "type": "contextual",

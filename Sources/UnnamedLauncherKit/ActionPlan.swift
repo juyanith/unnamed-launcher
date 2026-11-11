@@ -19,6 +19,8 @@ public enum ActionPlan: Sendable, Equatable {
     case send([Chord])
     /// Do Nothing.
     case nothing
+    /// Open the Help page of the Bindings window.
+    case showHelp
 }
 
 /// Why an action couldn't be planned. The message is shown in the Guide.
@@ -50,6 +52,8 @@ public enum ActionPlanner {
             return .send(try chords(keys))
         case .noop:
             return .nothing
+        case .help:
+            return .showHelp
         case .contextual:
             // Resolve with `ContextResolver` first.
             throw PlanError("Context Aware must be resolved for the app in front first.")

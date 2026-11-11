@@ -48,6 +48,10 @@ enum Snapshot {
                     model.actionSelection = "open-editor"
                     try? await Task.sleep(for: .seconds(0.8))
                     capture(to: "\(dir)/actions-app-\(mode).png")
+                    // S-053: Show Help, which has no fields.
+                    model.actionSelection = "show-help"
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/actions-help-\(mode).png")
                 }
                 if only?.contains("bindings") ?? true {
                     // S-048: a direct binding, with its editor pane.

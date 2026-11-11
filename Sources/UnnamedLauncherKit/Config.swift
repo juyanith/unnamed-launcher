@@ -95,6 +95,8 @@ public struct Config: Sendable, Equatable {
         case send(keys: String)
         case contextual(variants: [String: Action], fallback: Action?)
         case noop
+        /// Show Help: open the Help page of the Bindings window (S-053).
+        case help
 
         /// The `type` value in the file.
         public var type: String {
@@ -105,6 +107,7 @@ public struct Config: Sendable, Equatable {
             case .send: "send"
             case .contextual: "contextual"
             case .noop: "noop"
+            case .help: "help"
             }
         }
 
@@ -117,6 +120,7 @@ public struct Config: Sendable, Equatable {
             case .send: "Send Shortcut"
             case .contextual: "Context Aware"
             case .noop: "Do Nothing"
+            case .help: "Show Help"
             }
         }
     }
@@ -247,9 +251,12 @@ extension Config.Action: Decodable {
         case "noop":
             try c.rejectUnknown(allowed: ["type"], at: path)
             self = .noop
+        case "help":
+            try c.rejectUnknown(allowed: ["type"], at: path)
+            self = .help
         default:
             throw DecodingError.dataCorrupted(.init(codingPath: c.codingPath,
-                debugDescription: "Unknown action type “\(type)”. Use application, open, exec, send, contextual or noop."))
+                debugDescription: "Unknown action type “\(type)”. Use application, open, exec, send, contextual, noop or help."))
         }
     }
 }

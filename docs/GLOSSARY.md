@@ -23,6 +23,7 @@ One name per idea. Use these words in the UI, the docs, the log and VoiceOver la
 | Send Shortcut | The `send` action: press one or more key combinations in the app you were using. | send keys, keystroke, type, simulate |
 | Context Aware | The `contextual` action: run a different action depending on the app in front. | contextual, conditional, smart action, Choose by App |
 | Do Nothing | The `noop` action. | noop, placeholder, empty |
+| Show Help | The `help` action: open the Help page of the Bindings window. | help, home, open help |
 | Context | A named set of apps, such as "browser", that Context Aware actions check against. | app group, profile, scope |
 | App in front | The app that was active when you pressed the leader. Actions go to it. | focused app, frontmost, target app |
 | Guide | The small panel that shows where you are in a sequence and which keys come next (HUD in the code). | HUD, overlay, popup, palette, cheat sheet |

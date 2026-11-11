@@ -121,11 +121,7 @@ struct MenuBarMenu: View {
             NSApp.activate()
         }
         .keyboardShortcut(",")
-        Button("Help") {
-            model.sidebar = .help
-            openWindow(id: WindowID.bindings)
-            NSApp.activate()
-        }
+        Button("Help") { model.showHelp() }
         .keyboardShortcut("?", modifiers: .command)
         Divider()
         Text(AppVersion.line)
@@ -140,11 +136,13 @@ struct MenuBarMenu: View {
 /// The menu bar icon in its three states (DESIGN-SYSTEM.md, StatusIcon).
 struct MenuBarIcon: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         let status = MenuBarStatus(launcher: model.launcher, store: model.store)
         Image(nsImage: Self.image(for: status.icon))
             .accessibilityLabel(status.accessibilityLabel)
+            .task { model.openBindingsWindow = { [openWindow] in openWindow(id: WindowID.bindings) } }
     }
 
     /// A template image: dimmed when off, with a badge when something needs attention.

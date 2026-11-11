@@ -102,7 +102,7 @@ extension SelfTest {
         }
         let home = SeedData.homeContent
         check("S-050 Home lists every leader and direct binding by group, the current one first",
-              home.sections.map(\.title) == ["Hyper", "Meh", "CAG"] && home.rows.map(\.key) == ["Space", "W", "T"]
+              home.sections.map(\.title) == ["Hyper", "Meh", "CAG"] && home.rows.map(\.key) == ["Space", "Slash", "W", "T"]
               && home.columns.count == 1 && !home.dividesColumns, "\(home.sections.map(\.title))")
         let wide = SeedData.wideHomeContent
         let firstColumn = wide.columns.first?.map(\.title)
@@ -201,7 +201,7 @@ extension SelfTest {
               !WindowRaiser.raiseLastFocused(pid: 999_999) && ContinuousClock.now - asked < .seconds(1))
         let names = Config.Action.types(allowsContextAware: true).map { Config.Action.empty(of: $0).displayName }
         check("S-046 the Type picker is alphabetical", names == ["Context Aware", "Do Nothing", "Open", "Run Command",
-                                                               "Send Shortcut", "Use Application"], "\(names)")
+                                                               "Send Shortcut", "Show Help", "Use Application"], "\(names)")
         check("S-046 variants offer every type but Context Aware",
               !Config.Action.types(allowsContextAware: false).contains("contextual"))
 
