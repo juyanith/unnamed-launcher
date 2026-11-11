@@ -525,7 +525,7 @@ Acceptance:
 - [self] A row for an app that isn't installed gets no icon and still shows its title, with no error.
 - [self] When any row in a Guide column has an icon, every row in that column keeps the same icon space, so titles line up; a column with no app rows has none.
 - [self] Opening the Guide never waits on an icon lookup: icons come from the cache, filled when the config loads.
-- [snap] The Guide and Home show 16 pt icons between the keycap and the title, in light and dark, with the grid checks passing.
+- [snap] The Guide and Home show 24 pt icons between the keycap and the title, in light and dark, with the grid checks passing.
 - [manual] VoiceOver reads a row the same as before: the icon is decorative.
 UX:
 - Surface: the Guide (S-005) and Home (S-050). The Help page (S-052) is out of scope.
