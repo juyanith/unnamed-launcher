@@ -39,6 +39,8 @@ final class GuideIcons {
             return workspace.urlForApplication(toOpen: url).map { workspace.icon(forFile: $0.path) }
         case let .symbol(name):
             return NSImage(systemSymbolName: name, accessibilityDescription: nil)
+        case .menu:
+            return MenuBarIcon.glyph(side: Layout.guideGlyphSize)
         }
     }
 }

@@ -57,14 +57,14 @@ struct IconTests {
         #expect(icon("Hyper+Space X") == nil)
     }
 
-    @Test func menusAndOtherActionsCarryNone() {
-        #expect(icon("Hyper+Space") == nil)
-        #expect(icon("Hyper+Space A") == nil)
+    @Test func menusCarryTheGlyphAndOtherActionsNone() {
+        #expect(icon("Hyper+Space") == .menu)
+        #expect(icon("Hyper+Space A") == .menu)
         #expect(icon("Hyper+Space F") == nil)
     }
 
     @Test func everyIconOnce() {
-        #expect(config.iconSources(home: home) == [.app("dev.zed.Zed"), .app("com.apple.Terminal"), .symbol("star"),
+        #expect(config.iconSources(home: home) == [.menu, .app("dev.zed.Zed"), .app("com.apple.Terminal"), .symbol("star"),
                                                     .file("/Users/someone/Pictures/w.png"),
                                                     .file("/Users/someone/Notes"), .file("/Applications"),
                                                     .url(URL(string: "https://example.com")!)])

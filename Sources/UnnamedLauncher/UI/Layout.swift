@@ -34,6 +34,8 @@ enum Layout {
     static let guideColumnWidth: CGFloat = 240
     /// An app's icon in a Guide row (S-054).
     static let guideIconSize: CGFloat = 24
+    /// The app's glyph on a menu row, about the size of a large symbol.
+    static let guideGlyphSize: CGFloat = 16
     /// The widest a failure message gets before it wraps (S-015).
     static let guideFailureWidth: CGFloat = 360
     /// A keycap's minimum width, so "E" and "F12" line up in a column.

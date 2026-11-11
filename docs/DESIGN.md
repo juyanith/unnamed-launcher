@@ -98,7 +98,7 @@ Its look and behavior, as the base for design-system tokens and story S-005:
 - **Layout:**
   - The path row comes first, in Headline style with the › separators in secondary text.
   - Rows show the keycap (a monospaced key name in a small rounded rectangle), then the title in Body style, then a trailing › on menus.
-  - A Use Application row shows its app's 24 pt icon between the keycap and the title, and an Open row the Finder icon of its file or folder, or for a URL the icon of the app that opens it (S-054, S-055). An entry's own icon wins; an SF Symbol draws in secondary color, centered in the same 24 pt space (S-056). When any row in a column has an icon, every row in it keeps that space, so titles line up; a column with no icons has no icon space.
+  - A Use Application row shows its app's 24 pt icon between the keycap and the title, and an Open row the Finder icon of its file or folder, or for a URL the icon of the app that opens it (S-054, S-055). A menu shows the menu bar icon's glyph, 16 pt, in secondary color. An entry's own icon wins; an SF Symbol draws in secondary color, centered in the same 24 pt space (S-056). When any row in a column has an icon, every row in it keeps that space, so titles line up; a column with no icons has no icon space.
   - The footer has the Cancel and Back keycaps in Caption style, centered under the rows, below a separator.
   - The content is 20 pt from the panel edge, rows are 8 pt apart, and everything is on the 4 pt grid.
 - **Size:** it fits its content. Up to 12 rows make one column, up to 24 make two, and more make three. It is never resizable.

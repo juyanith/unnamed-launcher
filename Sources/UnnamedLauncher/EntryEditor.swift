@@ -88,7 +88,7 @@ struct EntryEditor: View {
             }
         } footer: {
             Text(BindingsEditor.iconProblem(icon)
-                 ?? "An SF Symbol name, such as terminal, or the path of a file whose icon to use. Apps and Open targets show their own icon when this is empty.")
+                 ?? "An SF Symbol name, such as terminal, or the path of a file whose icon to use. When this is empty, menus show the app's keycaps, and apps and Open targets their own icon.")
         }
     }
 

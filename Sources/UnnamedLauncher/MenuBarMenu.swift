@@ -167,6 +167,16 @@ struct MenuBarIcon: View {
         return image
     }
 
+    /// The glyph alone as a template image, for menu rows in the Guide.
+    static func glyph(side: CGFloat) -> NSImage {
+        let image = NSImage(size: NSSize(width: side, height: side), flipped: true) { rect in
+            drawGlyph(in: rect, alpha: 1)
+            return true
+        }
+        image.isTemplate = true
+        return image
+    }
+
     /// The app icon's glyph (front.svg and back.svg, whose shapes span 193 to
     /// 765 of 1024): the back keycap, a gap, then the front keycap with its
     /// › cut out. In a flipped rect, so the SVG's coordinates work as is.

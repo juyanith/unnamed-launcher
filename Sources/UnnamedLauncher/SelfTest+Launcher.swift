@@ -128,6 +128,9 @@ extension SelfTest {
               rows.first { $0.title == "Editor" }?.icon == .app("dev.zed.Zed")
               && rows.filter { if case .app = $0.icon { true } else { false } }.map(\.title) == ["Editor", "Browser"],
               "\(rows.map(\.icon))")
+        icons.load([.menu])
+        check("a menu without an icon of its own gets the app's glyph",
+              rows.first { $0.title == "Applications" }?.icon == .menu && icons.icon(for: .menu)?.isTemplate == true)
         check("S-055 an Open row carries its file", rows.first { $0.title.hasPrefix("Notes") }?.icon.map {
             if case let .file(path) = $0 { path.hasSuffix("/Documents") } else { false } } == true)
         check("S-054 a column with an icon keeps the icon space on every row; one without has none",

@@ -36,15 +36,18 @@ public enum IconSource: Hashable, Sendable {
     case url(URL)
     /// An SF Symbol, by name (S-056).
     case symbol(String)
+    /// The app icon's glyph, for a menu without an icon of its own.
+    case menu
 }
 
 extension LoadedConfig {
     /// The icon for an entry: its own icon if it has one (S-056); otherwise
-    /// its app for Use Application, its file, folder or URL for Open. nil for
-    /// menus and every other action, Context Aware included.
+    /// the app's glyph for a menu, its app for Use Application, and its file,
+    /// folder or URL for Open. nil for every other action, Context Aware
+    /// included.
     public func iconSource(_ binding: BindingNode, home: URL = FileManager.default.homeDirectoryForCurrentUser) -> IconSource? {
         if let icon = binding.icon { return IconSource(icon, home: home) }
-        guard let id = binding.action else { return nil }
+        guard let id = binding.action else { return .menu }
         switch config.actions[id] {
         case let .application(bundleId, _):
             return .app(bundleId)

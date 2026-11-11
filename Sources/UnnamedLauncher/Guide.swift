@@ -241,6 +241,11 @@ struct GuideView: View {
                 Image(systemName: name)
                     .imageScale(.large)
                     .foregroundStyle(.secondary)
+            } else if row.icon == .menu, let image = GuideIcons.shared.icon(for: .menu) {
+                // The menu bar icon's glyph, in secondary like a symbol.
+                Image(nsImage: image)
+                    .renderingMode(.template)
+                    .foregroundStyle(.secondary)
             } else if let image = row.icon.flatMap(GuideIcons.shared.icon) {
                 Image(nsImage: image).resizable()
             } else {
