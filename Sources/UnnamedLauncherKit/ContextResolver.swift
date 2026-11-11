@@ -26,19 +26,39 @@ extension LoadedConfig {
     }
 }
 
+/// Where a Guide row's icon comes from (S-054, S-055).
+public enum IconSource: Hashable, Sendable {
+    /// An app's icon, by bundle id.
+    case app(String)
+    /// The Finder icon of a file or folder, by full path.
+    case file(String)
+    /// The icon of the app that opens a URL.
+    case url(URL)
+}
+
 extension LoadedConfig {
-    /// The app a Use Application binding uses, for its icon in the Guide
-    /// (S-054). nil for menus and every other action, Context Aware included.
-    public func appBundleId(_ binding: BindingNode) -> String? {
-        guard let id = binding.action, case let .application(bundleId, _) = config.actions[id] else { return nil }
-        return bundleId
+    /// The icon for a binding: its app for Use Application, its file, folder
+    /// or URL for Open. nil for menus and every other action, Context Aware
+    /// included.
+    public func iconSource(_ binding: BindingNode, home: URL = FileManager.default.homeDirectoryForCurrentUser) -> IconSource? {
+        guard let id = binding.action else { return nil }
+        switch config.actions[id] {
+        case let .application(bundleId, _):
+            return .app(bundleId)
+        case let .open(target):
+            guard let url = try? ActionPlanner.openURL(target, home: home) else { return nil }
+            // The path as written, ~ expanded: a folder's file URL adds a trailing slash.
+            return url.isFileURL ? .file(ActionPlanner.expandTilde(target, home: home)) : .url(url)
+        default:
+            return nil
+        }
     }
 
-    /// Every app the bindings use, so their icons can be looked up once.
-    public var appBundleIds: Set<String> {
-        func ids(_ nodes: [BindingNode]) -> [String] {
-            nodes.flatMap { node in (appBundleId(node).map { [$0] } ?? []) + ids(node.children) }
+    /// Every icon the bindings use, so each can be looked up once.
+    public func iconSources(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> Set<IconSource> {
+        func sources(_ nodes: [BindingNode]) -> [IconSource] {
+            nodes.flatMap { node in (iconSource(node, home: home).map { [$0] } ?? []) + sources(node.children) }
         }
-        return Set(ids(leaders))
+        return Set(sources(leaders))
     }
 }

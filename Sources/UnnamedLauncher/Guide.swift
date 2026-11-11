@@ -12,8 +12,8 @@ struct GuideContent: Equatable {
         var isAvailable = true
         /// "not available in Notes", shown on an unavailable row.
         var note: String?
-        /// The app of a Use Application binding, for its icon (S-054).
-        var appBundleId: String?
+        /// Where its icon comes from: an app, a file or a URL (S-054, S-055).
+        var icon: IconSource?
         var id: String { key }
     }
 
@@ -64,7 +64,7 @@ struct GuideContent: Equatable {
         let available = node.isMenu || config.isAvailable(node, frontApp: frontApp)
         return Row(key: key.name, title: node.title, isMenu: node.isMenu,
                    isAvailable: available, note: available ? nil : "not available in \(appName)",
-                   appBundleId: config.appBundleId(node))
+                   icon: config.iconSource(node))
     }
 
     /// Every row, in order.
@@ -112,10 +112,10 @@ struct GuideContent: Equatable {
         return columns
     }
 
-    /// True when a column has an app icon, so every row in it keeps the
+    /// True when a column has an icon, so every row in it keeps the
     /// icon's space and the titles line up (S-054).
     static func showsIcons(_ column: [Section]) -> Bool {
-        column.contains { $0.rows.contains { $0.appBundleId != nil } }
+        column.contains { $0.rows.contains { $0.icon != nil } }
     }
 
     /// Home side by side: a vertical divider after the first group's column.
@@ -233,10 +233,10 @@ struct GuideView: View {
         .accessibilityLabel("\(row.key), \(row.title)\(row.isMenu ? ", menu" : "")\(row.note.map { ", \($0)" } ?? "")")
     }
 
-    /// The app's icon, or its empty space. Decorative: the row's label names it.
+    /// The row's icon, or its empty space. Decorative: the row's label names it.
     private func appIcon(_ row: GuideContent.Row) -> some View {
         Group {
-            if let image = row.appBundleId.flatMap(AppIcons.shared.icon) {
+            if let image = row.icon.flatMap(GuideIcons.shared.icon) {
                 Image(nsImage: image).resizable()
             } else {
                 Color.clear

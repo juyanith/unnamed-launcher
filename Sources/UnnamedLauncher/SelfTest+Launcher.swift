@@ -112,20 +112,28 @@ extension SelfTest {
               "\(wide.columns.map { $0.map(\.title) })")
         check("S-050 an unavailable direct binding in Home is dimmed",
               wide.rows.first { $0.title == "Address Bar" }?.isAvailable == false)
-        let icons = AppIcons()
-        icons.load(["com.apple.Terminal", "com.example.not-installed"])
-        icons.load(["com.apple.Terminal"])
+        let icons = GuideIcons()
+        let missingFile = IconSource.file("/tmp/unnamed-launcher-no-such-file")
+        let web = IconSource.url(URL(string: "https://example.com")!)
+        icons.load([.app("com.apple.Terminal"), .app("com.example.not-installed"), .file("/Applications"), missingFile, web])
+        icons.load([.app("com.apple.Terminal")])
         check("S-054 an installed app's icon is looked up once and cached",
-              icons.icon(for: "com.apple.Terminal") != nil && icons.lookups == 2, "lookups \(icons.lookups)")
-        check("S-054 an app that isn't installed gets no icon", icons.icon(for: "com.example.not-installed") == nil)
+              icons.icon(for: .app("com.apple.Terminal")) != nil && icons.lookups == 5, "lookups \(icons.lookups)")
+        check("S-054 an app that isn't installed gets no icon", icons.icon(for: .app("com.example.not-installed")) == nil)
+        check("S-055 a folder that exists gets its Finder icon; a missing file gets none",
+              icons.icon(for: .file("/Applications")) != nil && icons.icon(for: missingFile) == nil)
+        check("S-055 a URL gets the icon of the app that opens it", icons.icon(for: web) != nil)
         let rows = content.rows
         check("S-054 Use Application rows carry their app; menus and other actions don't",
-              rows.first { $0.title == "Editor" }?.appBundleId == "dev.zed.Zed"
-              && rows.filter { $0.appBundleId != nil }.map(\.title) == ["Editor", "Browser"], "\(rows.map(\.appBundleId))")
+              rows.first { $0.title == "Editor" }?.icon == .app("dev.zed.Zed")
+              && rows.filter { if case .app = $0.icon { true } else { false } }.map(\.title) == ["Editor", "Browser"],
+              "\(rows.map(\.icon))")
+        check("S-055 an Open row carries its file", rows.first { $0.title.hasPrefix("Notes") }?.icon.map {
+            if case let .file(path) = $0 { path.hasSuffix("/Documents") } else { false } } == true)
         check("S-054 a column with an icon keeps the icon space on every row; one without has none",
               content.columns.allSatisfy(GuideContent.showsIcons)
-              && !GuideContent.showsIcons([GuideContent.Section(rows: rows.filter { $0.appBundleId == nil })]))
-        let lookupsBefore = AppIcons.shared.lookups
+              && !GuideContent.showsIcons([GuideContent.Section(rows: rows.filter { $0.icon == nil })]))
+        let lookupsBefore = GuideIcons.shared.lookups
         _ = SeedData.homeContent
         check("S-021 a Guide that's never shown makes no panel", !GuideController().hasPanel)
         let front = NSApp.keyWindow
@@ -148,7 +156,7 @@ extension SelfTest {
         guide.hide()
         try? await Task.sleep(for: .seconds(0.3))
         check("S-007 the Guide hides when the sequence ends", !guide.window.isVisible)
-        check("S-054 showing the Guide looks up no icons", AppIcons.shared.lookups == lookupsBefore)
+        check("S-054 S-055 showing the Guide looks up no icons", GuideIcons.shared.lookups == lookupsBefore)
 
         // S-019: top and bottom sit a fifth of the way in from that edge.
         for position in [GuidePlacement.Position.top, .bottom] {

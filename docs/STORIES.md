@@ -549,7 +549,8 @@ UX:
 - Surface: the Guide and Home.
 - States: icon; no icon (missing file, no app for the URL).
 - Words: none new.
-Status: todo
+Status: done
+Verified: icon sources for apps, files, folders and URLs (unit tests, IconTests); a folder, a missing file, a URL, the fixture's Open row, no lookups when the Guide shows (self-test); hud in light and dark (snapshots), grid checks.
 
 ### S-056 Choose an icon for any entry
 As the user, I give a menu or a binding an icon of my own, an SF Symbol or a file's icon, so rows the launcher can't guess an icon for are easy to spot too.

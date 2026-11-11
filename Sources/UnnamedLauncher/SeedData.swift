@@ -31,7 +31,7 @@ enum SeedData {
         "open-browser": { "type": "application", "bundleId": "com.apple.Safari" },
         "open-terminal": { "type": "application", "bundleId": "com.apple.Terminal" },
         "open-messages": { "type": "application", "bundleId": "com.apple.MobileSMS" },
-        "notes": { "type": "open", "target": "~/Documents/Notes" },
+        "notes": { "type": "open", "target": "~/Documents" },
         "screenshot": { "type": "send", "keys": "Cmd+Shift+4" },
         "workspace-1": { "type": "send", "keys": "Ctrl+1" },
         "show-help": { "type": "help" },
