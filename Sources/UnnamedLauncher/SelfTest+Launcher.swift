@@ -31,9 +31,9 @@ extension SelfTest {
         store.reload()
         let fixed = MenuBarStatus(launcher: launcher, store: store)
         check("S-008 a fixed file reloads and clears the error", store.errors.isEmpty && fixed.firstError == nil)
-        check("S-008 the status line says when the config loaded",
-              fixed.statusLine?.hasPrefix("Config loaded at") == true || fixed.statusLine == "Created config file"
-              || !fixed.missingPermissions.isEmpty, fixed.statusLine ?? "nil")
+        check("S-008 the line under the version says when the config loaded",
+              fixed.configLine?.hasPrefix("Config loaded at") == true || fixed.configLine == "Created config file",
+              fixed.configLine ?? "nil")
 
         // S-033: saving. A valid edit is written atomically; an invalid one is refused.
         if var document = store.document {

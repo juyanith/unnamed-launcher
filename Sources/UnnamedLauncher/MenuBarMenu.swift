@@ -8,8 +8,10 @@ struct MenuBarStatus: Equatable {
     enum Icon: Equatable { case ready, off, warning }
 
     var icon: Icon
-    /// The disabled first line, or nil when a section above says more.
+    /// The disabled first line when the launcher is off, or nil.
     var statusLine: String?
+    /// The disabled line under the version: when the config last loaded.
+    var configLine: String?
     var missingPermissions: [Permission]
     var needsRelaunch: Bool
     /// Secure Event Input is on, so leaders can't be seen (S-038).
@@ -26,16 +28,13 @@ struct MenuBarStatus: Equatable {
         moreErrors = max(0, store.errors.count - 1)
         let attention = !missingPermissions.isEmpty || needsRelaunch || firstError != nil || keyboardIsSecured
         icon = !launcher.isEnabled ? .off : attention ? .warning : .ready
-        if !launcher.isEnabled {
-            statusLine = "Not capturing leaders"
-        } else if !missingPermissions.isEmpty || needsRelaunch {
-            statusLine = nil
-        } else if store.createdStarter, firstError == nil {
-            statusLine = "Created config file"
+        statusLine = launcher.isEnabled ? nil : "Not capturing leaders"
+        if store.createdStarter, firstError == nil {
+            configLine = "Created config file"
         } else if let loadedAt = store.loadedAt {
-            statusLine = "Config loaded at \(loadedAt.formatted(date: .omitted, time: .shortened))"
+            configLine = "Config loaded at \(loadedAt.formatted(date: .omitted, time: .shortened))"
         } else {
-            statusLine = nil
+            configLine = nil
         }
     }
 
@@ -125,6 +124,9 @@ struct MenuBarMenu: View {
         .keyboardShortcut("?", modifiers: .command)
         Divider()
         Text(AppVersion.line)
+        if let line = status.configLine {
+            Text(line)
+        }
         Button("Quit Unnamed Launcher") {
             launcher.stop()
             NSApp.terminate(nil)

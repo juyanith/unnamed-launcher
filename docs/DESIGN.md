@@ -49,7 +49,7 @@ The status item menu acts as the menu bar while no window is open (menus.md, rul
 
 | Command | Where | Shortcut |
 | --- | --- | --- |
-| Status line ("Ready", "Not capturing leaders", "Config loaded at 14:02") | Menu bar menu, disabled item | — |
+| Status line ("Not capturing leaders") | Menu bar menu, disabled first item, only when Enabled is off | — |
 | Needs Permission › Accessibility / Input Monitoring — Open Settings… | Menu bar menu, only when one is missing | — |
 | Relaunch to Finish Setup | Menu bar menu, only when needed | — |
 | Config Error lines and Open Config File | Menu bar menu, only on error | — |
@@ -60,6 +60,7 @@ The status item menu acts as the menu bar while no window is open (menus.md, rul
 | Settings… | Menu bar menu and the app menu | ⌘, |
 | Help (menu bar menu) / Unnamed Launcher Help (Help menu): open the Help page | Menu bar menu, and the Help menu of the Bindings window | ⌘? |
 | Version line ("Version 0.1.3", or "Version 0.1 (main, aa45720)" for a local build) | Menu bar menu, disabled item above Quit | — |
+| Config line ("Config loaded at 14:02", or "Created config file") | Menu bar menu, disabled item under the version line | — |
 | Quit Unnamed Launcher | Menu bar menu and the app menu | ⌘Q |
 | New Binding / New Menu | File menu, the toolbar over the outline, and the context menu | ⌘N / ⇧⌘N |
 | New Action / New Context | File menu on their pages | ⌘N |

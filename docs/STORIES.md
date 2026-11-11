@@ -137,7 +137,7 @@ Acceptance:
 UX:
 - Flow: menu bar icon → "Reload Config" (⌘R in the menu) → valid: the menu closes, and the next open shows "Config loaded at 14:02". Invalid: the icon gets its warning badge, and the menu shows the error with "Open Config File". Way back: the last valid config keeps running, so nothing breaks.
 - Surface: menu bar menu rows (inline). Never an alert, because a broken file doesn't stop the app working.
-- States: OK → a disabled line "Config loaded at 14:02". Error → a section "Config Error" with the first error in sentence case, wrapped to 2 lines with the full text in a tooltip, plus "+2 more" if there are more. Warnings (unused actions) never show in the menu, only in Settings (S-034) and the log.
+- States: OK → a disabled line "Config loaded at 14:02" under the version line (S-051). Error → a section "Config Error" with the first error in sentence case, wrapped to 2 lines with the full text in a tooltip, plus "+2 more" if there are more. Warnings (unused actions) never show in the menu, only in Settings (S-034) and the log.
 - Words: "Reload Config", "Open Config File", "Show in Finder" (with ⌥ held), and "Config Error" as the section header. Errors follow S-001's pattern.
 - Access: standard NSMenu. The error line is a disabled item, so VoiceOver reads it in order.
 Status: done
@@ -155,7 +155,7 @@ UX:
 - Flow: menu bar icon → "Enabled" (a check mark that toggles) → the icon dims and leaders type normally again → choose it again to turn it back on. "Quit Unnamed Launcher" (⌘Q) quits with no confirmation, since nothing is lost.
 - Surface: menu bar menu, a toggle item (inline: changes one value).
 - States: on → check mark, normal icon. Off → no check mark, dimmed icon, and the status line reads "Not capturing leaders". Enabled is remembered across launches.
-- Words: menu order is the status line, "Enabled", a separator, "Reload Config", "Open Config File", a separator, "Edit Bindings…" (⌘B), "Settings…" (⌘,), "Quit Unnamed Launcher" (⌘Q).
+- Words: menu order is the status line (only when off), "Enabled", a separator, "Reload Config", "Open Config File", a separator, "Edit Bindings…" (⌘B), "Settings…" (⌘,), "Help" (⌘?), a separator, the version line, the config line, "Quit Unnamed Launcher" (⌘Q).
 - Access: the status item's accessibility label includes the state: "Unnamed Launcher, off".
 Status: done
 Verified: Enabled off removes capture, dims the icon, VoiceOver label (self-test). Not yet tried by hand: the dimmed icon in the menu bar.
@@ -625,7 +625,7 @@ Depends: S-008
 Acceptance:
 - [self] A release shows "Version 0.1.3": the version alone.
 - [self] A local build (no `APP_VERSION`) shows "Version 0.1 (branch, commit)", with ", modified" when the working tree had changes.
-- [manual] The line sits above Quit, dimmed, and can't be clicked.
+- [manual] The line sits above Quit, dimmed, and can't be clicked. The config line ("Config loaded at 14:02") is right under it.
 UX:
 - Surface: a disabled item in the menu bar menu, above Quit.
 - Words: "Version 0.1.3"; "Version 0.1 (main, aa45720)".
@@ -642,7 +642,7 @@ Acceptance:
 - [self] With no bindings it shows No Bindings with New Binding, and the rest of the page.
 - [self] Help is a page of the Bindings window, in the sidebar and as ⌘4.
 - [snap] Each row shows its key, title, and "Leader" or "Direct binding"; In a Sequence, Words, and More (Open Config File, the documentation, Report a Problem, and the version line) follow.
-- [manual] Clicking a row shows it selected on the Bindings page. Help (⌘?) in the menu bar menu and Unnamed Launcher Help in the Help menu open the page.
+- [manual] Clicking a row shows it selected on the Bindings page (tried by hand on 2026-11-11). Help (⌘?) in the menu bar menu and Unnamed Launcher Help in the Help menu open the page.
 UX:
 - Flow: Help (⌘?) in the menu bar menu → the Bindings window on Help → click a row → the Bindings page with that row selected.
 - Surface: a sidebar page of the Bindings window; a grouped Form, centered, at most 640 pt wide.
