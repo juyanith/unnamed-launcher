@@ -23,3 +23,9 @@ Symptom: the Guide's icon for an Open binding to `~/Documents` was keyed as `/Us
 Cause: `URL(fileURLWithPath:)` adds a trailing slash when the path is an existing folder, and the icon source took its path from that URL.
 Fix: the icon source uses the target as written, with `~` expanded (`LoadedConfig.iconSource`).
 Rule: never compare or key paths taken from a file URL; use the path as written, or standardize both sides.
+
+## 2026-11-11 The self-test's S-019 check failed whenever a windowless app was in front
+Symptom: "S-019 the front app's window is found: no front window" failed some runs and passed others, with no code change in between.
+Cause: the check needed the front app to have a window on screen. When the front app was a menu bar app, here the running copy of Unnamed Launcher, it had none, and the Guide rightly fell back to the main screen.
+Fix: with no front window, the check confirms that fallback instead of failing.
+Rule: a self-test check must not depend on which app the person has in front; check each branch the code can take.

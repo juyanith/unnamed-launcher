@@ -149,9 +149,14 @@ extension SelfTest {
         if let screen = GuideController.frontScreen() {
             check("S-019 the Guide is on the screen of the front app's window",
                   screen.frame.contains(guide.window.frame), "\(guide.window.frame) not in \(screen.frame)")
+        } else if let main = NSScreen.main {
+            // The front app has no window on screen, such as a menu bar app
+            // (another copy of this one, when it's running): the main screen.
+            check("S-019 with no front window, the Guide is on the main screen",
+                  main.frame.contains(guide.window.frame),
+                  "front app \(NSWorkspace.shared.frontmostApplication?.localizedName ?? "none"): \(guide.window.frame) not in \(main.frame)")
         } else {
-            check("S-019 the front app's window is found", false,
-                  "no front window for \(NSWorkspace.shared.frontmostApplication?.localizedName ?? "no app")")
+            check("S-019 the Guide has a screen", false, "no front window and no main screen")
         }
         guide.flash()
         check("S-018 an unbound key flashes the Guide", guide.isFlashing)
