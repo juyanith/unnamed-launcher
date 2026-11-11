@@ -85,7 +85,15 @@ final class AppModel {
     func showHelp() {
         sidebar = .help
         openBindingsWindow?()
-        NSApp.activate()
+        // A chord doesn't make this app active, and macOS ignores activate()
+        // from an app in the background, so the window would open behind.
+        // Accessibility can make this process frontmost.
+        Task {
+            await Task.yield()
+            if !WindowRaiser.makeFrontmost(pid: ProcessInfo.processInfo.processIdentifier) { NSApp.activate() }
+            NSApp.windows.first { $0.identifier?.rawValue.hasPrefix(WindowID.bindings) == true }?
+                .makeKeyAndOrderFront(nil)
+        }
     }
 
     /// Shows an action on the Actions page.

@@ -128,6 +128,12 @@ public struct Chord: Sendable, Hashable, CustomStringConvertible {
         self.key = key
     }
 
+    /// Hyper+Comma, Hyper+Period and Hyper+Slash start macOS's diagnostics
+    /// (sysdiagnose), which take them before any event tap sees them.
+    public var isKeptByMacOS: Bool {
+        modifiers == .hyper && [.comma, .period, .slash].contains(key)
+    }
+
     /// Parses a chord token: "Hyper+Space", "Ctrl+Opt+L", "⌃⌥⇧T" or
     /// "⌘+F". Returns nil when a part isn't a known name.
     public init?(parsing token: String) {

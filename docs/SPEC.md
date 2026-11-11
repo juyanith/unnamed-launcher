@@ -63,7 +63,7 @@ Home is the menu above the leaders. It lists every leader and direct binding, so
 | `send` | `keys` | Sends one or more chords to the app that was in front. Held leader modifiers must not leak into the chord. `Primary` means ⌘. |
 | `contextual` | `variants` (context id → action), optional `fallback` | Uses the first context, in config order, that matches the app in front and has a variant. If none matches, uses `fallback`. With no fallback, the action is unavailable. |
 | `noop` | none | Does nothing. |
-| `help` | none | Opens the Bindings window on its Help page and brings it in front. The sequence ends, as for any action. |
+| `help` | none | Opens the Bindings window on its Help page and brings it in front with focus, through Accessibility, since a chord doesn't make the launcher the active app. The sequence ends, as for any action. |
 
 When an action fails, for example because the app isn't installed or the command can't start, the sequence ends and the failure is shown in the HUD and the log.
 
@@ -119,6 +119,7 @@ A config is rejected if any of these are true:
 - A menu has no children. (A top-level entry with an action is a direct binding, not an error.)
 - A step key has modifiers, or is the cancel or back key.
 - The cancel and back keys are the same.
+- A leader or direct binding is Hyper+Comma, Hyper+Period or Hyper+Slash. macOS keeps these for its diagnostics (sysdiagnose) and takes them before any event tap, so the launcher would never see them. The key recorder refuses them too.
 - A delay is negative.
 - A binding names an undefined action.
 - An action has the wrong fields for its type.

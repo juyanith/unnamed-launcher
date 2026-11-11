@@ -107,6 +107,9 @@ public enum ConfigValidator {
         var childCount: [KeySequence: Int] = [:]
         for (entry, path) in parsed {
             let name = entry.action == nil ? "Menu" : "Binding"
+            if path.parent == nil, path.leader.isKeptByMacOS {
+                error("\(entry.action == nil ? "Leader" : "Direct binding") “\(path)” uses a chord macOS keeps for its diagnostics (sysdiagnose), so the launcher never sees it. Choose another key.", path.description)
+            }
             if let parent = path.parent {
                 guard let parentEntry = byPath[parent] else {
                     error("\(name) “\(path)” has no parent. Add an entry for “\(parent)”.", path.description)

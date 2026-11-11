@@ -76,6 +76,7 @@ public struct ConfigDocument: Sendable, Equatable {
     public enum EditError: Error, Sendable, Equatable {
         case keyTaken(String)
         case reservedKey(String)
+        case keptByMacOS(String)
         case notFound
         case idTaken(String)
         case inUse([String])
@@ -151,6 +152,9 @@ public struct ConfigDocument: Sendable, Equatable {
     /// Why `key` can't be this entry's key, or nil when it can.
     public func keyProblem(for path: KeySequence, newKey: Chord) -> EditError? {
         let parent = path.parent
+        if parent == nil, newKey.isKeptByMacOS {
+            return .keptByMacOS(newKey.description)
+        }
         if parent != nil {
             if reservedKeys.contains(newKey.key) && newKey.modifiers.isEmpty {
                 return .reservedKey(newKey.key.name)

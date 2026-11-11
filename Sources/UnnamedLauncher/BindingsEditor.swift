@@ -158,6 +158,7 @@ final class BindingsEditor {
         switch draft.keyProblem(for: path, newKey: key) {
         case let .keyTaken(other): return "\(key) is already used by “\(draft.entry(KeySequence(parsing: other)!)?.title ?? other)”."
         case let .reservedKey(name): return "\(name) is the \(name == draft.config.runtime.cancelKey ? "cancel" : "back") key."
+        case let .keptByMacOS(chord): return "macOS keeps \(chord) for its diagnostics, so the launcher never sees it."
         default: return nil
         }
     }

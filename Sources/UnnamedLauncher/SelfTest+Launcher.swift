@@ -102,7 +102,7 @@ extension SelfTest {
         }
         let home = SeedData.homeContent
         check("S-050 Home lists every leader and direct binding by group, the current one first",
-              home.sections.map(\.title) == ["Hyper", "Meh", "CAG"] && home.rows.map(\.key) == ["Space", "Slash", "W", "T"]
+              home.sections.map(\.title) == ["Hyper", "Meh", "CAG"] && home.rows.map(\.key) == ["Space", "H", "W", "T"]
               && home.columns.count == 1 && !home.dividesColumns, "\(home.sections.map(\.title))")
         let wide = SeedData.wideHomeContent
         let firstColumn = wide.columns.first?.map(\.title)

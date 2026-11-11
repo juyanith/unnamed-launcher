@@ -113,7 +113,7 @@ struct LoadingTests {
         let loaded = try load(ConfigLoader.starterJSON).get()
         #expect(loaded.leaders.first?.path.description == "Hyper+Space")
         #expect(loaded.leaders.first?.children.map(\.title) == ["Finder", "Terminal"])
-        #expect(loaded.leaders.last?.path.description == "Hyper+Slash")
+        #expect(loaded.leaders.last?.path.description == "Hyper+H")
         #expect(loaded.leaders.last?.action.flatMap { loaded.config.actions[$0] } == .help)
     }
 

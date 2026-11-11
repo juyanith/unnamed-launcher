@@ -23,7 +23,7 @@ enum SeedData {
         { "keys": "Meh+W", "title": "Workspace" },
         { "keys": "Meh+W 1", "title": "Workspace 1", "action": "workspace-1" },
         { "keys": "CAG+T", "title": "Terminal", "action": "open-terminal" },
-        { "keys": "Hyper+Slash", "title": "Help", "action": "show-help" }
+        { "keys": "Hyper+H", "title": "Help", "action": "show-help" }
       ],
       "actions": {
         "spotlight": { "type": "send", "keys": "Cmd+Space" },

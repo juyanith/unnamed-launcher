@@ -50,27 +50,55 @@ struct HelpPlanTests {
 
     @Test("Show Help reads from the file, takes no fields, and is written back")
     func roundTrip() throws {
-        let text = json(entries: #"{ "keys": "Hyper+Slash", "title": "Help", "action": "show-help" }"#,
+        let text = json(entries: #"{ "keys": "Hyper+H", "title": "Help", "action": "show-help" }"#,
                         actions: #"{ "show-help": { "type": "help" } }"#)
         let config = try load(text).get()
         #expect(config.config.actions["show-help"] == .help)
         #expect(config.config.actions["show-help"]?.displayName == "Show Help")
         let written = String(decoding: ConfigDocument(config: config.config).data(), as: UTF8.self)
         #expect(try load(written).get().config.actions["show-help"] == .help)
-        #expect(!errors(json(entries: #"{ "keys": "Hyper+Slash", "title": "Help", "action": "h" }"#,
+        #expect(!errors(json(entries: #"{ "keys": "Hyper+H", "title": "Help", "action": "h" }"#,
                              actions: #"{ "h": { "type": "help", "page": "keys" } }"#)).isEmpty)
     }
 
     @Test("A Show Help direct binding runs from its chord")
     func direct() throws {
-        let text = json(entries: #"{ "keys": "Hyper+Slash", "title": "Help", "action": "show-help" }"#,
+        let text = json(entries: #"{ "keys": "Hyper+H", "title": "Help", "action": "show-help" }"#,
                         actions: #"{ "show-help": { "type": "help" } }"#)
         var engine = SequenceEngine(config: try load(text).get())
-        guard case let .run(binding, _) = engine.handle(.down(keyCode: KeyName.slash.keyCode!, modifiers: .hyper, isRepeat: false)).effect else {
+        guard case let .run(binding, _) = engine.handle(.down(keyCode: KeyName.h.keyCode!, modifiers: .hyper, isRepeat: false)).effect else {
             Issue.record("no run"); return
         }
         #expect(binding.title == "Help")
         #expect(!engine.isActive)
+    }
+}
+
+@Suite("Chords macOS keeps")
+struct KeptByMacOSTests {
+    @Test("Hyper+Comma, Hyper+Period and Hyper+Slash can't be leaders or direct bindings", arguments: ["Comma", "Period", "Slash"])
+    func rejected(_ key: String) {
+        let found = errors(json(entries: #"{ "keys": "Hyper+\#(key)", "title": "Help", "action": "h" }"#,
+                                actions: #"{ "h": { "type": "help" } }"#))
+        #expect(found.contains { $0.contains("macOS keeps for its diagnostics") }, "\(found)")
+    }
+
+    @Test("Other modifiers on those keys, and those keys in a menu, are fine")
+    func allowed() throws {
+        _ = try load(json(entries: """
+            { "keys": "Meh+Slash", "title": "Help", "action": "h" },
+            { "keys": "Hyper+Space", "title": "Commands" },
+            { "keys": "Hyper+Space Period", "title": "Help", "action": "h" }
+            """, actions: #"{ "h": { "type": "help" } }"#)).get()
+    }
+
+    @Test("The key recorder refuses them for a leader")
+    func recorder() throws {
+        let document = ConfigDocument(config: try load(json(entries: #"{ "keys": "Hyper+H", "title": "Help", "action": "h" }"#,
+                                                             actions: #"{ "h": { "type": "help" } }"#)).get().config)
+        let path = KeySequence(parsing: "Hyper+H")!
+        #expect(document.keyProblem(for: path, newKey: Chord(modifiers: .hyper, key: .slash)) == .keptByMacOS("Hyper+Slash"))
+        #expect(document.keyProblem(for: path, newKey: Chord(modifiers: .meh, key: .slash)) == nil)
     }
 }
 
