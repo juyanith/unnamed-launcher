@@ -513,11 +513,31 @@ Acceptance:
 Status: done
 Verified: sort order and file order (unit tests), the popup's choices and a new action sorting first (self-test), the Actions page in light and dark (snapshots). Not yet tried by hand: the action popup in the Bindings editor.
 
+## M8 Guide Icons
+
+### S-054 See app icons in the Guide
+As the user, I see each app's icon next to its Use Application binding in the Guide, so I can find the app I want before I read its title.
+Screens: hud, hud-home
+Depends: S-005, S-046, S-050
+Acceptance:
+- [unit] A row whose action is Use Application carries its bundle ID; rows with other actions, menus, and Context Aware rows carry none.
+- [self] A row for an installed app gets that app's icon, looked up once per bundle ID and cached for the rest of the run.
+- [self] A row for an app that isn't installed gets no icon and still shows its title, with no error.
+- [self] When any row in a section has an icon, every row in that section keeps the same icon space, so titles line up.
+- [self] Opening the Guide never waits on an icon lookup: icons come from the cache, filled when the config loads.
+- [snap] The Guide and Home show 16 pt icons between the keycap and the title, in light and dark, with the grid checks passing.
+- [manual] VoiceOver reads a row the same as before: the icon is decorative.
+UX:
+- Surface: the Guide (S-005) and Home (S-050). The Help page (S-052) is out of scope.
+- States: icon; no icon (not installed, or not Use Application); a dimmed row dims its icon too.
+- Words: none new.
+- Access: icons are hidden from VoiceOver.
+Status: todo
+
 ## Later
 - Import and export a single menu as a JSON snippet.
 - A Windows version that reads the same config.
 - Double-tap modifier leaders, such as tapping ⌥ twice.
-- Showing app icons in the HUD rows for `application` bindings.
 
 ## Dropped
 Main jobs in the brief map to M1 (job 1), M4 (job 2) and S-002, S-008 and S-009 (job 3). Rows marked "Version one? Yes" in the research matrix were written before the scope changed to leader keys only:
