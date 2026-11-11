@@ -17,7 +17,9 @@ M8 added icons to the Guide: apps (S-054), files, folders and URLs (S-055), an `
 
 **Fix log.** No area shows up three times.
 
-## One home for Guide icons  [Strong]
+## One home for Guide icons  [Strong, done]
+
+Done in 04d849a, b07f941 and cd4a0ed. The unit tests and the self-test pass unchanged. The menu bar sheet and seven Guide and editor snapshots are byte for byte the same. `bindings-icon-light` differs only in encoding: no pixel moved more than 3%.
 
 Files:
 - `Sources/UnnamedLauncherKit/ContextResolver.swift`: `IconSource` and `iconSource(_:)`, 60 lines that have nothing to do with contexts.
