@@ -114,6 +114,20 @@ enum Snapshot {
                     try? await Task.sleep(for: .seconds(0.3))
                 }
             }
+            if only == nil || only?.contains("hud-home") == true {
+                // S-050: Home in one column, and side by side.
+                let guide = model.launcher.guide
+                for (name, content) in [("hud-home", SeedData.homeContent), ("hud-home-wide", SeedData.wideHomeContent)] {
+                    for mode in ["light", "dark"] {
+                        NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                        guide.show(content)
+                        try? await Task.sleep(for: .seconds(0.8))
+                        capture(to: "\(dir)/\(name)-\(mode).png", window: guide.window)
+                        guide.hide()
+                        try? await Task.sleep(for: .seconds(0.3))
+                    }
+                }
+            }
             if only == nil || only?.contains("menubar-icons") == true {
                 // S-041: ready, off and warning on a light and a dark menu bar.
                 if let png = MenuBarIcon.contactSheet() {

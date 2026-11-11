@@ -107,8 +107,8 @@ struct SequenceEngineTests {
         var e = try engine()
         _ = e.handle(down(.space, .hyper))
         _ = e.handle(down(.a))
-        guard case let .unbound(menu, _) = e.handle(down(.z)).effect else { Issue.record("no error"); return }
-        #expect(menu.title == "Applications" && e.path == ["Commands", "Applications"])
+        guard case let .unbound(path) = e.handle(down(.z)).effect else { Issue.record("no error"); return }
+        #expect(path == ["Commands", "Applications"] && e.path == ["Commands", "Applications"])
     }
 
     @Test("Keys match physical positions: the engine sees key codes, not characters")
@@ -139,13 +139,23 @@ struct SequenceEngineTests {
         #expect(!e.isActive)
     }
 
-    @Test("Back goes to the parent, and ends the sequence from a leader's menu")
+    @Test("Back goes to the parent, then Home, then ends the sequence")
     func back() throws {
         var e = try engine()
         _ = e.handle(down(.space, .hyper))
         _ = e.handle(down(.a))
         guard case let .showMenu(menu, path, _) = e.handle(down(.backspace)).effect else { Issue.record("no parent"); return }
         #expect(menu.title == "Commands" && path == ["Commands"])
+        guard case let .showHome(_, homePath, _) = e.handle(down(.backspace)).effect else { Issue.record("no Home"); return }
+        #expect(homePath == ["Home"] && e.isActive)
+        #expect(e.handle(down(.backspace)).effect == .cancelled)
+        #expect(!e.isActive)
+    }
+
+    @Test("With one top-level entry, Back from the leader's menu ends the sequence")
+    func backWithoutHome() throws {
+        var e = SequenceEngine(config: try load(json(entries: minimalEntries, actions: minimalActions)).get())
+        _ = e.handle(down(.space, .hyper))
         #expect(e.handle(down(.backspace)).effect == .cancelled)
         #expect(!e.isActive)
     }

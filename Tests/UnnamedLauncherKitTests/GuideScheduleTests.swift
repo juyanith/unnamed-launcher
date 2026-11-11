@@ -95,7 +95,7 @@ struct GuideTimeoutTests {
         _ = s.handle(open(leader), at: 0)
         _ = s.handle(open(apps, ["Commands", "Applications"]), at: 900)
         #expect(s.tick(at: 1_000) == [])
-        _ = s.handle(.unbound(apps, path: ["Commands", "Applications"]), at: 1_800)
+        _ = s.handle(.unbound(path: ["Commands", "Applications"]), at: 1_800)
         #expect(s.tick(at: 2_700) == [])
         #expect(s.tick(at: 2_800) == [.hide, .endSequence])
     }
@@ -122,7 +122,7 @@ struct GuideErrorTests {
     func feedback() {
         var s = schedule()
         _ = s.handle(open(leader), at: 0)
-        #expect(s.handle(.unbound(leader, path: ["Commands"]), at: 10) == [.bell, .flash])
+        #expect(s.handle(.unbound(path: ["Commands"]), at: 10) == [.bell, .flash])
         #expect(s.isVisible)
     }
 
@@ -130,17 +130,17 @@ struct GuideErrorTests {
     func settings() {
         var quiet = schedule(bell: false)
         _ = quiet.handle(open(leader), at: 0)
-        #expect(quiet.handle(.unbound(leader, path: ["Commands"]), at: 10) == [.flash])
+        #expect(quiet.handle(.unbound(path: ["Commands"]), at: 10) == [.flash])
         var still = schedule(flash: false)
         _ = still.handle(open(leader), at: 0)
-        #expect(still.handle(.unbound(leader, path: ["Commands"]), at: 10) == [.bell])
+        #expect(still.handle(.unbound(path: ["Commands"]), at: 10) == [.bell])
     }
 
     @Test("If the Guide was still waiting for its delay, it appears at once")
     func revealsEarly() {
         var s = schedule(delay: 500)
         _ = s.handle(open(leader), at: 0)
-        #expect(s.handle(.unbound(leader, path: ["Commands"]), at: 100) == [.bell, shown(leader), .flash])
+        #expect(s.handle(.unbound(path: ["Commands"]), at: 100) == [.bell, shown(leader), .flash])
         #expect(s.isVisible && s.nextDeadline == nil)
     }
 
@@ -158,7 +158,7 @@ struct GuideHiddenTests {
     func never() {
         var s = schedule(delay: 0, showHud: false)
         #expect(s.handle(open(leader), at: 0) == [])
-        #expect(s.handle(.unbound(leader, path: ["Commands"]), at: 1) == [.bell])
+        #expect(s.handle(.unbound(path: ["Commands"]), at: 1) == [.bell])
         #expect(s.handle(.run(binding, frontApp: nil), at: 2) == [])
         #expect(!s.isVisible)
     }

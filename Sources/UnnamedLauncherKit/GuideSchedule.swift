@@ -4,6 +4,8 @@ import Foundation
 public enum GuideCommand: Sendable, Equatable {
     /// Show this menu, or update the Guide to it if it's already up.
     case show(BindingNode, path: [String], frontApp: String?)
+    /// Show Home, or update the Guide to it (S-050).
+    case showHome(Home, path: [String], frontApp: String?)
     case hide
     /// Flash the Guide for an unbound or unavailable key (S-018).
     case flash
@@ -48,17 +50,10 @@ public struct GuideSchedule: Sendable, Equatable {
     public mutating func handle(_ effect: SequenceEffect, at now: Double) -> [GuideCommand] {
         switch effect {
         case let .showMenu(menu, path, frontApp):
-            let show = GuideCommand.show(menu, path: path, frontApp: frontApp)
-            guard showHud else { return [] }
-            if isVisible {
-                restartTimeout(at: now)
-                return [show]
-            }
-            pending = show
-            if delayMs <= 0 { return reveal(at: now) }
-            // Every key, Back included, restarts the delay.
-            showAt = now + delayMs
-            return []
+            return show(.show(menu, path: path, frontApp: frontApp), at: now)
+
+        case let .showHome(home, path, frontApp):
+            return show(.showHome(home, path: path, frontApp: frontApp), at: now)
 
         case .run, .cancelled:
             let wasVisible = isVisible
@@ -87,6 +82,20 @@ public struct GuideSchedule: Sendable, Equatable {
             clear()
             return [.hide, .endSequence]
         }
+        return []
+    }
+
+    /// Shows a menu or Home now, or once the delay passes.
+    private mutating func show(_ show: GuideCommand, at now: Double) -> [GuideCommand] {
+        guard showHud else { return [] }
+        if isVisible {
+            restartTimeout(at: now)
+            return [show]
+        }
+        pending = show
+        if delayMs <= 0 { return reveal(at: now) }
+        // Every key, Back included, restarts the delay.
+        showAt = now + delayMs
         return []
     }
 

@@ -13,6 +13,8 @@ public enum SequenceEffect: Sendable, Equatable {
     /// A sequence started or moved into a menu, including Back. Show it.
     /// `frontApp` is the app that was in front when the leader was pressed.
     case showMenu(BindingNode, path: [String], frontApp: String?)
+    /// Back from a leader's menu opened Home (S-050). Show it.
+    case showHome(Home, path: [String], frontApp: String?)
     /// A binding was selected, or a direct binding's chord was pressed: run its
     /// action for `frontApp`. Any sequence has ended.
     case run(BindingNode, frontApp: String?)
@@ -21,8 +23,8 @@ public enum SequenceEffect: Sendable, Equatable {
     case unavailable(BindingNode, path: [String])
     /// Cancel, or Back from a leader's menu. The sequence has ended.
     case cancelled
-    /// A key that isn't bound. The sequence stays in `menu`.
-    case unbound(BindingNode, path: [String])
+    /// A key that isn't bound. The sequence stays where it is.
+    case unbound(path: [String])
 }
 
 public struct SequenceOutput: Sendable, Equatable {
@@ -41,6 +43,10 @@ public struct SequenceEngine: Sendable {
     public private(set) var config: LoadedConfig
     /// The menus from the leader down to the current one. Empty when idle.
     public private(set) var stack: [BindingNode] = []
+    /// Home, while the sequence is in it (S-050).
+    public private(set) var home: Home?
+    /// True once the sequence has been to Home, so its path starts there.
+    private var viaHome = false
     /// Leader modifiers still physically held. They're ignored on step keys.
     private var heldLeaderModifiers: Modifiers = []
     /// Key-downs that were consumed, so their key-ups are consumed too.
@@ -54,15 +60,18 @@ public struct SequenceEngine: Sendable {
         self.config = config
     }
 
-    public var isActive: Bool { !stack.isEmpty }
+    public var isActive: Bool { !stack.isEmpty || home != nil }
 
-    /// The titles from the leader down: ["Commands", "Applications"].
-    public var path: [String] { stack.map(\.title) }
+    /// The titles from the leader down: ["Commands", "Applications"], after
+    /// "Home" once the sequence has been there.
+    public var path: [String] { (viaHome ? [Home.title] : []) + stack.map(\.title) }
 
     /// Swaps in a new config. A running sequence ends.
     public mutating func replaceConfig(_ config: LoadedConfig) {
         self.config = config
         stack = []
+        home = nil
+        viaHome = false
     }
 
     /// The bundle id of the app in front. Call it whenever that changes.
@@ -73,6 +82,8 @@ public struct SequenceEngine: Sendable {
     /// Ends the sequence from outside (for example, Enabled turned off).
     public mutating func reset() {
         stack = []
+        home = nil
+        viaHome = false
         heldLeaderModifiers = []
     }
 
@@ -87,11 +98,12 @@ public struct SequenceEngine: Sendable {
             return consumedKeys.remove(keyCode) != nil ? .consumed() : .pass
 
         case let .down(keyCode, modifiers, isRepeat):
-            if stack.isEmpty {
+            if !isActive {
                 return idle(keyCode: keyCode, modifiers: modifiers, isRepeat: isRepeat)
             }
             consumedKeys.insert(keyCode)
             if isRepeat { return .consumed() }
+            if let home { return pick(in: home, keyCode: keyCode, modifiers: modifiers) }
             return step(keyCode: keyCode, modifiers: modifiers)
         }
     }
@@ -120,7 +132,7 @@ public struct SequenceEngine: Sendable {
 
     private mutating func step(keyCode: UInt16, modifiers: Modifiers) -> SequenceOutput {
         guard let menu = stack.last else { return .pass }
-        guard let key = KeyName(keyCode: keyCode) else { return .consumed(.unbound(menu, path: path)) }
+        guard let key = KeyName(keyCode: keyCode) else { return .consumed(.unbound(path: path)) }
         let extra = modifiers.subtracting(heldLeaderModifiers)
 
         if extra.isEmpty && key == config.cancelKey {
@@ -128,15 +140,22 @@ public struct SequenceEngine: Sendable {
             return .consumed(.cancelled)
         }
         if extra.isEmpty && key == config.backKey {
-            stack.removeLast()
+            let leaving = stack.removeLast()
             guard let parent = stack.last else {
-                reset()
-                return .consumed(.cancelled)
+                // Above a leader's menu is Home, when there's more than the one entry.
+                guard config.leaders.count > 1 else {
+                    reset()
+                    return .consumed(.cancelled)
+                }
+                let home = Home(leaders: config.leaders, current: leaving.path.leader.modifiers)
+                self.home = home
+                viaHome = true
+                return .consumed(.showHome(home, path: path, frontApp: sequenceFrontApp))
             }
             return .consumed(.showMenu(parent, path: path, frontApp: sequenceFrontApp))
         }
         guard extra.isEmpty, let child = menu.child(for: key) else {
-            return .consumed(.unbound(menu, path: path))
+            return .consumed(.unbound(path: path))
         }
         if child.isMenu {
             stack.append(child)
@@ -148,5 +167,31 @@ public struct SequenceEngine: Sendable {
         let app = sequenceFrontApp
         reset()
         return .consumed(.run(child, frontApp: app))
+    }
+
+    /// A key in Home: Cancel and Back end the sequence, a leader opens its
+    /// menu, and a direct binding runs (SPEC.md, Home).
+    private mutating func pick(in home: Home, keyCode: UInt16, modifiers: Modifiers) -> SequenceOutput {
+        guard let key = KeyName(keyCode: keyCode) else { return .consumed(.unbound(path: path)) }
+        let extra = modifiers.subtracting(heldLeaderModifiers)
+        if extra.isEmpty && (key == config.cancelKey || key == config.backKey) {
+            reset()
+            return .consumed(.cancelled)
+        }
+        guard let entry = home.entry(for: Chord(modifiers: modifiers, key: key)) else {
+            return .consumed(.unbound(path: path))
+        }
+        if entry.isMenu {
+            self.home = nil
+            heldLeaderModifiers = modifiers
+            stack = [entry]
+            return .consumed(.showMenu(entry, path: path, frontApp: sequenceFrontApp))
+        }
+        guard config.isAvailable(entry, frontApp: sequenceFrontApp) else {
+            return .consumed(.unavailable(entry, path: path))
+        }
+        let app = sequenceFrontApp
+        reset()
+        return .consumed(.run(entry, frontApp: app))
     }
 }

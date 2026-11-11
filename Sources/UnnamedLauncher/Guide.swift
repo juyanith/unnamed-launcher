@@ -15,8 +15,18 @@ struct GuideContent: Equatable {
         var id: String { key }
     }
 
+    /// A group of rows: in Home, the entries on one set of modifiers under
+    /// its name (S-050); elsewhere, one section with no title.
+    struct Section: Equatable, Identifiable {
+        var title: String?
+        var rows: [Row]
+        var id: String { title ?? "" }
+    }
+
     var path: [String]
-    var rows: [Row]
+    var sections: [Section]
+    /// True for Home, which puts a separator after its first group.
+    var isHome = false
     var cancelKey: String
     /// nil when Back is turned off.
     var backKey: String?
@@ -26,16 +36,36 @@ struct GuideContent: Equatable {
     init(menu: BindingNode, path: [String], config: LoadedConfig, frontApp: String?, frontAppName: String? = nil) {
         self.path = path
         let appName = frontAppName ?? frontApp.flatMap(Self.appName) ?? "this app"
-        rows = menu.children.compactMap { child in
-            child.path.lastStep.map { step in
-                let available = child.isMenu || config.isAvailable(child, frontApp: frontApp)
-                return Row(key: step.key.name, title: child.title, isMenu: child.isMenu,
-                           isAvailable: available, note: available ? nil : "not available in \(appName)")
-            }
+        let rows = menu.children.compactMap { child in
+            child.path.lastStep.map { Self.row(child, key: $0.key, config: config, frontApp: frontApp, appName: appName) }
         }
+        sections = [Section(rows: rows)]
         cancelKey = Self.footerLabel(config.cancelKey)
         backKey = config.backKey.map(Self.footerLabel)
     }
+
+    /// Home: every leader and direct binding, by group, keys without modifiers.
+    init(home: Home, path: [String], config: LoadedConfig, frontApp: String?, frontAppName: String? = nil) {
+        self.path = path
+        let appName = frontAppName ?? frontApp.flatMap(Self.appName) ?? "this app"
+        sections = home.groups.map { group in
+            Section(title: group.title, rows: group.entries.map {
+                Self.row($0, key: $0.path.leader.key, config: config, frontApp: frontApp, appName: appName)
+            })
+        }
+        isHome = true
+        cancelKey = Self.footerLabel(config.cancelKey)
+        backKey = config.backKey.map(Self.footerLabel)
+    }
+
+    private static func row(_ node: BindingNode, key: KeyName, config: LoadedConfig, frontApp: String?, appName: String) -> Row {
+        let available = node.isMenu || config.isAvailable(node, frontApp: frontApp)
+        return Row(key: key.name, title: node.title, isMenu: node.isMenu,
+                   isAvailable: available, note: available ? nil : "not available in \(appName)")
+    }
+
+    /// Every row, in order.
+    var rows: [Row] { sections.flatMap(\.rows) }
 
     /// The name people know an app by, from its bundle id.
     private static func appName(_ bundleId: String) -> String? {
@@ -52,12 +82,35 @@ struct GuideContent: Equatable {
         }
     }
 
-    /// Rows split into columns of at most 12, up to three (DESIGN.md).
-    var columns: [[Row]] {
-        let perColumn = max(Layout.guideRowsPerColumn,
-                            Int((Double(rows.count) / Double(Layout.guideMaxColumns)).rounded(.up)))
-        return stride(from: 0, to: rows.count, by: perColumn).map { Array(rows[$0..<min($0 + perColumn, rows.count)]) }
+    /// Rows split into columns of at most 12, up to three (DESIGN.md). Home
+    /// that doesn't fit one column puts its first group in a column of its
+    /// own and packs the others after it, never splitting a group (S-050).
+    var columns: [[Section]] {
+        guard isHome else {
+            let rows = rows
+            let perColumn = max(Layout.guideRowsPerColumn,
+                                Int((Double(rows.count) / Double(Layout.guideMaxColumns)).rounded(.up)))
+            return stride(from: 0, to: rows.count, by: perColumn).map {
+                [Section(rows: Array(rows[$0..<min($0 + perColumn, rows.count)]))]
+            }
+        }
+        guard rows.count > Layout.guideRowsPerColumn, let first = sections.first else { return [sections] }
+        var columns: [[Section]] = [[first]]
+        var count = Layout.guideRowsPerColumn
+        for section in sections.dropFirst() {
+            if columns.count == 1 || count + section.rows.count > Layout.guideRowsPerColumn {
+                columns.append([section])
+                count = section.rows.count
+            } else {
+                columns[columns.count - 1].append(section)
+                count += section.rows.count
+            }
+        }
+        return columns
     }
+
+    /// Home side by side: a vertical divider after the first group's column.
+    var dividesColumns: Bool { isHome && columns.count > 1 }
 
     /// What VoiceOver says when the Guide opens or changes menu.
     var announcement: String {
@@ -107,15 +160,34 @@ struct GuideView: View {
     }
 
     private var menuRows: some View {
-            HStack(alignment: .top, spacing: Space.xl) {
-                ForEach(Array(content.columns.enumerated()), id: \.offset) { _, column in
-                    // A Grid lines the titles up after the widest keycap.
-                    Grid(alignment: .leading, horizontalSpacing: Space.sm, verticalSpacing: Space.sm) {
-                        ForEach(column) { row in rowView(row) }
+        let columns = content.columns
+        return HStack(alignment: .top, spacing: Space.xl) {
+            ForEach(Array(columns.enumerated()), id: \.offset) { index, column in
+                if index == 1 && content.dividesColumns { Divider() }
+                // A Grid lines the titles up after the widest keycap.
+                Grid(alignment: .leading, horizontalSpacing: Space.sm, verticalSpacing: Space.sm) {
+                    ForEach(Array(column.enumerated()), id: \.element.id) { position, section in
+                        // Home in one column: a separator after the current group.
+                        let divided = content.isHome && columns.count == 1 && position == 1
+                        if divided { Divider() }
+                        if let title = section.title {
+                            // A group right under another group's rows gets a step of air.
+                            sectionHeader(title)
+                                .padding(.top, position > 0 && !divided ? Space.xs : 0)
+                        }
+                        ForEach(section.rows) { row in rowView(row) }
                     }
-                    .frame(width: Layout.guideColumnWidth, alignment: .leading)
                 }
+                .frame(width: Layout.guideColumnWidth, alignment: .leading)
             }
+        }
+    }
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .accessibilityAddTraits(.isHeader)
     }
 
     private var pathRow: some View {
@@ -181,7 +253,7 @@ extension GuideContent {
 
     init(path: [String], rows: [Row], cancelKey: String, backKey: String?, failure: String? = nil) {
         self.path = path
-        self.rows = rows
+        sections = [Section(rows: rows)]
         self.cancelKey = cancelKey
         self.backKey = backKey
         self.failure = failure

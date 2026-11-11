@@ -59,4 +59,35 @@ enum SeedData {
         return GuideContent(menu: leader, path: [leader.title], config: config,
                             frontApp: "com.apple.Notes", frontAppName: "Notes")
     }
+
+    /// Home after Back from Commands, in Notes (S-050).
+    static var homeContent: GuideContent {
+        let config = fixture
+        let home = Home(leaders: config.leaders, current: .hyper)
+        return GuideContent(home: home, path: [Home.title], config: config,
+                            frontApp: "com.apple.Notes", frontAppName: "Notes")
+    }
+
+    /// Home with more rows than one column holds, so its groups sit side by side.
+    static var wideHomeContent: GuideContent {
+        let direct: [(String, String)] = [
+            ("Hyper+T", "Terminal"), ("Hyper+B", "Browser"), ("Hyper+M", "Mail"), ("Hyper+N", "Notes"),
+            ("Hyper+C", "Calendar"), ("Hyper+F", "Finder"), ("Hyper+L", "Address Bar"),
+            ("Meh+S", "Screenshot"), ("Meh+R", "Record Screen"), ("Meh+P", "Passwords"),
+            ("CAG+T", "New Terminal Window"), ("CAG+M", "Music"),
+            ("Cmd+F13", "Dictation"),
+        ]
+        let entries = [#"{ "keys": "Hyper+Space", "title": "Commands" }"#, #"{ "keys": "Hyper+Space E", "title": "Editor", "action": "n" }"#,
+                       #"{ "keys": "Meh+W", "title": "Workspace" }"#, #"{ "keys": "Meh+W 1", "title": "Workspace 1", "action": "n" }"#]
+            + direct.map { #"{ "keys": "\#($0.0)", "title": "\#($0.1)", "action": "\#($0.0 == "Hyper+L" ? "address" : "n")" }"# }
+        let json = """
+        { "version": 1, "entries": [\(entries.joined(separator: ","))],
+          "actions": { "n": { "type": "noop" },
+                       "address": { "type": "contextual", "variants": { "browser": { "type": "send", "keys": "Cmd+L" } } } },
+          "contexts": [{ "id": "browser", "apps": ["com.apple.Safari"] }] }
+        """
+        let config = try! ConfigLoader.load(Data(json.utf8)).get()
+        return GuideContent(home: Home(leaders: config.leaders, current: .hyper), path: [Home.title], config: config,
+                            frontApp: "com.apple.Notes", frontAppName: "Notes")
+    }
 }

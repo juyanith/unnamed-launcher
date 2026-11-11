@@ -113,7 +113,7 @@ As the user, I press Escape to stop, or Backspace to go up one menu.
 Depends: S-005
 Acceptance:
 - [unit] Cancel ends the sequence without running anything, from any depth.
-- [unit] Back goes to the parent menu. In a leader's own menu, it ends the sequence.
+- [unit] Back goes to the parent menu. In a leader's own menu, it opens Home (S-050), or ends the sequence when there's only one top-level entry.
 - [snap] After Back, the HUD shows the parent menu's breadcrumbs and rows.
 UX:
 - Flow: during a sequence, Escape → the guide fades out and nothing runs. Backspace → the guide shows the parent menu, and Backspace in the leader's own menu cancels.
@@ -596,9 +596,10 @@ Acceptance:
 - [unit] With two or more top-level entries, Back in a leader's menu opens Home; with one, it ends the sequence.
 - [unit] Back or Cancel in Home ends the sequence.
 - [unit] Home groups top-level entries by exact modifiers, with the group of the leader you came from first, then the others in order of their first entry; rows keep file order.
-- [unit] In the current group the key alone picks, with its modifiers held or not; other entries need their exact chord, counting held modifiers; anything else is unbound.
+- [unit] In the current group the key alone picks, with some, all or none of its modifiers held; other entries need their exact chord, counting held modifiers; a bare key prefers the current group; anything else is unbound.
 - [unit] Picking a leader opens its menu; picking a direct binding runs it for the app that was in front when the sequence started.
 - [unit] An unavailable Context Aware direct binding flashes and stays in Home.
+- [self] Home's Guide lists the groups in order, and a wide Home never splits a group.
 - [snap] Home with 12 rows or fewer: the current group, a horizontal separator, then each other group under its header.
 - [snap] Home with more rows: groups side by side, no group split, a vertical divider after the current group.
 UX:
@@ -607,4 +608,5 @@ UX:
 - States: normal; wide (side by side); a disabled row reads "not available in <App>" (S-013).
 - Words: path "Home", then "Home › Commands" after picking a leader. Group headers use the chord names the app writes: "Hyper", "Meh", "CAG", "Cmd", and "No modifiers". Keycaps show the key alone.
 - Access: VoiceOver announces "Home, N keys" and each group header as a heading.
-Status: proposed
+Status: done (on branch `feature-home-menu`)
+Verified: engine and grouping (unit tests, HomeTests), groups, columns and dimmed rows (self-test), hud-home and hud-home-wide in light and dark (snapshots). Not yet tried by hand: Back to Home and picking another leader with the real keyboard, and VoiceOver reading the group headers.

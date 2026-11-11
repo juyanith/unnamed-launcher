@@ -95,6 +95,18 @@ extension SelfTest {
         } else {
             check("S-022 a config with custom keys loads", false)
         }
+        let home = SeedData.homeContent
+        check("S-050 Home lists every leader and direct binding by group, the current one first",
+              home.sections.map(\.title) == ["Hyper", "Meh", "CAG"] && home.rows.map(\.key) == ["Space", "W", "T"]
+              && home.columns.count == 1 && !home.dividesColumns, "\(home.sections.map(\.title))")
+        let wide = SeedData.wideHomeContent
+        let firstColumn = wide.columns.first?.map(\.title)
+        let split = Set(wide.columns.flatMap { $0.map(\.title) }).count != wide.sections.count
+        check("S-050 a wide Home puts the current group alone first and never splits a group",
+              wide.columns.count > 1 && firstColumn == ["Hyper"] && !split && wide.dividesColumns,
+              "\(wide.columns.map { $0.map(\.title) })")
+        check("S-050 an unavailable direct binding in Home is dimmed",
+              wide.rows.first { $0.title == "Address Bar" }?.isAvailable == false)
         check("S-021 a Guide that's never shown makes no panel", !GuideController().hasPanel)
         let front = NSApp.keyWindow
         let guide = model.launcher.guide

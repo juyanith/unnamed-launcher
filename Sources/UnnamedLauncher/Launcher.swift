@@ -174,6 +174,9 @@ final class Launcher {
             case let .show(menu, path, frontApp):
                 guard let config = store.loaded else { continue }
                 guide.show(GuideContent(menu: menu, path: path, config: config, frontApp: frontApp))
+            case let .showHome(home, path, frontApp):
+                guard let config = store.loaded else { continue }
+                guide.show(GuideContent(home: home, path: path, config: config, frontApp: frontApp))
             case .hide:
                 guide.hide()
             case .flash:
