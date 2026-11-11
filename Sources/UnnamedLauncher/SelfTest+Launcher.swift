@@ -13,6 +13,11 @@ extension SelfTest {
         check("S-001 a missing config file gets the starter config", store.createdStarter
               && store.loaded?.leaders.first?.children.map(\.title) == ["Finder", "Terminal"])
         check("S-002 snapshots and self-tests install no event tap", !launcher.isCapturing)
+        check("S-051 a release's version line is the version alone",
+              AppVersion.line(version: "0.1.3", source: "") == "Version 0.1.3")
+        check("S-051 a local build's version line names its branch and commit",
+              AppVersion.line(version: "0.1", source: "main, aa45720") == "Version 0.1 (main, aa45720)")
+        check("S-051 this build has a version line", AppVersion.line.hasPrefix("Version 0."), AppVersion.line)
 
         let good = try? String(contentsOf: store.url, encoding: .utf8)
         try? Data(#"{ "version": 1, "entries": [{ "keys": "Hyper+Spcae", "title": "C" }] }"#.utf8).write(to: store.url)

@@ -57,6 +57,7 @@ The status item menu acts as the menu bar while no window is open (menus.md, rul
 | Open Config File / Show in Finder (⌥) | Menu bar menu, and the File menu | — |
 | Edit Bindings… | Menu bar menu | ⌘B |
 | Settings… | Menu bar menu and the app menu | ⌘, |
+| Version line ("Version 0.1.3", or "Version 0.1 (main, aa45720)" for a local build) | Menu bar menu, disabled item above Quit | — |
 | Quit Unnamed Launcher | Menu bar menu and the app menu | ⌘Q |
 | New Binding / New Menu | File menu, the toolbar over the outline, and the context menu | ⌘N / ⇧⌘N |
 | New Action / New Context | File menu on their pages | ⌘N |

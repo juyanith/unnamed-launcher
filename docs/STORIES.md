@@ -611,3 +611,21 @@ UX:
 - Access: VoiceOver announces "Home, N keys" and each group header as a heading.
 Status: done
 Verified: engine and grouping (unit tests, HomeTests), groups, columns and dimmed rows (self-test), hud-home and hud-home-wide in light and dark (snapshots). Not yet tried by hand: Back to Home and picking another leader with the real keyboard, and VoiceOver reading the group headers.
+
+## Help
+
+A starting point when you're stuck, and a way to tell which build you're running.
+
+### S-051 See the version in the menu bar menu
+As the user, I open the menu bar menu and see which version is running, and for a build I made myself, which branch and commit it came from.
+Screens: none (the menu bar menu isn't captured)
+Depends: S-008
+Acceptance:
+- [self] A release shows "Version 0.1.3": the version alone.
+- [self] A local build (no `APP_VERSION`) shows "Version 0.1 (branch, commit)", with ", modified" when the working tree had changes.
+- [manual] The line sits above Quit, dimmed, and can't be clicked.
+UX:
+- Surface: a disabled item in the menu bar menu, above Quit.
+- Words: "Version 0.1.3"; "Version 0.1 (main, aa45720)".
+Status: done
+Verified: the line's text (self-test), the branch and commit in a local build's Info.plist. Not yet tried by hand: the manual line.

@@ -10,7 +10,9 @@
 #        ./build.sh --out DIR    put the app in DIR instead of ./build (releases)
 #
 # Environment:
-#   APP_VERSION     CFBundleShortVersionString (default 0.1); releases set it from the tag
+#   APP_VERSION     CFBundleShortVersionString (default 0.1); releases set it from the tag.
+#                   Without it, the build also records its git branch and commit, which
+#                   the menu bar menu's version line shows, to tell it from a release.
 #   SIGN_IDENTITY   codesign identity; a "Developer ID Application" identity also turns on
 #                   the hardened runtime and a secure timestamp, which notarization needs
 set -euo pipefail
@@ -30,6 +32,13 @@ while (( $# )); do
   shift
 done
 version="${APP_VERSION:-0.1}"
+source=""
+if [[ -z "${APP_VERSION:-}" ]]; then
+  branch=$(git -C "$here" branch --show-current 2>/dev/null || true)
+  commit=$(git -C "$here" rev-parse --short HEAD 2>/dev/null || true)
+  source="${branch:-detached}, ${commit:-no commit}"
+  [[ -n "$(git -C "$here" status --porcelain 2>/dev/null)" ]] && source+=", modified"
+fi
 
 # Signing, first match wins:
 #   1. SIGN_IDENTITY
@@ -77,7 +86,7 @@ app="${out:A}/$name.app"
 rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$bin" "$app/Contents/MacOS/$name"
-sed -e "s/__BUILD__/$(date +%Y%m%d%H%M)/" -e "s/__VERSION__/$version/" "$here/Info.plist.in" > "$app/Contents/Info.plist"
+sed -e "s/__BUILD__/$(date +%Y%m%d%H%M)/" -e "s/__VERSION__/$version/" -e "s|__SOURCE__|$source|" "$here/Info.plist.in" > "$app/Contents/Info.plist"
 # The icon: Icon/AppIcon.icon -> Resources/Assets.car + AppIcon.icns, rebuilt when it changed.
 if [[ -d "$here/Icon/AppIcon.icon" ]]; then
   car="$here/Resources/Assets.car"

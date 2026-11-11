@@ -50,6 +50,22 @@ struct MenuBarStatus: Equatable {
     }
 }
 
+/// The version line in the menu bar menu (S-051): "Version 0.1.3" for a
+/// release, and the branch and commit too for a local build, which
+/// `build.sh` records in Info.plist when APP_VERSION isn't set.
+enum AppVersion {
+    static var line: String {
+        line(version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
+             source: Bundle.main.object(forInfoDictionaryKey: "UNBuildSource") as? String)
+    }
+
+    static func line(version: String?, source: String?) -> String {
+        let base = "Version \(version ?? "unknown")"
+        guard let source, !source.isEmpty else { return base }
+        return "\(base) (\(source))"
+    }
+}
+
 /// The menu bar menu. It acts as the app's menu bar while no window is open
 /// (DESIGN.md, Command map).
 struct MenuBarMenu: View {
@@ -106,6 +122,7 @@ struct MenuBarMenu: View {
         }
         .keyboardShortcut(",")
         Divider()
+        Text(AppVersion.line)
         Button("Quit Unnamed Launcher") {
             launcher.stop()
             NSApp.terminate(nil)
