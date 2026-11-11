@@ -344,7 +344,7 @@ Acceptance:
 - [self] The new order is written to the file, and the HUD then lists the items in that order.
 - [self] An item can't be dropped into a different menu by dragging, because that would change its key path.
 Status: done
-Verified: the new order is saved and the Guide follows; no moving into another menu (self-test). Not yet tried by hand: dragging in the outline.
+Verified: the new order is saved and the Guide follows; no moving into another menu (self-test). Tried by hand on 2026-11-11: dragging in the outline.
 
 ### S-029 Sort a menu alphabetically
 As the user, I choose Sort Alphabetically on a menu.
@@ -375,7 +375,7 @@ Acceptance:
 - [snap] A list of contexts in order, each showing its apps with their icons and names.
 - [self] Contexts can be reordered by dragging, and the order is saved because it decides which variant wins.
 Status: done
-Verified: /tmp/UnnamedLauncher-shots/contexts-dark.png; reordering is saved (self-test). Not yet tried by hand: dragging contexts.
+Verified: /tmp/UnnamedLauncher-shots/contexts-dark.png; reordering is saved (self-test). Tried by hand on 2026-11-11: dragging contexts.
 
 ### S-032 Change general settings
 As the user, I open Settings… (⌘,) and set the Guide delay, timeout, position, theme, cancel and back keys, and feedback options.
@@ -669,7 +669,7 @@ UX:
 - Words: path "Home", then "Home › Commands" after picking a leader. Group headers use the chord names the app writes: "Hyper", "Meh", "CAG", "Cmd", and "No modifiers". Keycaps show the key alone.
 - Access: VoiceOver announces "Home, N keys" and each group header as a heading.
 Status: done
-Verified: engine and grouping (unit tests, HomeTests), groups, columns and dimmed rows (self-test), hud-home and hud-home-wide in light and dark (snapshots). Not yet tried by hand: Back to Home and picking another leader with the real keyboard, and VoiceOver reading the group headers.
+Verified: engine and grouping (unit tests, HomeTests), groups, columns and dimmed rows (self-test), hud-home and hud-home-wide in light and dark (snapshots). Tried by hand on 2026-11-11: Back to Home and picking another leader with the real keyboard. Not yet tried by hand: VoiceOver reading the group headers.
 
 ## Help
 
